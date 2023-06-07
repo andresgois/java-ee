@@ -14,5 +14,69 @@ docker container run --name java-ee-mysql-container -e MYSQL_USER=andre -e MYSQL
 ```
 $ docker exec -it container_id bash
 root@container_id:/# mysql -uroot -p
-Enter password: RootPassword
+Enter password: 123456
+
+show databases
+use javaee;
+show tables
+select * from Conta
+desc Conta;
 ```
+
+### Módulo 01
+
+- A JPA é um ORM (Object Relacional Mapper) Java
+    - Um ORM mapeia as classes para tabelas e gera o SQL de forma automática
+- Para inicializar a JPA, é preciso definir um arquivo de configuração, chamado **persistence.xml**
+    - Nele, colocamos as configurações mais importantes, como o driver e os dados da conexão
+- A classe Persistence lê a configuração e cria uma EntityManagerFactory
+- Podemos usar a JPA para gerar e atualizar as tabelas no banco de dados
+- Uma entidade deve usar as anotações @Entity e @Id
+    - *@GeneratedValue* não é obrigatório, mas pode ser útil para definir uma chave **auto-increment**
+
+
+> Mapeamento Objeto Relacional
+
+``` mermaid
+graph TD;
+    B[OpenJPA] ==> A[Java Persistence API]
+    C[Hibernate Implementação de referência] ==> A[Java Persistence API]
+    D[Eclipse Link] ==> A[Java Persistence API]
+
+```
+
+- Um item muito importante da JPA é a interface EntityManager, onde, por meio dela, conseguimos abstrair o mundo relacional e focar apenas em objetos. Para conseguir uma instância de EntityManager, precisamos configurar propriedades no arquivo persistence.xml e obter a instância através da classe Persistence, como mostrado no código acima:
+- O método createEntityManagerFactory irá gerar um EntityManagerFactory baseado nas configurações do persistence.xml. Baseado nisso, é fundamental que este método receba como argumento o nome de alguma unidade de persistência existente no arquivo
+- As configurações relacionadas ao acesso banco de dados ficam dentro da sessão persistence-unit. A JPA não limita o número de unidades de persistência (o que é útil quando precisamos de mais de um banco por aplicação, como veremos no próximo exercício) e por isso precisamos escolher um para usar no método createEntityManagerFactor
+
+### Módulo 02
+
+#### Estado Managed
+- Quando fazemos um find() no EntityManager, a JPA e o Hibernate buscarão no banco e criarão um objeto tipo Conta para ser devolvido, representando o registro buscado no database.
+- Essa Conta devolvida ainda mantém uma referência, então a JPA ainda a conhece mesmo após a devolução. Sendo assim, costuma-se dizer que esta entidade Conta se encontra no estado Managed, ou seja, gerenciado pela JPA.
+
+##### O que são transações?
+- é um mecanismo para manter a consistência das alterações de estado no banco, visto que todas as operações precisam ser executadas com sucesso, para que a transação seja confirmada.
+
+> Managed
+
+```mermaid
+  graph RL;
+      subgraph main
+        Conta
+      end
+
+      subgraph Contexto
+        o
+      end
+
+      db[(Database)]
+
+      Contexto --> Conta
+      Contexto -- CONTA --> main
+      Contexto --> db
+      db --> Contexto
+```
+- A característica do estado Managed é a sincronização automática.
+- Nem toda conta com Id é necessariamente Managed
+
