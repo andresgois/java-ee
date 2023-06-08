@@ -117,3 +117,34 @@ Hibernate:
 - Para evitar isso, usamos a notação `Named Parameter Notation` que é mais expressiva. Usando ela, ganhamos como vantagem:
 
 - A facilidade de identificar os parâmetros, diminuindo a probabilidade de erros
+
+## JPA2
+> Relacionamento em duas vias
+```
+Classe Conta
+    @OneToMany
+    private List<Movimentacao> movimentacao;
+
+Classe Movimentacao
+    @ManyToOne
+    private Conta conta;
+
+// Criando uma segunda tabela *conta_movimentacao*
+```
+![Unindo com mappedBy](./asserts/relacionamento_by_direcional.png)
+> Relacionamento em apenas uma vi, bi-direcional
+```
+Classe Conta
+    @OneToMany(mappedBy = "conta")
+    private List<Movimentacao> movimentacao;
+
+Classe Movimentacao
+    @ManyToOne
+    private Conta conta;
+
+    private List<Movimentacao> movimentacao;
+
+// Atributo forte será  da classe conta
+```
+
+![Unindo com mappedBy](./asserts/relacionamento_by_direcional2.png)
