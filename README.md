@@ -80,3 +80,27 @@ graph TD;
 - A característica do estado Managed é a sincronização automática.
 - Nem toda conta com Id é necessariamente Managed
 
+> Característica de uma entidade no estado Detached
+- A entidade nesse estado possui um ID, apesar de não existir sincronização automática
+
+>  A JPA tem o estado Transient para designar este tipo de objeto desvinculado. Sua característica é uma conta que existe na memória, possui informações e não tem Id nenhum, mas pode se tornar Managed futuramente.
+
+- A JPA perceberá que a conta Transient acabou de ser criada, e portanto precisará inseri-la no database.
+- Saida no console
+```
+Hibernate: 
+    insert 
+    into
+        Conta
+        (agencia, numero, saldo, titular) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    delete 
+    from
+        Conta 
+    where
+        id=?
+```
+> O estado Removed
+- A entidade nesse estado possui um ID, apesar de não existir sincronização automática e não possuir registro no banco
