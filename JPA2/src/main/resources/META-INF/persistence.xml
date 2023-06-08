@@ -11,6 +11,7 @@
         <class>io.github.andresgois.Movimentacao</class>
         <class>io.github.andresgois.Categoria</class>
         <class>io.github.andresgois.Cliente</class>
+        <class>io.github.andresgois.model.MediaComData</class>
 
         <properties>
             <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver" />
