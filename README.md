@@ -185,3 +185,19 @@ String jpql = "select c from Conta c left join fetch c.movimentacoes";
 - Vantagem do Lazyness
     - Performance. Economizando recursos de rede e banda.
 - o Lazy Loading faz com que determinados objetos não sejam carregados do banco até que você precise deles, ou seja, são carregados 'on demand' (apenas quando você solicitar explicitamente o carregamento destes).
+
+### Criteria
+
+- O Root é quem define qual entidade estamos buscando, então, ela seria análoga - na SQL - a cláusula from. Portanto, usamos a classe `CriteriaQuery`, que é a responsável em montar a query.
+
+> API de Criteria como o CriteriaBuilder
+- Usamos a CriteriaBuilder para criar a CriteriaQuery
+- Usamos a CriteriaBuilder para aplicar funções como sum() e avg(), além de criar Expressions ou Predicates.
+
+- Acho que ficou claro que o JPQL é muito mais fácil de ler e entender. Isso faz sentido pois JPQL é uma DSL, uma linguagem especifica para consultas. A Criteria por sua vez é puramente Java e por isso mais verboso. Ou seja, devemos usar a JPQL sempre?
+
+- A resposta é: depende. Só devemos usar a API de Criteria quando a consulta é dinâmica. Ai sim ele fica mais flexível e a JPQL perde toda legibilidade e simplicidade. E sempre devemos usar a JPQL quando a pesquisa é estática, pois ela é muito mais legível e enxuta.
+
+- Resumindo:
+    - as consultas JPQL são mais fáceis de escrever e ler quando a consulta é estática.
+    - as consultas com a API de Criteria são superiores na hora de construir consultas dinâmicas.

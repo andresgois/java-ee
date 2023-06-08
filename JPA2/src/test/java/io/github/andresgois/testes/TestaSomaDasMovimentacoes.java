@@ -5,12 +5,8 @@ import java.math.BigDecimal;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Root;
 
+import io.github.andresgois.dao.MovimentacaoDao;
 import io.github.andresgois.model.Movimentacao;
 
 public class TestaSomaDasMovimentacoes {
@@ -20,7 +16,7 @@ public static void main(String[] args) {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("contas2");
         EntityManager em = emf.createEntityManager();
 
-        CriteriaBuilder builder = em.getCriteriaBuilder();
+        /*CriteriaBuilder builder = em.getCriteriaBuilder();
         CriteriaQuery<BigDecimal> query = builder.createQuery(BigDecimal.class);
         
         //from Movimentacao m
@@ -36,7 +32,10 @@ public static void main(String[] args) {
         
         TypedQuery<BigDecimal> typedQuery = em.createQuery(query);
         
-        System.out.println("A soma das movimentacoes é: " + typedQuery.getSingleResult());
-
+        System.out.println("A soma das movimentacoes é: " + typedQuery.getSingleResult());*/
+        
+        MovimentacaoDao dao = new MovimentacaoDao(em);
+        BigDecimal soma = dao.getSomaDasMovimentacoesComCriteria();
+        System.out.println("A soma das movimentacoes é: " + soma);
     }
 }
