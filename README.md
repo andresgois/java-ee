@@ -336,12 +336,6 @@ public class AutorBean {
 Ao iniciar o servidor podemos ver no console os endereços dos 3 EJB Session Beans que já configuramos.
 
 ### Callbacks
-- Vamos voltar à classe AutorDao e adicionar um método que chamaremos aposCriacao. Nele faremos um simples sys para imprimir uma mensagem:
-```
-void aposCriacao() {
-    System.out.println("AutorDao foi criado");
-}
-```
 - Este método não precisa ser público, pois ele não será chamado pela classe AutorBean. Basta anotá-lo com @PostConstruct e ele será chamado pelo próprio EJB Container:
 ```
 @PostConstruct
@@ -357,36 +351,28 @@ void aposCriacao() {
 - Ao acessar a URI pelo navegador e passar pela tela de login, podemos ver que o combobox com os autores está populado, ou seja, o EJB Container já criou o AutorBean. Isso fica claro no console do Eclipse. Repare que aparece a saída AutorDao foi criado. O EJB Container instanciou o Session Bean e chamou o método callback.
 
 ### Thread safety
-Vamos testar mais um pouco a aplicação e acessar pela interface web a página dos autores, navegando entre as abas. Muito bem. Voltando ao Eclipse, podemos ver no console que continua apenas uma saída do nosso método callback. Isso significa que apenas um Session Bean foi criado, já que o container sempre chama o callback na criação.
+- Vamos testar isso melhor e simular um pouco a execução lenta do método salva no AutorDao.
+- Vamos travar a execução da thread atual usando o comando Thread.sleep(..). No nosso exemplo, o thread atual vai dormir por 5 segundos. O método sleep(..) exige um tratamento de erro, por isso é preciso fazer um try-catch e podemos gerá-lo pelo Eclipse. Pronto.
+- Ao salvar, podemos perceber que o nome do autor não aparece imediatamente na lista de autores abaixo. Isso acontece, pois a thread para salvar o autor ainda está em execução. Travamos por 5 segundos. Repare no console que o AutorDao foi criado e o método salva(), que está sendo executado, não terminou ainda.
 
-Vamos testar isso melhor e simular um pouco a execução lenta do método salva no AutorDao.
+- Vamos rapidamente abrir uma nova aba e recarregar a aplicação para cadastrar mais um autor. Ao salvar novamente a thread parou, mas podemos observar no console que mais um AutorDao foi criado, pois apareceu a saída do callback. Ou seja, como o primeiro objeto Session Bean estava em uso, o EJB Container decidiu criar mais um para atender a chamada. Só depois, quando os 5s passaram, aparece a última mensagem no console e consequentemente o autor é listado na interface.
 
-Primeiro colocaremos um Syso no inicio do método e um Syso no final do método para saber quando a execução começou e quando terminou.
-
-Segundo, vamos travar a execução da thread atual usando o comando Thread.sleep(..). No nosso exemplo, o thread atual vai dormir por 20 segundos. O método sleep(..) exige um tratamento de erro, por isso é preciso fazer um try-catch e podemos gerá-lo pelo Eclipse. Pronto.
-
-Depois da alteração, faremos o publish obrigatório para recarregar a aplicação. Depois de ter limpado o console, vamos acessar a aplicação web pelo navegador. Logo após login, vamos para a página de autores para cadastrar um autor.
-
-Ao salvar, podemos perceber que o nome do autor não aparece imediatamente na lista de autores abaixo. Isso acontece, pois a thread para salvar o autor ainda está em execução. Travamos por 20 segundos. Repare no console que o AutorDao foi criado e o método salva(), que está sendo executado, não terminou ainda.
-
-Vamos rapidamente abrir uma nova aba e recarregar a aplicação para cadastrar mais um autor. Ao salvar novamente a thread parou, mas podemos observar no console que mais um AutorDao foi criado, pois apareceu a saída do callback. Ou seja, como o primeiro objeto Session Bean estava em uso, o EJB Container decidiu criar mais um para atender a chamada. Só depois, quando os 20s passaram, aparece a última mensagem no console e consequentemente o autor é listado na interface.
-
-Esse pequeno exemplo mostrou que um Session Bean não é compartilhado entre Threads. Apenas uma thread pode usar o nosso AutorDao ao mesmo tempo. Um Session Bean é automaticamente Thread safe. Thread safety é um dos serviços que ganhamos de graça ao usarmos EJBs.
+- Esse pequeno exemplo mostrou que um Session Bean não é compartilhado entre Threads. *Apenas uma thread pode usar o nosso AutorDao ao mesmo tempo*. Um Session Bean é automaticamente Thread safe. `Thread safety` é um dos serviços que ganhamos de graça ao usarmos EJBs.
 
 ![EJB02](./asserts/ejb2-cap2png.png)
 
 ### Pool de Objetos
-Vimos que o EJB Container criou um segundo objeto do tipo AutorDao, pois o primeiro estava sendo usado. EJB Container fez isso para melhorar o desempenho, já que o Sesson Bean não é compartilhado.
+- Vimos que o EJB Container criou um segundo objeto do tipo AutorDao, pois o primeiro estava sendo usado. EJB Container fez isso para melhorar o desempenho, já que o Sesson Bean não é compartilhado.
 
-A pergunta é, quantos objetos o EJB Container serão criados? Se eu tiver 100 threads ao mesmo tempo, 100 objetos AutorDao serão criados em memória?
+- A pergunta é, quantos objetos o EJB Container serão criados? Se eu tiver 100 threads ao mesmo tempo, 100 objetos AutorDao serão criados em memória?
 
 ![EJB03](./asserts/ejb3-cap2png.png)
 
-O EJB Container automaticamente fornece um pool de objetos que gerencia a quantidade do Session Beans. A configuração desse pool se encontra no arquivo de configuração do JBoss AS, ou seja, é totalmente específico.
+- O EJB Container automaticamente fornece um pool de objetos que gerencia a quantidade do Session Beans. A configuração desse pool se encontra no arquivo de configuração do JBoss AS, ou seja, é totalmente específico.
 
 ![EJB04](./asserts/ejb4-cap2png.png)
 
-Vamos abrir o arquivo `standalone.xml` da pasta de `standalone/configuration`. Nele procuraremos o elemento `<pools>`. Dentro desse elemento, encontraremos a configuração do pool para session beans. Repare o atributo max-pool-size que define a quantidade de objetos no pool. No nosso caso são 20 instancias.
+- Vamos abrir o arquivo `standalone.xml` da pasta de `standalone/configuration`. Nele procuraremos o elemento `<pools>`. Dentro desse elemento, encontraremos a configuração do pool para session beans. Repare o atributo max-pool-size que define a quantidade de objetos no pool. No nosso caso são 20 instancias.
 ```
 <pools>
     <bean-instance-pools>
@@ -395,76 +381,46 @@ Vamos abrir o arquivo `standalone.xml` da pasta de `standalone/configuration`. N
     </bean-instance-pools>
 </pools>
 ```
-Vamos fazer um teste e configurar o pool com apenas 1 instancia. Basta colocar o valor no atributo max-pool-size. Como alteramos o arquivo principal de configuração é necessário reiniciar o servidor. No final limparemos o console para acompanhar melhor o trabalho do EJB Container.
+- O `max-pool-size` define as transações em paralelo, se tiver só uma, então a outra só será iniciada quando a primeira terminar, os Session Beans são thread safe. Repare que o console mostra que na execução foi um depois do outro, já que existe apenas um objeto do tipo AutorDao em memória.
 
-```
-<pools>
-    <bean-instance-pools>
-        <strict-max-pool name="slsb-strict-max-pool" max-pool-size="1" instance-acquisition-timeout="5" instance-acquisition-timeout-unit="MINUTES"/>
-        <!-- outros elementos omitidos -->
-    </bean-instance-pools>
-</pools>
-```
-Vamos fazer o mesmo teste, ou seja, acessar a nossa aplicação através de duas abas, simulando duas ações de usuário executado ao mesmo tempo. Após ter feito o login, vamos para a aba autores. Não podemos esquecer de atualizar a outra aba também. Quando estiver pronto podemos salvar o primeiro autor.
-
-No console, aparecem as mensagens do callback e do método salva(...). Até aqui tudo igual. Vamos para a segunda aba para salvar um outro autor. Ao salvar e analisar o console NÃO aparece a mensagem do callback. Isso faz sentido, pois configuramos para que exista apenas um objeto AutorDao. Enquanto a primeira ação não finalizar, não é possível acessar esse objeto, pois, como já mencionamos, os Session Beans são thread safe. Repare que o console mostra que na execução foi um depois do outro, já que existe apenas um objeto do tipo AutorDao em memória.
-
-Repare que a configuração do tamanho do pool influencia diretamente na escalabilidade da aplicação. Ter apenas um objeto AutorDao em memória significa que só podemos atender um chamado por vez. Por isso faz sentido, para objeto DAO, aumentar a quantidade de objetos no pool.
-
-Por fim, vamos desfazer a alteração no arquivo standalone.xml e configurar novamente 20 instancias no pool. Como mexemos no xml, não podemos esquecer de reiniciar o servidor. No método salva(..) também vamos comentar o código que mandou o Thread atual dormir. Pronto.
+- Repare que a configuração do tamanho do pool influencia diretamente na escalabilidade da aplicação. Ter apenas um objeto AutorDao em memória significa que `só podemos atender um chamado por vez`. Por isso faz sentido, para objeto DAO, aumentar a quantidade de objetos no pool.
 
 ### Singleton Beans
-Já aprendemos como configurar as classes DAOs, agora vamos atacar a classe Banco. O Banco ainda não é um EJB Session Bean. Podemos facilmente mudar isso e colocar a anotação @Stateless em cima da classe como vimos nos exemplos anteriores
+- Já aprendemos como configurar as classes DAOs, agora vamos atacar a classe Banco. O Banco ainda não é um EJB Session Bean. Podemos facilmente mudar isso e colocar a anotação @Stateless em cima da classe como vimos nos exemplos anteriores
 
 ```
 @Stateless
 public class Banco {
 ```
-E, por exemplo, no AutorDao, vamos injetar o banco. Para tal, não devemos instanciar o Banco e sim, usar a anotação @Inject:
+- E, por exemplo, no AutorDao, vamos injetar o banco. Para tal, não devemos instanciar o Banco e sim, usar a anotação @Inject:
 
 ```
 @Inject
 private Banco banco;
 ```
-Voltando para classe Banco, vimos, no exemplo anterior, que existe um pool de objetos para Session Beans. Ou seja, como o Banco é um Session Bean, teremos, no máximo, 20 instancias em memória.
+- Voltando para classe Banco, vimos, no exemplo anterior, que existe um pool de objetos para Session Beans. Ou seja, como o Banco é um Session Bean, teremos, no máximo, 20 instancias em memória.
 
-Nesse caso pode surgir a pergunta, faz sentido ter todas essas instancias dessa classe? Claro que não! Apesar do fato de que essa classe só existe para simular um banco de dados, não faz sentido nenhum ter mais do que um objeto dessa classe. É preciso ter apenas um único objeto para simular o banco.
+- Nesse caso pode surgir a pergunta, faz sentido ter todas essas instancias dessa classe? Claro que não! Apesar do fato de que essa classe só existe para simular um banco de dados, não faz sentido nenhum ter mais do que um objeto dessa classe. É preciso ter apenas um único objeto para simular o banco.
 
-Felizmente podemos configurar isso sem mexer na configuração XML do JBoss AS. Basta usar a anotação `@Singleton`:
+> Felizmente podemos configurar isso sem mexer na configuração XML do JBoss AS. Basta usar a anotação `@Singleton`:
 
 ```
 @Singleton  // do package javax.ejb
 public class Banco {
 ```
-Para ter certeza que não existem mais instâncias, vamos fazer o mesmo teste. Na classe Banco adicionaremos um método de callback usando a anotação @PostConstruct:
-
-```
-@PostConstruct
-void aposCriacao() {
-    System.out.println("acabou de criar o Banco");
-}
-```
-
-Se tudo estiver configurado, podemos iniciar o JBoss AS para testar a aplicação com o novo Singleton Session Bean. Na saída do console, podemos ver que o EJB Container já entrou e carregou o Banco. Repare que existe uma saída parecida com a dos outros Session Beans.
-
-Só falta limpar o console e acessar a interface web. Após o login, o conteúdo de ambos os callbacks é impresso no console; aquele do AutorDao e esse novo do Banco.
-
-Vamos cadastrar uma vez um Autor pela interface para verificar se realmente existe uma única instancia do Banco. Como esperado, o console indica que o callback foi só uma vez.
-
 ### Eager Initialization
-Session Beans do tipo Singleton são tipicamente usados para inicializar alguma configuração ou agendar algum serviço. Fazer isso só faz sentido no inicio da aplicação, ou seja, quando o JBoss AS carrega a aplicação e já queremos que o Session Bean seja criado para carregar todas as configurações.
+- Session Beans do tipo Singleton são tipicamente usados para inicializar alguma configuração ou agendar algum serviço. Fazer isso só faz sentido no inicio da aplicação, ou seja, quando o JBoss AS carrega a aplicação e já queremos que o Session Bean seja criado para carregar todas as configurações.
 
-Por padrão um EJB é carregado sob demanda (lazy), mas através da anotação @Startup podemos definir que queremos usar o Singleton Bean desde o início da aplicação:
+- Por padrão um EJB é carregado sob demanda (`lazy`), mas através da anotação @Startup podemos definir que queremos usar o Singleton Bean desde o início da aplicação:
 
 ```
 @Singleton //do package javax.ejb
 @Startup
 public class Banco {
 ```
+- Ao iniciar a aplicação o Banco já é criado e inicializado pelo EJB Container.
 
-Para testar, vamos recarregar a aplicação, ou seja, Full Publish aba Servers do Eclipse. Após ter carregado a aplicação, aparece no console a saída do callback. O Banco já é criado e inicializado pelo EJB Container.
-
-Aquela inicialização com `@Startup` também é chamada **eager initialization** e a testaremos nos exercícios.
+- Aquela inicialização com `@Startup` também é chamada **eager initialization** e a testaremos nos exercícios.
 
 > EJB Container cria e inicializa o Session Bean, o método anotado com @PostConstruct é executado. Esse tipo de comportamento está ligado ao ciclo de vida do Session Bean e também é chamado de Callbacks.
 
@@ -472,28 +428,136 @@ Aquela inicialização com `@Startup` também é chamada **eager initialization*
 
 > O atributo é max-pool-size, que por default está configurado para 20 objetos Stateless Session Bean (SLSB) no pool.
 
-> Qual a principal característica do Singleton Session Bean? Ele garante que haverá somente uma instância do Session Bean.
-
-> Por padrão um EJB é carregado sob demanda (`lazy`), mas através da anotação @Startup podemos definir que queremos usar o Singleton Bean desde o início da aplicação. Inicialização com `@Startup` também é chamada eager initialization.
+> A principal característica do Singleton Session Bean é garantir que haverá somente uma instância do Session Bean.
 
 ### Session Bean Stateful (SBSF)
-Há mais um tipo de EJB Session Bean. Além dos Session Beans Stateless e Singleton, existe um Session Bean do tipo Stateful. Basta anotar a classe com @Stateful, por exemplo:
+- Há mais um tipo de EJB Session Bean. Além dos Session Beans Stateless e Singleton, existe um Session Bean do tipo Stateful. Basta anotar a classe com @Stateful, por exemplo:
 ```
 @Stateful
 public class CarrinhoDeCompras {
  //...
 }
 ```
-Um Session Bean Stateful (SBSF) também é um objeto administrado pelo EJB Container. Assim ele ganha os serviços oferecidos pelo Container como injeção de dependências, transação ou JPA (como veremos mais para frente).
+- Um Session Bean Stateful (SBSF) também é um objeto administrado pelo EJB Container. Assim ele ganha os serviços oferecidos pelo Container como injeção de dependências, transação ou JPA (como veremos mais para frente).
 
-Qual é a diferença entre `Stateful` e `Stateless` então?
+> Qual é a diferença entre `Stateful` e `Stateless` então?
 
-Vimos que Session Beans `Stateless` são objetos que fazem parte de um pool. Esse pool não existe para Session Bean `Stateful`. Um SBSF funciona parecido com o objeto HttpSession do mundo de Servlets. É um objeto exclusivo de um cliente, apenas um cliente usará este objeto.
+- Vimos que Session Beans `Stateless` são objetos que fazem parte de um pool. Esse pool não existe para Session Bean `Stateful`. Um SBSF funciona parecido com o objeto HttpSession do mundo de Servlets. *É um objeto exclusivo de um cliente*, apenas um cliente usará este objeto.
 
-Podemos imaginar que um Session Bean `Stateful` funciona como um carrinho de compras. Cada cliente possui o seu carrinho e ele utilizará o mesmo carrinho o tempo todo. Não queremos compartilhar esse carrinho com ninguém (as compras são nossas). Um Session Bean `Stateful` garante esse comportamento.
+- Podemos imaginar que um Session Bean `Stateful` funciona como um carrinho de compras. Cada cliente possui o seu carrinho e ele utilizará o mesmo carrinho o tempo todo. Não queremos compartilhar esse carrinho com ninguém (as compras são nossas). Um Session Bean `Stateful` garante esse comportamento.
 
-No entanto, no dia a dia os SBSF são pouco usados. Isto porque normalmente se usa o objeto HttpSession para guardar dados do cliente (como o carrinho de compras ou as permissões do usuário). Como já usamos esse objeto dentro do servlet container não é preciso repetir essas informações através do EJB Container. Assim muitos arquitetos preferem usar apenas Stateless/Singleton em conjunto com o HttpSession.
+- No entanto, no dia a dia os SBSF são pouco usados. Isto porque normalmente se usa o objeto HttpSession para guardar dados do cliente (como o carrinho de compras ou as permissões do usuário). Como já usamos esse objeto dentro do servlet container não é preciso repetir essas informações através do EJB Container. Assim muitos arquitetos preferem usar apenas Stateless/Singleton em conjunto com o HttpSession.
 
 > O Session Bean Stateful (SBSF) tem uma funcionalidade muito parecida com a do objeto HttpSession: representa um objeto para o cliente. Ideal para guardar informações que só dizem respeito ao cliente. Exemplos disso são carrinhos de compras ou permissões.
 
 > A diferença entre Session Bean Stateful e HttpSession é que o primeiro é administrado pelo EJB Container e o segundo pelo Servlet Container.
+
+## Integração do JPA com Pool e DataSource
+
+Injetando o EntityManager
+Até agora usamos a classe Banco para simular um banco de dados, mas chegou a hora de realmente persistir os dados. O primeiro passo é injetar o EntityManager; interface principal da especificação JPA. Para tanto, onde usávamos Banco, passaremos a usar o EntityManager.
+
+O EntityManager possui métodos de alto nível para trabalharmos com objetos. Para salvar o autor podemos usar o método persist():
+
+manager.persist(autor);COPIAR CÓDIGO
+Para listar todos os autores, basta executar uma query:
+
+manager.createQuery("select a from Autor a", Autor.class).getResultList();COPIAR CÓDIGO
+Por último, podemos procurar um autor pelo id:
+
+manager.find(Autor.class, autorId);COPIAR CÓDIGO
+Pronto, a classe AutorDao já está compilando, agora só falta ajustar a anotação de injeção de dependência. Quando injetamos um EntityManager não podemos utilizar a anotação @Inject. Nesse caso, o Contexts and Dependency Injection (CDI), outra especificação com o foco na injeção de dependência, buscaria o EntityManager. No entanto não encontraria o objeto e causaria uma exceção. Como o EJB Container administrará o JPA, é preciso usar uma anotação especifica do mundo EJB, nesse caso @PersistenceContext:
+
+@PersistenceContext
+EntityManager manager;COPIAR CÓDIGO
+Isso fará com que o EJB Container injete o EntityManager. Mas qual banco de dados vamos utilizar e qual é o endereço desse banco? Para tudo isso realmente funcionar, temos que definir algumas configurações sobre o banco de dados.
+
+Configuração do banco de dados
+O primeiro passo é copiar o arquivo persistence.xml que faz parte do JPA. Já preparamos o arquivo para você e está disponível dentro dos resources, basta copiar a pasta META-INF para a pasta src do projeto livraria.
+
+O arquivo persistence.xml possui algumas configurações específicas do mundo JPA como, o nome da unidade da persistência, o provedor de persistência e as entidades do projeto - todas elas explicadas no treinamento JPA 2 da plataforma Alura.
+
+Também há algumas propriedades sobre a conexão com o banco de dados, usuário, senha e o driver connector utilizadas. O problema é que não devemos configurar os dados da conexão dentro do persistence.xml. Quem é responsável por fornecer a conexão é o EJB Container! É um serviço que o servidor disponibilizará para a aplicação.
+
+A única coisa que deve ser feita dentro do persistence.xml é configurar o endereço do serviço. Para isso, existe a configuração <jta-data-source>. Vamos deixar o endereço ainda com interrogações para entender como configura-lo primeiro.
+
+Usando o datasource
+Como já falamos antes, é responsabilidade do servidor fornecer a conexão com o banco de dados. Uma conexão é feita através de um driver connector, por isso precisamos registrar o driver do banco MySQL como módulo no JBoss AS.
+
+Dentro da pasta resources nos downloads já temos o módulo preparado, que consiste de um arquivo XML e um JAR do connector. Esses dois arquivos devem ser copiados para a pasta modules do JBoss AS.
+
+Internamente o JBoss AS organiza seus módulos em pacotes, por isso devemos navegar para a pasta modules/com. Dentro da pasta com criaremos uma nova pasta mysql e dentro dela uma pasta main. Dentro da pasta main colocaremos o arquivo XML e o JAR (hierarquia final das pastas: jboss/modules/com/mysql/main).
+
+Ao iniciar o JBoss AS, ele já carregará o novo módulo. Agora falta dizer ao JBoss AS que esse módulo representa um driver connector. Isso é feito no arquivo de configurações standalone.xml.
+
+Vamos abrir o XML dentro de um editor de texto qualquer e procurar pelo elemento <drivers>. Dentro desse elemento vamos copiar a configuração do driver que já está disponível na pasta resources.
+
+<driver name="com.mysql" module="com.mysql">
+    <xa-datasource-class>
+        com.mysql.jdbc.jdbc2.optional.MysqlXADataSource
+    </xa-datasource-class>
+</driver>COPIAR CÓDIGO
+A configuração do driver refere-se ao módulo definido anteriormente e fornece um nome para esse driver, além de especificar o nome da classe.
+
+Por último, falta configurar o componente que no JavaEE chamamos de DataSource. Em uma aplicação mais robusta, é boa prática utilizar um pool de conexões. Cabe ao pool gerenciar e verificar as conexões disponíveis. Como existem várias implementações de pool no mercado, o JavaEE define um padrão que se chama DataSource. Podemos dizer de maneira simplificada que um DataSource é a interface do pool de conexões.
+
+Podemos ver no arquivo XML que até já existe um datasource dentro do JBoss AS. Nele podemos ver o min e max de conexões definidos, além do nome do driver responsável e os dados sobre o usuário e senha do banco.
+
+Agora só precisamos definir o nosso próprio datasource. Isso também já está preparado dentro da pasta resources. Basta copiar e colar a definição do datasource para o arquivo standalone.xml.
+
+<datasource jndi-name="java:/livrariaDS" pool-name="livrariaDS"
+    enabled="true" use-java-context="true">
+
+    <connection-url>jdbc:mysql://localhost:3306/livraria</connection-url>
+    <driver>com.mysql</driver>
+    <pool>
+        <min-pool-size>10</min-pool-size>
+        <max-pool-size>100</max-pool-size>
+        <prefill>true</prefill>
+    </pool>
+    <security>
+        <user-name>root</user-name>
+        <password></password>
+    </security>
+</datasource>COPIAR CÓDIGO
+Repare que aquelas configurações do persistence.xml estão dentro do datasource agora. O servidor JBoss AS então criará o pool de conexões disponibilizando-o para as aplicações. A única coisa que as aplicações precisam saber é o endereço do serviço. Em nosso caso o endereço é java:/livrariaDS.
+
+Vamos copiar e colar este endereço no persistence.xml. Pronto, a única informação que a aplicação precisa saber agora é que está acessando um datasource que se chama livrariaDS. Os detalhes da configuração estão totalmente desacoplados da aplicação.
+
+Preparação do banco de dados
+Vamos reiniciar o servidor e ficaramos atentos à saída no console para perceber possíveis problemas de configuração.
+
+Para nossa surpresa o JBoss AS jogou uma exceção. A mensagem Unkown Database indica que o MySQL não conhece o banco livraria. Esquecemos de preparar o MySQL.
+
+Para resolver o problema vamos abrir um terminal e abrir uma conexão com o MySQL. Em nosso caso basta digitar:
+
+mysql -u rootCOPIAR CÓDIGO
+Uma vez estabelecida a conexão do terminal com MySQL podemos criar e testar o banco:
+
+create database livraria;
+use livraria;
+show tables;COPIAR CÓDIGO
+Como acabamos de criar o banco, ainda não há nenhuma tabela. Voltando ao Eclipse, vamos novamente iniciar o JBoss AS.
+
+Dessa vez o servidor iniciou sem problemas. Até podemos observar no console que as tables foram criadas no banco.
+
+Com o terminal ainda aberto testaremos rapidamente se as tabelas realmente existem. Basta repetir o comando show tables. O terminal mostrará as tabelas corretamente.
+
+Testando a persistência
+Chegou a hora de testar a aplicação pela interface web.
+
+No navegador, após o login, podemos ver que o combobox dos autores está vazio. Isso faz sentido pois não cadastramos ainda nenhum autor. Vamos verificar o cadastro de autores e inserir alguns autores.
+
+Agora, no combobox aparecem corretamente os autores que indicam a execução sem problemas. Vamos verificar o console, nele aparece o SQL gerado pelo JPA.
+
+A próxima tarefa é alterar o UsuarioDao, que ainda usa a classe antiga. Mas isso ficará para os exercícios.
+
+## Gerenciamento de Transações com JTA
+
+## Lidando com Exceções
+
+## Novos serviços com Interceptadores
+
+## Integração com Web Services
+
+## Agendamento e EAR
