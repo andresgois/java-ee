@@ -108,3 +108,12 @@ Hibernate:
 > Por padrão, quando temos um relacionamento @OneToOne, ainda não obtemos a restrição que é esperada por um relacionamento @OneToOne.
 - A anotação @JoinColumn só funciona na criação do schema, portanto é necessário deletar o banco e criá-lo novamente.
 
+### JPQL
+> JPQL é orientado a objetos, enquanto SQL não
+
+##### Named Parameter Notation
+- Essa notação de passar o valor do parâmetro, baseado na posição onde ele se encontra, também existe em JPA e se chama `Positional Parameter Notation`. No entanto, a presença de muitos parâmetros pode facilmente se tornar uma confusão.
+
+- Para evitar isso, usamos a notação `Named Parameter Notation` que é mais expressiva. Usando ela, ganhamos como vantagem:
+
+- A facilidade de identificar os parâmetros, diminuindo a probabilidade de erros
