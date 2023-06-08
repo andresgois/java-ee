@@ -104,3 +104,7 @@ Hibernate:
 ```
 > O estado Removed
 - A entidade nesse estado possui um ID, apesar de não existir sincronização automática e não possuir registro no banco
+
+> Por padrão, quando temos um relacionamento @OneToOne, ainda não obtemos a restrição que é esperada por um relacionamento @OneToOne.
+- A anotação @JoinColumn só funciona na criação do schema, portanto é necessário deletar o banco e criá-lo novamente.
+
