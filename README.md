@@ -148,3 +148,40 @@ Classe Movimentacao
 ```
 
 ![Unindo com mappedBy](./asserts/relacionamento_by_direcional2.png)
+
+### Lidando com queries N + 1
+
+![N + 1](./asserts/n_mais_1.png)
+
+- Resolução
+    - N + 1 ocorre quando precisamos disparar queries select para preencher os relacionamentos e pode ser resolvido com um join.
+#### EAGER
+- o Eager Loading carrega os dados mesmo que você não vá utilizá-los, mas é óbvio que você só utilizará esta técnica se de fato você for precisar com muita frequência dos dados carregados.
+
+- Carregamento padrão, faz uma consulta, imprime o resultado depois faz outra e imprime o seu resultado
+
+![EAGER](./asserts/fetch_padrao.png)
+
+- Carregamento atencipado, faz as duas consutas e depois mostra o resultado para tudo
+- Esse é o padrão para o Relacionamento `@*ToOne`
+- Não é performatico para o Relacionamento `@*ToMany`
+> fetch=FetchType.EAGER
+
+![EAGER](./asserts/fetch_eager.png)
+
+- Para usar no Relacionamento `@*ToMany`e melhorar a performace usamos um join
+
+![Com Join](./asserts/fetch_eager_com_join.png)
+
+```
+- Trás apenas dados que tenham movimentações
+String jpql = "select c from Conta c join fetch c.movimentacoes";
+
+- Busca todos os dados
+String jpql = "select c from Conta c left join fetch c.movimentacoes";
+```
+
+#### Lazyness
+- Vantagem do Lazyness
+    - Performance. Economizando recursos de rede e banda.
+- o Lazy Loading faz com que determinados objetos não sejam carregados do banco até que você precise deles, ou seja, são carregados 'on demand' (apenas quando você solicitar explicitamente o carregamento destes).
