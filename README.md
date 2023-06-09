@@ -535,35 +535,19 @@ docker container run --name livraria-mysql-container -e MYSQL_USER=andre -e MYSQ
 ```
 - Repare que aquelas configurações do persistence.xml estão dentro do datasource agora. O servidor JBoss AS então criará o pool de conexões disponibilizando-o para as aplicações. A única coisa que as aplicações precisam saber é o endereço do serviço. Em nosso caso o endereço é java:/livrariaDS.
 
-Vamos copiar e colar este endereço no persistence.xml. Pronto, a única informação que a aplicação precisa saber agora é que está acessando um datasource que se chama livrariaDS. Os detalhes da configuração estão totalmente desacoplados da aplicação.
-
-Preparação do banco de dados
-Vamos reiniciar o servidor e ficaramos atentos à saída no console para perceber possíveis problemas de configuração.
-
-Para nossa surpresa o JBoss AS jogou uma exceção. A mensagem Unkown Database indica que o MySQL não conhece o banco livraria. Esquecemos de preparar o MySQL.
-
-Para resolver o problema vamos abrir um terminal e abrir uma conexão com o MySQL. Em nosso caso basta digitar:
-
+- Entrar via terminal para criar o banco
+```
 mysql -u root
-Uma vez estabelecida a conexão do terminal com MySQL podemos criar e testar o banco:
 
 create database livraria;
 use livraria;
 show tables;
-Como acabamos de criar o banco, ainda não há nenhuma tabela. Voltando ao Eclipse, vamos novamente iniciar o JBoss AS.
+```
 
-Dessa vez o servidor iniciou sem problemas. Até podemos observar no console que as tables foram criadas no banco.
+- A principal interface da JPA que deve ser utilizada para gerenciar esses dados é o `EntityManager`.
 
-Com o terminal ainda aberto testaremos rapidamente se as tabelas realmente existem. Basta repetir o comando show tables. O terminal mostrará as tabelas corretamente.
+- Como o EJB Container administrará o JPA, é preciso usar uma anotação especifica do mundo EJB para fazer a "injeção" do EntityManager, nesse caso, precisamos utilizar @PersistenceContext.
 
-Testando a persistência
-Chegou a hora de testar a aplicação pela interface web.
-
-No navegador, após o login, podemos ver que o combobox dos autores está vazio. Isso faz sentido pois não cadastramos ainda nenhum autor. Vamos verificar o cadastro de autores e inserir alguns autores.
-
-Agora, no combobox aparecem corretamente os autores que indicam a execução sem problemas. Vamos verificar o console, nele aparece o SQL gerado pelo JPA.
-
-A próxima tarefa é alterar o UsuarioDao, que ainda usa a classe antiga. Mas isso ficará para os exercícios.
 
 ## Gerenciamento de Transações com JTA
 
