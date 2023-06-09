@@ -454,57 +454,63 @@ public class CarrinhoDeCompras {
 
 ## Integração do JPA com Pool e DataSource
 
-Injetando o EntityManager
-Até agora usamos a classe Banco para simular um banco de dados, mas chegou a hora de realmente persistir os dados. O primeiro passo é injetar o EntityManager; interface principal da especificação JPA. Para tanto, onde usávamos Banco, passaremos a usar o EntityManager.
+> Injetando o EntityManager
+- O EntityManager possui métodos de alto nível para trabalharmos com objetos. Para salvar o autor podemos usar o método persist():
+```
+manager.persist(autor);
+```
+- Para listar todos os autores, basta executar uma query:
 
-O EntityManager possui métodos de alto nível para trabalharmos com objetos. Para salvar o autor podemos usar o método persist():
+```
+manager.createQuery("select a from Autor a", Autor.class).getResultList();
+```
+- Por último, podemos procurar um autor pelo id:
 
-manager.persist(autor);COPIAR CÓDIGO
-Para listar todos os autores, basta executar uma query:
+```
+manager.find(Autor.class, autorId);
+```
 
-manager.createQuery("select a from Autor a", Autor.class).getResultList();COPIAR CÓDIGO
-Por último, podemos procurar um autor pelo id:
-
-manager.find(Autor.class, autorId);COPIAR CÓDIGO
-Pronto, a classe AutorDao já está compilando, agora só falta ajustar a anotação de injeção de dependência. Quando injetamos um EntityManager não podemos utilizar a anotação @Inject. Nesse caso, o Contexts and Dependency Injection (CDI), outra especificação com o foco na injeção de dependência, buscaria o EntityManager. No entanto não encontraria o objeto e causaria uma exceção. Como o EJB Container administrará o JPA, é preciso usar uma anotação especifica do mundo EJB, nesse caso @PersistenceContext:
-
+- Quando injetamos um EntityManager não podemos utilizar a anotação @Inject. Nesse caso, o Contexts and Dependency Injection (CDI), outra especificação com o foco na injeção de dependência, buscaria o EntityManager. No entanto não encontraria o objeto e causaria uma exceção. Como o EJB Container administrará o JPA, é preciso usar uma anotação especifica do mundo EJB, nesse caso @PersistenceContext:
+```
 @PersistenceContext
-EntityManager manager;COPIAR CÓDIGO
-Isso fará com que o EJB Container injete o EntityManager. Mas qual banco de dados vamos utilizar e qual é o endereço desse banco? Para tudo isso realmente funcionar, temos que definir algumas configurações sobre o banco de dados.
+EntityManager manager;
+```
+- Isso fará com que o EJB Container injete o EntityManager. Mas qual banco de dados vamos utilizar e qual é o endereço desse banco? Para tudo isso realmente funcionar, temos que definir algumas configurações sobre o banco de dados.
 
-Configuração do banco de dados
-O primeiro passo é copiar o arquivo persistence.xml que faz parte do JPA. Já preparamos o arquivo para você e está disponível dentro dos resources, basta copiar a pasta META-INF para a pasta src do projeto livraria.
+> Configuração do banco de dados
+- O arquivo persistence.xml possui algumas configurações específicas do mundo JPA como, o nome da unidade da persistência, o provedor de persistência e as entidades do projeto.
 
-O arquivo persistence.xml possui algumas configurações específicas do mundo JPA como, o nome da unidade da persistência, o provedor de persistência e as entidades do projeto - todas elas explicadas no treinamento JPA 2 da plataforma Alura.
+- Também há algumas propriedades sobre a conexão com o banco de dados, usuário, senha e o driver connector utilizadas. O problema é que não devemos configurar os dados da conexão dentro do persistence.xml. Quem é responsável por fornecer a conexão é o `EJB Container`! É um serviço que o servidor disponibilizará para a aplicação.
 
-Também há algumas propriedades sobre a conexão com o banco de dados, usuário, senha e o driver connector utilizadas. O problema é que não devemos configurar os dados da conexão dentro do persistence.xml. Quem é responsável por fornecer a conexão é o EJB Container! É um serviço que o servidor disponibilizará para a aplicação.
+- A única coisa que deve ser feita dentro do persistence.xml é configurar o endereço do serviço. Para isso, existe a configuração *<jta-data-source>*. Vamos deixar o endereço ainda com interrogações para entender como configura-lo primeiro.
 
-A única coisa que deve ser feita dentro do persistence.xml é configurar o endereço do serviço. Para isso, existe a configuração <jta-data-source>. Vamos deixar o endereço ainda com interrogações para entender como configura-lo primeiro.
+> Usando o datasource
+- Como já falamos antes, é responsabilidade do servidor fornecer a conexão com o banco de dados. Uma conexão é feita através de um driver connector, por isso precisamos registrar o driver do banco MySQL como módulo no JBoss AS.
 
-Usando o datasource
-Como já falamos antes, é responsabilidade do servidor fornecer a conexão com o banco de dados. Uma conexão é feita através de um driver connector, por isso precisamos registrar o driver do banco MySQL como módulo no JBoss AS.
+- Dentro da pasta resources nos downloads já temos o módulo preparado, que consiste de um arquivo XML e um JAR do connector. Esses dois arquivos devem ser copiados para a pasta modules do JBoss AS.
 
-Dentro da pasta resources nos downloads já temos o módulo preparado, que consiste de um arquivo XML e um JAR do connector. Esses dois arquivos devem ser copiados para a pasta modules do JBoss AS.
+- Internamente o JBoss AS organiza seus módulos em pacotes, por isso devemos navegar para a pasta modules/com. Dentro da pasta com criaremos uma nova pasta mysql e dentro dela uma pasta main. Dentro da pasta main colocaremos o arquivo XML e o JAR (hierarquia final das pastas: jboss/modules/com/mysql/main).
 
-Internamente o JBoss AS organiza seus módulos em pacotes, por isso devemos navegar para a pasta modules/com. Dentro da pasta com criaremos uma nova pasta mysql e dentro dela uma pasta main. Dentro da pasta main colocaremos o arquivo XML e o JAR (hierarquia final das pastas: jboss/modules/com/mysql/main).
+- Ao iniciar o JBoss AS, ele já carregará o novo módulo. Agora falta dizer ao JBoss AS que esse módulo representa um driver connector. Isso é feito no arquivo de configurações standalone.xml.
 
-Ao iniciar o JBoss AS, ele já carregará o novo módulo. Agora falta dizer ao JBoss AS que esse módulo representa um driver connector. Isso é feito no arquivo de configurações standalone.xml.
+- Vamos abrir o XML dentro de um editor de texto qualquer e procurar pelo elemento *<drivers>*. Dentro desse elemento vamos copiar a configuração do driver que já está disponível na pasta resources.
 
-Vamos abrir o XML dentro de um editor de texto qualquer e procurar pelo elemento <drivers>. Dentro desse elemento vamos copiar a configuração do driver que já está disponível na pasta resources.
-
+```
 <driver name="com.mysql" module="com.mysql">
     <xa-datasource-class>
         com.mysql.jdbc.jdbc2.optional.MysqlXADataSource
     </xa-datasource-class>
-</driver>COPIAR CÓDIGO
-A configuração do driver refere-se ao módulo definido anteriormente e fornece um nome para esse driver, além de especificar o nome da classe.
+</driver>
+```
 
-Por último, falta configurar o componente que no JavaEE chamamos de DataSource. Em uma aplicação mais robusta, é boa prática utilizar um pool de conexões. Cabe ao pool gerenciar e verificar as conexões disponíveis. Como existem várias implementações de pool no mercado, o JavaEE define um padrão que se chama DataSource. Podemos dizer de maneira simplificada que um DataSource é a interface do pool de conexões.
+- A configuração do driver refere-se ao módulo definido anteriormente e fornece um nome para esse driver, além de especificar o nome da classe.
 
-Podemos ver no arquivo XML que até já existe um datasource dentro do JBoss AS. Nele podemos ver o min e max de conexões definidos, além do nome do driver responsável e os dados sobre o usuário e senha do banco.
+- Por último, falta configurar o componente que no JavaEE chamamos de DataSource. Em uma aplicação mais robusta, é boa prática utilizar um pool de conexões. Cabe ao pool gerenciar e verificar as conexões disponíveis. Como existem várias implementações de pool no mercado, o JavaEE define um padrão que se chama DataSource. Podemos dizer de maneira simplificada que um DataSource é a interface do pool de conexões.
 
-Agora só precisamos definir o nosso próprio datasource. Isso também já está preparado dentro da pasta resources. Basta copiar e colar a definição do datasource para o arquivo standalone.xml.
+- Podemos ver no arquivo XML que até já existe um datasource dentro do JBoss AS. Nele podemos ver o min e max de conexões definidos, além do nome do driver responsável e os dados sobre o usuário e senha do banco.
 
+- Agora só precisamos definir o nosso próprio datasource. Isso também já está preparado dentro da pasta resources. Basta copiar e colar a definição do datasource para o arquivo standalone.xml.
+```
 <datasource jndi-name="java:/livrariaDS" pool-name="livrariaDS"
     enabled="true" use-java-context="true">
 
@@ -519,8 +525,15 @@ Agora só precisamos definir o nosso próprio datasource. Isso também já está
         <user-name>root</user-name>
         <password></password>
     </security>
-</datasource>COPIAR CÓDIGO
-Repare que aquelas configurações do persistence.xml estão dentro do datasource agora. O servidor JBoss AS então criará o pool de conexões disponibilizando-o para as aplicações. A única coisa que as aplicações precisam saber é o endereço do serviço. Em nosso caso o endereço é java:/livrariaDS.
+</datasource>
+```
+
+#### Docker
+```
+docker container run --name livraria-mysql-container -e MYSQL_USER=andre -e MYSQL_PASSWORD=123456 -e MYSQL_DATABASE=livraria -e MYSQL_ROOT_PASSWORD=123456 -d -p 3306:3306 mysql:5
+
+```
+- Repare que aquelas configurações do persistence.xml estão dentro do datasource agora. O servidor JBoss AS então criará o pool de conexões disponibilizando-o para as aplicações. A única coisa que as aplicações precisam saber é o endereço do serviço. Em nosso caso o endereço é java:/livrariaDS.
 
 Vamos copiar e colar este endereço no persistence.xml. Pronto, a única informação que a aplicação precisa saber agora é que está acessando um datasource que se chama livrariaDS. Os detalhes da configuração estão totalmente desacoplados da aplicação.
 
@@ -531,12 +544,12 @@ Para nossa surpresa o JBoss AS jogou uma exceção. A mensagem Unkown Database i
 
 Para resolver o problema vamos abrir um terminal e abrir uma conexão com o MySQL. Em nosso caso basta digitar:
 
-mysql -u rootCOPIAR CÓDIGO
+mysql -u root
 Uma vez estabelecida a conexão do terminal com MySQL podemos criar e testar o banco:
 
 create database livraria;
 use livraria;
-show tables;COPIAR CÓDIGO
+show tables;
 Como acabamos de criar o banco, ainda não há nenhuma tabela. Voltando ao Eclipse, vamos novamente iniciar o JBoss AS.
 
 Dessa vez o servidor iniciou sem problemas. Até podemos observar no console que as tables foram criadas no banco.
