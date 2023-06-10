@@ -32,19 +32,19 @@ public class AutorDao {
 		
 		}*/
 		//banco.save(autor);
-		em.persist(autor);
+		this.em.persist(autor);
 		System.out.println("Depois de salvas");
 	}
 	
 	public List<Autor> todosAutores() {
 		//return banco.listaAutores();
 		System.out.println("Todos os autores do banco");
-		return em.createQuery("select a from Autor a", Autor.class).getResultList();
+		return this.em.createQuery("select a from Autor a", Autor.class).getResultList();
 	}
 
 	public Autor buscaPelaId(Integer autorId) {
 		//Autor autor = this.banco.buscaPelaId(autorId);
-		Autor autor = em.find(Autor.class, autorId);
+		Autor autor = this.em.find(Autor.class, autorId);
 		return autor;
 	}
 	
