@@ -12,7 +12,7 @@ import br.com.caelum.livraria.modelo.Livro;
 import br.com.caelum.livraria.modelo.Usuario;
 
 @Singleton
-@Startup // inicia junto com a aplicação
+@Startup 
 public class Banco {
 	
 	public static List<Livro> livros = new ArrayList<Livro>();
@@ -22,8 +22,8 @@ public class Banco {
 	private static int chave = 1;
 	
 	@PostConstruct
-	void aposCriacao() {
-	    System.out.println("Banco Criado");
+	void iniciaBanco() {
+		System.out.println("Inicia banco");
 	}
 	
 	static {
