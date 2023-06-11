@@ -4,12 +4,17 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import javax.ejb.TransactionManagement;
+import javax.ejb.TransactionManagementType;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import br.com.caelum.livraria.modelo.Autor;
 
 @Stateless
+@TransactionManagement(TransactionManagementType.CONTAINER)
 public class AutorDao {
 
 	//@Inject
@@ -21,7 +26,7 @@ public class AutorDao {
 	void metodoCallBack() {
 		System.out.println("AutorDao iniciado");
 	}
-
+	@TransactionAttribute(TransactionAttributeType.MANDATORY)
 	public void salva(Autor autor) {
 		System.out.println("Antes de salvas");
 		
@@ -34,6 +39,9 @@ public class AutorDao {
 		//banco.save(autor);
 		this.em.persist(autor);
 		System.out.println("Depois de salvas");
+		
+		// Forçando um erro
+		//throw new RuntimeException("Serviço externo deu erro!");
 	}
 	
 	public List<Autor> todosAutores() {

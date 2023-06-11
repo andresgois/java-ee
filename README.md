@@ -550,8 +550,206 @@ show tables;
 
 
 ## Gerenciamento de Transações com JTA
+- Vimos como usar o JPA com EJB. O uso dentro de uma aplicação foi bastante simples, basta injetar o EntityManager para utilizar os métodos que acessam a persistência com JPA.
+
+- O JPA delega uma boa parte das configurações para o servidor JavaEE. É o JBoss quem fornece uma DataSource e que encapsula os detalhes da configuração do driver e do pool de conexão.
+
+- Inserindo dados para login
+```
+insert into Usuario(login, senha) values('admin','pass');
+```
+#### Transação JTA
+- Já conseguimos manipular os dados no banco através da nossa aplicação. Mas, como isso funcionou já que em nenhum momento nos preocupamos com o gerenciamento de uma transação? Isso é importante pois o MySQL precisa ter uma transação para realmente gravar os dados. 
+    - A resposta é que o EJB Container automaticamente abriu e consolidou a transação sem ser necessário deixar isso explicito no código. Mais um serviço disponível para os EJBs!
+
+- Isso é bem diferente caso utilizemos o JPA fora de um EJB Container. Nesse caso seria necessário gerenciar a transação na mão, ou seja, usando os método `begin() e rollback()`. Podemos testar isso rapidamente, basta tentar usar o método getTransaction() de EntityManager para chamar begin() e commit():
+
+- É ilegal chamar getTransaction() dentro do EJB Container
+```
+manager.getTransaction().begin();
+manager.persist(autor);
+manager.getTransaction().commit();
+```
+- JTA significa `Java Transaction API` que é um padrão JavaEE que se preocupe com o gerenciamento da transação dentro de um servidor JavaEE. Para ser mais correto, o JTA é coordenador de transação e é ele quem vai coordenar a transação do JPA.
+
+#### Gerenciamento da transação com JTA
+- O JTA, então, é a forma padrão de gerenciar a transação dentro do servidor JavaEE e já funciona sem nenhuma configuração. Este padrão se chama CONTAINER MANAGED TRANSACTION (CMT).
+
+- Podemos deixar a nossa intenção explicita e configurar o gerenciamento pelo container. Para tal existe a anotação `@TransactionManagement` que define o tipo de gerenciamento da transação, no nosso caso CONTAINER:
+```
+@Stateless
+@TransactionManagement(TransactionManagementType.CONTAINER) //opcional
+public class AutorDao {
+```
+- Essa configuração é totalmente opcional e serve apenas para fins didáticos. Igualmente, podemos deixar explicito o padrão da configuração (atributo) para cada método. Para isso existe a anotação 
+`@TransactionAttribute`:
+
+```
+@TransactionAttribute(TransactionAttributeType.REQUIRED) //opcional
+public void salva(Autor autor) {
+```
+- *REQUIRED* significa que o JTA garante uma transação rodando quando o método é chamado. Se não tiver nenhuma transação, uma nova é aberta. Caso já tenha uma rodando, a atual será utilizada. De qualquer forma, sempre é preciso ter uma transação (REQUIRED).
+
+![REQUIRED](./asserts/jta1.png)
+
+- É importante ressaltar que o tipo de gerenciamento CONTAINER e o atributo REQUIRED já é o padrão adotado para um Session Bean, então não é necessário configurar.
+
+#### TransactionAttribute
+- Através da anotação @TransactionAttribute, temos acesso a outras configurações. A primeira a testar é o MANDATORY. `MANDATORY` significa obrigatório. Nesse caso, o container verifica se já existe uma transação rodando, caso contrário, joga uma exceção. Ou seja, quem faz a chamada deve abrir uma transação.
+
+- recebemos uma exceção. No console do Eclipse aparece o nome e a mensagem da exceção. Nesse caso foi lançado um EJBTransactionRequiredException.
+
+- Então, quando e como devemos utilizar o MANDATORY?
+
+- Normalmente, os DAOs não são o lugar ideal para abrir uma nova transação. Ao usar `um DAO é preciso ter uma transação rodando`. Quem faz a chamada precisa se preocupar com isso e abrir uma transação para o DAO funcionar.
+
+#### Serviços como Transaction boundary
+- Repare que na nossa aplicação são os BEANs que usam os DAOs, por exemplo o AutorBean. O problema aqui é que os BEANs não são EJBs (não são Session Beans) e por isso não têm acesso ao JTA.
+
+![Bean sem jta](./asserts/jta2.png)
+
+- Para resolver isso vamos criar uma classe intermediária, uma classe AutorService que fica entre os Beans e os DAOs. A classe *AutorService* também será um Session Bean e responsável por abrir uma nova transação. É ela quem recebe um AutorDao injetado e delega a chamada:
+
+![Service](./asserts/jta3.png)
+
+- Na classe AutorService, vamos primeiro injetar o AutorDao::
+- O método adiciona(..) recebe um autor e delega a chamada para o DAO:
+```
+@Stateless
+public class AutorService {
+
+    @Inject AutorDao dao;
+
+public void adiciona(Autor autor) {
+    dao.salva(autor);
+}
+```
+- Nesse método poderiam ficar mais regras ou chamadas de regras de negócios. É muito comum ter essa divisão de responsabilidade entre bean, serviço e DAO em um projeto real. O bean possui muito código relacionado ao JSF (view), o serviço é o controlador na regra de negócio e o DAO possui o código de infraestrutura.
+
+![EJB Container](./asserts/jta4.png)
+
+- Como já falamos, o padrão TransactionAttribute é REQUIRED, ou seja, ao chamar o método adiciona(..) será aberta, automaticamente, uma nova transação.
+- Revisando, o bean recebe a chamada da tela, delega para o serviço que abre a transação e delega para o DAO.
+
+#### Outros atributos
+- Além do REQUIRED e MANDATORY, há outros atributos disponíveis. O *REQUIRES_NEW* indica que sempre deve ter uma nova transação rodando. Caso já exista, a transação atual será suspensa para abrir uma nova. Caso não tenha nenhuma rodando, será criada uma nova transação.
+
+- Outro atributo *NEVER* é quem indica que jamais deve haver uma transação em execução. Isso pode ser útil para métodos que obrigatoriamente devem ser executados sem contexto transacional. Vamos testar isso uma vez para mostrar o funcionamento.
+
+- Existem outros atributos como *SUPPORTS* e *NOT_SUPPORTED* que veremos nos exercícios.
+
+#### Gerenciamento da transação programaticamente
+- O gerenciamento da transação pelo container é uma das vantagens do EJB e sempre deve ser a maneira preferida de se trabalhar. Contudo existe uma outra forma, parecida com aquela mostrada baseado no EntityManager. Essa forma permite o controle programaticamente, chamando begin() ou commit() na mão.
+
+- Para o EJB Container aceitar o gerenciamento da transação programaticamente, é preciso reconfigurar o padrão. Ou seja, ao invés de usar CONTAINER na anotação TransactionManagement usaremos BEAN, porque o Session Bean vai gerenciar a transação (também é chamado BEAN MANAGED TRANSACTION). Assim também podemos apagar a anotação @TransactionAttribute que não faz mais sentido.
+
+- Para realmente gerenciar a transação, é preciso injetar um objeto com este papel. Para este propósito existe a interface UserTransaction do JTA. Basta injetar o objeto através da anotação @Inject:
+```
+@Inject UserTransaction tx;
+```
+- `UserTransaction` possui os métodos clássicos relacionados com o gerenciamento da transação como begin(), commit() e rollback(). O problema é que exige um tratamento excessivo de exceções checked que poluem muito o código.
+
+- Vamos colocar as chamadas dos métodos begin() e commit() dentro de um try-catch. O Eclipse ajuda nessa tarefa e gera automaticamente o bloco de tratamento. No nosso exemplo, para simplificar o entendimento, vamos capturar qualquer exceção, ou seja, fazer um catch(Exception):
+```
+public void salva(Autor autor) {
+    //...
+    try {
+        tx.begin();
+        manager.persist(autor);
+        tx.commit();
+    }catch(Exception e) {
+        e.printStackTrace();
+    }
+    //...
+}
+```
+> O Java Transaction API é a forma padrão de gerenciar transações com bases de dados dentro do servidor Java EE e já funciona sem nenhuma configuração adicional.
+- Este padrão se chama Container Managed Transaction (CMT)
+
+> Configuração adicional para gerenciar transações dentro do servidor Java EE, explícita
+- Bastaria utilizar a anotação @TransactionManagement(...) que define o tipo de gerenciamento da transação, no nosso caso TransactionManagementType.CONTAINER.
+
+> Qual a principal diferença entre os atributos de transação REQUIRED e REQUIRES_NEW?
+- Utilizando tanto o atributo REQUIRED quanto REQUIRES_NEW, o JTA garante uma transação rodando quando o método é chamado. Porém, a principal diferença está no fato de que, utilizando o atributo REQUIRED, caso já tenha uma transação rodando, ela será utilizada. Já no caso do atributo REQUIRES_NEW, caso já exista uma transação rodando, a transação atual será suspensa para abrir uma nova.
+
+> Existem mais dois atributos dentro para definir o comportamento da transação:
+- TransactionAttributeType.SUPPORTS
+- TransactionAttributeType.NOT_SUPPORTED.
+    -  Com o atributo configurado para SUPPORTS, o código será executado com ou sem transação. Já com NOT_SUPPORTED o código deverá ser executado sem transação, caso alguma transação esteja aberta, ela será suspensa temporariamente até a execução do método acabar.
 
 ## Lidando com Exceções
+- Já percebemos que podem acontecer exceções durante a execução da aplicação, mas como o container EJB lida com elas? Além disso quais são as formas que o desenvolvedor tem para mitigar um problema?
+
+- Vamos imaginar que dentro do DAO, além de cadastrar o autor no banco, também seja feito uma chamada para um serviço externo (um web service por exemplo). Nessa comunicação a rede pode falhar ou o serviço pode ficar desligado temporariamente. Esse são problemas que não dependem da aplicação.
+
+- Ou seja, nesse caso inevitavelmente vai ocorrer uma exceção. Para simular este problema, vamos lançar uma exceção no fim do método salva() da classe AutorDao:
+
+```
+throw new RuntimeException("Serviço externo deu erro!");
+```
+- Vamos republicar a aplicação e acessá-la pela interface, algo nada novo pra nós. Depois do login, vamos testar o cadastro de autores que executa justamente o método que causa a RuntimeException.
+
+- O resultado não é uma surpresa. No console do Eclipse aparece o Stacktrace, ou seja, a pilha de execução com a exceção em cima dela. Podemos ver que nossa exceção foi quem causou o problema.
+
+- Ainda no console vamos subir mais um pouco, quase no início. Aí podemos ver que a nossa exceção foi "embrulhada" em uma outra do tipo EJBTransactionRollbackException. O nome indica que foi feito um rollback da transação.
+
+- É importante deixar isso claro, pois antes de lançar a exceção já usamos o JPA para persistir o autor. Sem rollback o autor estaria salvo no banco. Para ter certeza disso, vamos verificar o MySQL no terminal. Nele executaremos um select para verificar a tabela Autor. Como já esperávamos, não foi salvo o autor por causa do lançamento da exceção.
+
+#### Exceções da Aplicação
+- Vamos comentar a RuntimeException dentro da classe AutorDao e abrir a classe AutorService. Em uma aplicação real, essas classes de serviços são utilizadas para coordenar as chamadas de regras de negócios.
+
+- É claro que ao chamar alguma regra também podem aparecer alguns problemas. Alguns deles são previstos e farão parte do negócio. É comum que uma validação falhe e um valor não seja salvo, pois uma regra específica não permite. Repare que este tipo de problema não é relacionado com a infraestrutura e sim com o domínio da aplicação.
+
+- Vamos simular isso uma vez e causar uma nova exceção, mas agora uma exceção do tipo LivrariaException:
+
+```
+throw new LivrariaException();
+```
+- Crie essa classe de exceção.
+
+- No nosso caso vamos colocar o throws na assinatura do método. Isso significa que agora a classe AutorBean não compila mais, já que a chamada do serviço causa uma exceção checked. Faremos a mesma coisa usando na assinatura do método o throws. Pronto, tudo está compilando.
+
+- Vamos tentar salvar o autor Mauricio Aniche.
+
+- Já podemos ver que o autor não aparece na tabela da interface web. Como esperado, no Eclipse aparece a exceção igual ao exemplo anterior. Ao analisar o console podemos ver a LivrariaException, mas dessa vez ela não foi "embrulhada" dentro de uma `EJBTransactionRollbackException`.
+
+- Para ter certeza, vamos verificar o banco de dados. Novamente selecionaremos todos os autores da tabela Autor. Para nossa surpresa o autor foi salvo! Mesmo sendo lançado uma exceção na pilha de execução, foi feito um commit na transação!
+
+- Ao atualizar a interface web, podemos ver que realmente aparece o autor. Como, então, o container lida com as exceções?
+
+#### System e Application Exceptions
+- Vimos dois comportamentos diferentes do container referentes a exceção. 
+    - O primeiro exemplo foi uma exceção do tipo unchecked que causou um rollback
+    - Segundo exemplo usou uma exceção checked que não causou rollback.
+
+- Pelo ponto de vista do container, o primeiro exemplo representa uma `System Exception`, algo grave e imprevisto. `System Exception` sempre causam rollback. Além disso, aquele Session Bean que lançou a exceção é invalidado e retirado do pool de objetos.
+
+- O segundo exemplo representa uma `Application Exception`. Que é uma erro que pode acontecer durante a vida da aplicação e é relacionado ao domínio. Por isso não causa rollback e nem invalida o Session Bean.
+
+- Por padrão, qualquer exceção unchecked é uma `System Exception` e qualquer exceção checked é uma `Application Exception`. Isso é o padrão do EJB Container, mas como já vimos anteriormente, esse padrão pode ser reconfigurado.
+
+![Exceções](./asserts/ex1.png)
+
+#### Configurando Application Exceptions
+- Vamos abrir a classe LivrariaException e deixar explícito que ela é uma `Application Exception`. Para isso usaremos a anotação *@ApplicationException* que possui atributos para redefinir o comportamento referente a transação. Vamos fazer uma configuração para que essa `Application Exception` cause sim um rollback:
+
+```
+@ApplicationException(rollback=true)
+public class LivrariaException extends Exception{
+
+}
+```
+- Como sempre, vamos testar o novo comportamento. Ao cadastrar um autor pela interface web é lançado uma LivrariaException. Novamente a exceção aparece no console do Eclipse e repare também que essa exceção não foi embrulhada. Até aqui é tudo igual. No entanto, ao verificar o banco de dados, percebemos que o autor não foi salvo, ou seja, foi feito um rollback da transação.
+
+- Por fim, uma vez declarado a LivrariaException como @ApplicationException, podemos deixar ela unchecked. Isso significa que não precisamos estender a classe Exception e sim RuntimeException. Assim, o compilador não obriga o desenvolvedor a fazer um tratamento explicito da exceção. Podemos, então, apagar aquelas declarações throws na assinatura dos métodos no AutorBean e no AutorService.
+
+> O que acontece quando uma EJBTransactionRollbackException é lançada?
+- Uma System Exception é lançada
+
+> Uma Application Exception é do tipo checked, por padrão.
+
+> Qual é a diferença entre System Exception (SE) e Application Exception (AE)?
+- AE é relacionada ao domínio. SE é relacionada com problemas na infra-estrutura.
 
 ## Novos serviços com Interceptadores
 
