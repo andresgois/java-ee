@@ -19,7 +19,7 @@ public class AutorService {
 		this.dao.salva(autor);
 		
 		// simular erro
-		throw new LivrariaException();
+		//throw new LivrariaException();
 	}
 
 	public List<Autor> todosAutores() {

@@ -15,6 +15,7 @@ import br.com.caelum.livraria.modelo.Autor;
 
 @Stateless
 @TransactionManagement(TransactionManagementType.CONTAINER)
+//@Interceptors({LogInterceptador.class})
 public class AutorDao {
 
 	//@Inject
@@ -29,7 +30,6 @@ public class AutorDao {
 	@TransactionAttribute(TransactionAttributeType.MANDATORY)
 	public void salva(Autor autor) {
 		System.out.println("Antes de salvas");
-		
 		/*try {
 			Thread.sleep(5000);
 		} catch (Exception e) {
@@ -39,7 +39,6 @@ public class AutorDao {
 		//banco.save(autor);
 		this.em.persist(autor);
 		System.out.println("Depois de salvas");
-		
 		// Forçando um erro
 		//throw new RuntimeException("Serviço externo deu erro!");
 	}
