@@ -81,9 +81,92 @@
 > servidor de aplicação J2EE
 - Os servidores de aplicação implementam os serviços do Java/Jakarta EE.
 
+- Use a versão 14 do Java
+
+- Então começando pela versão do Eclipse como falado a versão do Java que nós vamos utilizar é a 14, então se você vir no menu superior em “Window > Preferences > Java > Installed JREs” nós vamos ver que o ‘jdk' é a 14.
+
+- Agora a ideia do nosso projeto, a ideia do projeto do curso é ser desenvolvido um agendamento de e-mails. Vai ser um projeto Maven e ao longo das aulas nos vamos acrescentado os recursos do Jakarta EE nessa nossa aplicação.
+
+- Importar projeto, “File > Import" nós vamos selecionar essa opção ‘Existing Maven Projects', o projeto Maven existente.
+
+- Agora que temos uma aplicação nós precisamos de um lugar para deploiarmos essa aplicação. Chegou a hora de configurarmos o nosso servidor de aplicação.
+
+- Para esse curso nós definimos que o servidor de aplicação vai ser o WildFly, ele é um servidor robusto, é gratuito e opensource.
+
+- Mas para configurar o nosso servidor de aplicação nós podemos voltar para ideia é nos vamos na aba de "Servers". A sua pode não estar disponível para visualização, mas se não tiver você vai em "Window > Show View > Server" e se não tiver nas primeiras opções você pode ir em "other" e escrever "Server" que já vai aparecer, você seleciona e dar um "open" e vai aparecer essa aba para configurarmos o nosso servidor de aplicação.
+
+- Para configurar nós vamos clicar nesse link que ele tá falando que não tem nenhum servidor disponível, se você quiser criar um novo é só clicar nesse link. É isso que nós vamos fazer. Baixamos a versão 20 do WildFly, só que aqui na nossa ideia só tem até a versão 19, só que não tem nenhum problema vamos poder selecionar ela sem nenhum problema.
+
+- Dá um "next", essas duas opções do servidor local ou ‘Controlled by: Filesystem and shell operations’ podemos deixar selecionadas. O que vai valer para a gente é essa ‘Create new runtime' é a única opção que tem aqui a não ser que você já tenha configurado um outro ‘runtime’ anteriormente, mas se tiver vai ter a opção para você criar um novo e nós vamos selecionar aqui.
+
+- Vou dar um next e ele vai dar um alerta falando “as versões são diferentes”, mas não tem problema nós podemos deixar dessa forma mesmo. A única coisa que nós vamos fazer é renomear para ‘WildFly 20 Runtime' ou o nome de preferência de vocês.
+
+- Agora chegou o momento de selecionar o nosso servidor de aplicação, o download do nosso servidor de aplicação. O meu está em "downloads", então você vem em "downloads", "WildFly" seleciona ele, seleciona a pasta e vocês vão selecionar no diretório em que vocês salvaram.
+
+- Chegou na hora de colocar o ‘Runtime JRE', então qual que a versão da JRE que vamos executar a nossa aplicação? Já vimos que é a versão 14, então eu vou botar ‘Alternate JRE’ e selecionar 'jdk-14' que é a minha que está configurada na minha máquina. Vamos ver aqui que é exatamente a da minha máquina local que está salvo, o meu Java.
+
+- Nós vamos ver que no WildFly nós temos alguns arquivos de configuração e chamamos esses arquivos de ‘standalone', aqui o ‘standalone.xml' e se eu vim em ‘browse’ nós vamos ter outras opções.
+
+- Nós vamos ter o ‘standalone' que é o que está selecionado, o ‘standalone-full, ‘standalone-ha'. Nós vamos usar o ‘standalone-full’ porque é o que tem mais configurações a que serem feitas. Nós vamos ver ao longo das aulas o que são essas configurações e em que momento nós vamos mexer nelas.
+
+- Aperta o "next", chegou o momento de informar para o nosso servidor de aplicação qual aplicação que vai ser deploiada nele, no nosso caso é ‘agendamento-email’.
+
+- Vamos ver isso nas próximas aulas. Configurei minha aplicação dou um "Finish". Aparentemente tudo certo, só que agora como nós vamos usar o Jakarta EE para desenvolver o nosso projeto, nada mais justo que pegarmos a API do Jakarta EE para colocarmos nas nossas dependências.
+
+- Como que nós vamos fazer isso? Vamos aqui no nosso navegador e vamos lá no Maven repository e vamos procurar pelo Jakarta EE. A primeira que vai aparecer é o Jakarta EE Plataform API, nós vamos selecionar e eu quero a [versão 8.0](https://mvnrepository.com/artifact/jakarta.platform/jakarta.jakartaee-api).
+
+- A única coisa que eu preciso fazer aqui é clicar nessa dependência abaixo, mandar copiar e aqui no meu ‘pom.xml’ abaixo de properties eu crio uma tag chamada <dependencies > e copio a dependência do Jakarta EE aqui dentro de dependências.
+
+- Agora o que eu posso fazer é clicar com o botão direito na minha aplicação, vou na opção de “Maven > Update Project" e seleciono “Force Update of Snapshots/Releases.
+
 <a name="anc2"></a>
 
 ## Apresentando EJB’s e o projeto de agendamento de e-mails
+
+- Quando nós estamos trabalhando com aplicações corporativas nós temos uma série de informações que devemos dominar para que a aplicação saia entregue o valor necessário para o cliente.
+
+![Aplicação](./asserts/jakarta1.png)
+
+- Por exemplo, eu vou ter o meu usuário fazendo a requisição para nossa aplicação, geralmente esse usuário vai fazer a requisição via browser ou via um software como o Postman, que é um software de requisição http e essa requisição vai chegar na nossa aplicação.
+
+- Só que a nossa aplicação vai precisar conhecer os detalhes do protocolo http porque a partir disso ela consegue transformar essa requisição como objeto Java e o objeto Java vai passar pelas nossas regras negociais que são as caixas verdes no desenho.
+
+- Ele vai fazer alguma alteração com essa requisição e, por exemplo, se precisar persistir no banco de dados eu vou precisar abrir uma transação, usar os detalhes da implementação que nós escolhemos para persistir essa informação.
+
+- Então, por exemplo, se eu estou usando um JPA, que é a especificação "Jakarta Persistence API", junto com o Hibernate que é o framework que a implementa, eu vou precisar chamar os métodos para eu conseguir persistir o meu objeto.
+
+- Eu tenho que configurar um pool de Conexões porque o banco de dados é uma questão sensível de aplicação, então eu não posso sair abrindo conexões de forma descontrolada desse banco de dados Porque eu posso onerar meu banco de dados e assim derrubar, fazendo com que a nossa aplicação tenha um péssimo comportamento.
+
+- Podemos ter também aqui detalhes de "Filas" e conforme nossa aplicação vai crescendo nós vamos ter detalhes de segurança, de Jobs, ou seja, são agendamentos ficam executando de tempos em tempos para executar alguma ação. Enfim, são vários detalhes que nós temos que ter domínio para criar uma aplicação corporativa.
+
+- Só que uma coisa que eu gostaria de chamar atenção na nossa imagem é sobre o que nós estamos fazendo nela. Pelo que nós falamos teremos que ter conhecimento sobre protocolo "http", porque eu preciso transformar a requisição no objeto Java.
+
+- Por isso eu tenho que ter conhecimento sobre como abro a transação com o banco de dados, tenho que ter o conhecimento sobre o JPA, tenho que configurar um pool de Conexões além de ter que configurar "Filas" e outros detalhes.
+
+- São questões de infra da nossa aplicação, ou seja, elas não fazem parte das nossas regras negociais, nós apenas usamos esses detalhes para que as nossas regras negociais estejam de forma correta, digamos assim, para que nossa aplicação tenha um comportamento correto.
+
+- Pensando bem, o interessante seria se tudo isso aqui que é infra como detalhes do protocolo http, abertura de uma transação, a configuração de uma "Fila" fosse fornecido para nossa aplicação e nós desenvolvedores tivéssemos que focar apenas nas regras negociais.
+
+- E aqui tem a vantagem de se trabalhar com um servidor robusto porque quando eu tenho servidor igual ao WildFly, ele passa a nos fornecer esse tipo de serviço para que o desenvolvedor não me preocupe justamente com detalhes de implementação do que acabamos de ver como "Transação", pool de Conexões, Persistência.
+
+- Então o meu WildFly vai ter esse serviço para me fornecer e todos esses que foram citados anteriormente saem da minha aplicação e passam a ser fornecidos por ele. O "protocolo http" agora é um serviço fornecido pelo WildFly, uma "transação" é aberta pelo WildFly, "persistência" também como detalhes da implementação do "JPA" vai ser do nosso WildFly, e as "Filas" também. Assim, nós temos todos os serviços configurados para nós.
+
+- Agora nós estamos vendo a vantagem de trabalhar com um servidor mais robusto.
+
+- Só que agora o que vocês devem estar pensando é: eu tenho minha aplicação com minhas regras negociais e eu tenho um servidor que me fornece serviços de infra, mas como que eu junto os dois? Como que minha transação vai usar um serviço de transação fornecido por um servidor de aplicação?
+
+- Essa é a motivação dessa nossa aula, nós vamos ter um recurso que é uma especificação do Jakarta EE que se chama "**Enterprise Java Beans**", nós costumamos falar que os EJB's que vão ser classes normais, classes Java como nós estamos acostumados a trabalhar, só que com algumas configurações a mais. Nós vamos ter as nossas classes que tem as nossas regras negociais que agora são os nossos EJB's.
+
+![EJB](./asserts/jakarta2.png)
+
+- Com o EJB eu vou ter uma forma de injetar esses serviços aqui, então através da injeção de dependências eu consigo injetar um serviço na minha classe, no meu EJB e quando eu precisar usar um serviço do meu servidor de aplicação a partir do meu EJB quando eu chamar esse serviço o servidor de aplicação vai me fornecer uma instância desse serviço.
+
+- Fazemos a inversão de controle, ao invés de instanciar um serviço na mão usando o New objeto, agora quando eu injeto esse serviço no meu EJB e eu preciso usá-lo quem vai me fornecer a instância desse cara é o meu servidor de aplicação. Aqui é a beleza do EJB, pois todo o controle de detalhes sobre instanciação, sobre implementações, não passa mais a ser do domínio do desenvolvedor.
+
+- Ele só precisa conhecer as regras negociais e quando precisar utilizar um serviço desse nós temos aí os EJB's juntamente com os serviços fornecidos pelo nosso servidor de aplicação para resolver essa situação para nós.
+
+- Então o foco é cem por cento em regra negocial. Obviamente, pode ter ficado alguma dúvida, mas a ideia agora é sabermos qual que é a motivação de se usar o EJB e nas próximas aulas começar a codificar as nossas classes, os nossos EJB's e ver essas vantagens na prática.
+
 
 <a name="anc3"></a>
 
