@@ -1,8 +1,32 @@
 # JAVA EE
 
+### Módulo 1
+- [Sobre a Java Persistence API](#anc1)
+- [Usando EntityManager](#anc2)
+- [Mapeando relacionamentos](#anc3)
+- [Relacionamento para Muitos](#anc4)
+- [Pesquisando com JPQL](#anc5)
 
-## jpa1
-> Java e JPA: Persista seus objetos com a JPA2 e Hibernate
+### Módulo 2
+- [Relacionamentos bidirecionais](#anc6)
+- [Lidando com queries N+1](#anc7)
+- [Funções da agregação e Group By](#anc8)
+- [Camada de persistência](#anc9)
+- [Queries dinâmicas com Criteria](#anc10)
+### Módulo 3
+- [Introdução ao EJB](#anc11)
+- [Ciclo de vida dos Session Beans](#anc12)
+- [Integração do JPA com Pool e DataSource](#anc13)
+- [Gerenciamento de Transações com JTA](#anc14)
+- [Lidando com Exceções](#anc15)
+- [Novos serviços com Interceptadores](#anc16)
+- [Integração com Web Services](#anc17)
+- [Agendamento e EAR](#anc18)
+
+> jpa1
+<a name="anc1"></a>
+
+## Sobre a Java Persistence API
 
 ### Docker
 
@@ -22,9 +46,8 @@ show tables
 select * from Conta
 desc Conta;
 ```
-
-### Módulo 01
-
+<a name="anc2"></a>
+## Usando EntityManager
 - A JPA é um ORM (Object Relacional Mapper) Java
     - Um ORM mapeia as classes para tabelas e gera o SQL de forma automática
 - Para inicializar a JPA, é preciso definir um arquivo de configuração, chamado **persistence.xml**
@@ -34,8 +57,9 @@ desc Conta;
 - Uma entidade deve usar as anotações @Entity e @Id
     - *@GeneratedValue* não é obrigatório, mas pode ser útil para definir uma chave **auto-increment**
 
+<a name="anc3"></a>
 
-> Mapeamento Objeto Relacional
+## Mapeando relacionamentos
 
 ``` mermaid
 graph TD;
@@ -55,6 +79,8 @@ graph TD;
 - Quando fazemos um find() no EntityManager, a JPA e o Hibernate buscarão no banco e criarão um objeto tipo Conta para ser devolvido, representando o registro buscado no database.
 - Essa Conta devolvida ainda mantém uma referência, então a JPA ainda a conhece mesmo após a devolução. Sendo assim, costuma-se dizer que esta entidade Conta se encontra no estado Managed, ou seja, gerenciado pela JPA.
 
+<a name="anc4"></a>
+## Relacionamento para Muitos
 ##### O que são transações?
 - é um mecanismo para manter a consistência das alterações de estado no banco, visto que todas as operações precisam ser executadas com sucesso, para que a transação seja confirmada.
 
@@ -108,8 +134,9 @@ Hibernate:
 > Por padrão, quando temos um relacionamento @OneToOne, ainda não obtemos a restrição que é esperada por um relacionamento @OneToOne.
 - A anotação @JoinColumn só funciona na criação do schema, portanto é necessário deletar o banco e criá-lo novamente.
 
-### JPQL
-> JPQL é orientado a objetos, enquanto SQL não
+<a name="anc5"></a>
+
+## Pesquisando com JPQL
 
 ##### Named Parameter Notation
 - Essa notação de passar o valor do parâmetro, baseado na posição onde ele se encontra, também existe em JPA e se chama `Positional Parameter Notation`. No entanto, a presença de muitos parâmetros pode facilmente se tornar uma confusão.
@@ -118,8 +145,10 @@ Hibernate:
 
 - A facilidade de identificar os parâmetros, diminuindo a probabilidade de erros
 
-## JPA2
-> Relacionamento em duas vias
+> JPA2
+<a name="anc6"></a>
+
+## Relacionamentos bidirecionais
 ```
 Classe Conta
     @OneToMany
@@ -149,12 +178,18 @@ Classe Movimentacao
 
 ![Unindo com mappedBy](./asserts/relacionamento_by_direcional2.png)
 
-### Lidando com queries N + 1
+<a name="anc7"></a>
+
+## Lidando com queries N + 1
 
 ![N + 1](./asserts/n_mais_1.png)
 
 - Resolução
     - N + 1 ocorre quando precisamos disparar queries select para preencher os relacionamentos e pode ser resolvido com um join.
+
+<a name="anc8"></a>
+
+## Funções da agregação e Group By
 #### EAGER
 - o Eager Loading carrega os dados mesmo que você não vá utilizá-los, mas é óbvio que você só utilizará esta técnica se de fato você for precisar com muita frequência dos dados carregados.
 
@@ -171,6 +206,9 @@ Classe Movimentacao
 
 - Para usar no Relacionamento `@*ToMany`e melhorar a performace usamos um join
 
+<a name="anc9"></a>
+## Camada de persistência
+
 ![Com Join](./asserts/fetch_eager_com_join.png)
 
 ```
@@ -186,7 +224,9 @@ String jpql = "select c from Conta c left join fetch c.movimentacoes";
     - Performance. Economizando recursos de rede e banda.
 - o Lazy Loading faz com que determinados objetos não sejam carregados do banco até que você precise deles, ou seja, são carregados 'on demand' (apenas quando você solicitar explicitamente o carregamento destes).
 
-### Criteria
+<a name="anc10"></a>
+
+## Queries dinâmicas com Criteria
 
 - O Root é quem define qual entidade estamos buscando, então, ela seria análoga - na SQL - a cláusula from. Portanto, usamos a classe `CriteriaQuery`, que é a responsável em montar a query.
 
@@ -201,6 +241,10 @@ String jpql = "select c from Conta c left join fetch c.movimentacoes";
 - Resumindo:
     - as consultas JPQL são mais fáceis de escrever e ler quando a consulta é estática.
     - as consultas com a API de Criteria são superiores na hora de construir consultas dinâmicas.
+
+# Módulo 3
+
+<a name="anc11"></a>
 
 ## Introdução ao EJB
 - Hoje em dia, a grande maioria das aplicações são desenvolvidas para executar na web. Ou seja, usamos um navegador para acessar o servidor através do protocolo HTTP. Para fazer isso funcionar basta termos um servidor como o Apache Tomcat, bastante utilizado em outros treinamentos no Alura. Com ele podemos executar uma aplicação feita com JavaServer Faces (JSF) ou outros frameworks MVC (Model-View-Controller).
@@ -331,7 +375,9 @@ public class AutorBean {
 > Ao usar EJB, não podemos mais instanciar o AutorDaoe o LivroDao na mão. Estamos assumindo o controle ao criar o DAO naquelas linhas (1) e (2). Nesse caso não estamos usando o AutorDao e o LivroDao como EJBs.
 - O DAO está sendo administrado pelo EJB Container. Portanto, quem cria o DAO é o EJB Container e não a minha classe. Consequentemente precisamos pedir ao EJB Container para passar aquela instância que ele está administrando. Felizmente, isso é fácil de fazer, basta usar a anotação @Inject:
 
-## Capítulo 2
+<a name="anc12"></a>
+
+## Ciclo de vida dos Session Beans
 - Nas classes Bean usamos a anotação @Inject para receber o EJB pronto para ser utilizado. Chamamos de Injeção de dependência essa forma de receber uma instância.
 Ao iniciar o servidor podemos ver no console os endereços dos 3 EJB Session Beans que já configuramos.
 
@@ -452,6 +498,8 @@ public class CarrinhoDeCompras {
 
 > A diferença entre Session Bean Stateful e HttpSession é que o primeiro é administrado pelo EJB Container e o segundo pelo Servlet Container.
 
+<a name="anc13"></a>
+
 ## Integração do JPA com Pool e DataSource
 
 > Injetando o EntityManager
@@ -548,6 +596,7 @@ show tables;
 
 - Como o EJB Container administrará o JPA, é preciso usar uma anotação especifica do mundo EJB para fazer a "injeção" do EntityManager, nesse caso, precisamos utilizar @PersistenceContext.
 
+<a name="anc14"></a>
 
 ## Gerenciamento de Transações com JTA
 - Vimos como usar o JPA com EJB. O uso dentro de uma aplicação foi bastante simples, basta injetar o EntityManager para utilizar os métodos que acessam a persistência com JPA.
@@ -677,6 +726,8 @@ public void salva(Autor autor) {
 - TransactionAttributeType.NOT_SUPPORTED.
     -  Com o atributo configurado para SUPPORTS, o código será executado com ou sem transação. Já com NOT_SUPPORTED o código deverá ser executado sem transação, caso alguma transação esteja aberta, ela será suspensa temporariamente até a execução do método acabar.
 
+<a name="anc15"></a>
+
 ## Lidando com Exceções
 - Já percebemos que podem acontecer exceções durante a execução da aplicação, mas como o container EJB lida com elas? Além disso quais são as formas que o desenvolvedor tem para mitigar um problema?
 
@@ -750,6 +801,8 @@ public class LivrariaException extends Exception{
 
 > Qual é a diferença entre System Exception (SE) e Application Exception (AE)?
 - AE é relacionada ao domínio. SE é relacionada com problemas na infra-estrutura.
+
+<a name="anc16"></a>
 
 ## Novos serviços com Interceptadores
 ### Monitoramento com Interceptadores
@@ -890,6 +943,8 @@ public class LivroDao {
 - Então, um interceptador permite ligar e desligar um serviço com os Session Beans, sem alterar um bean especifico. Fizemos apenas um monitoramento, mas poderíamos implementar algo muito mais sofisticado com segurança ou cache.
 
 - Repare também que seria possível implementar o gerenciamento da transação manualmente, através do UserTransaction no interceptador. Podemos injetar qualquer recurso dentro do interceptador. É bom pensar que o interceptador faz parte da funcionalidade do Session Bean, só que fica separado e serve para vários beans.
+
+<a name="anc17"></a>
 
 ## Integração com Web Services
 #### Introdução ao Web Service
@@ -1119,4 +1174,107 @@ wsimport -s src  -p br.com.caelum.livraria.clientews
 - -p - pacote das classes geradas
 - **O comando deve ser executado a partir da raiz do projeto.**
 > Obserção: essa aplicação não funcionou no eclipse 2023, tive que baixar o 2019.9 pra funcionar
+
+<a name="anc18"></a>
+
 ## Agendamento e EAR
+#### Agendamento de chamadas
+- Na maioria de aplicações surge a necessidade de chamar algum método em intervalos. Por exemplo, pode ser necessário gerar e enviar um relatório diariamente, ou acessar o banco para verificar e limpar alguns registros. Pode ser preciso acessar um Web Service externo para pegar algumas novidades, etc. É claro que os EJBs também atendem esse requisito.
+
+![Relógio](./asserts/agenda1.png)
+
+- Vamos configurar um agendamento usando os Session Beans. Como essa funcionalidade não é diretamente relacionada ao projeto livraria criaremos um novo projeto.
+
+- O novo projeto se chamará ejb-timerservice e será do tipo EJB Project. Aqui usamos um projeto especifico EJB, mas na verdade a unidade de deploy será um JAR. Ou seja, poderíamos usar um simples Java Project.
+
+- No projeto criado, dentro da pasta ejbModule criaremos a classe Agendador. O agendamento é feito através de Session Bean. A primeira ideia é usar a anotação @Stateless:
+
+- No entanto, todo EJB Stateless cria um pool de objetos. Para agendar a execução não precisamos de um pool. Não faz sentido configurar o agendamento várias vezes, o que poderia até causar problemas. Por isso utilizaremos @Singleton no lugar de @Stateless.
+
+- Também queremos que o agendamento comece assim que a aplicação é iniciada. É possível combinar o @Singleton com a anotação @Startup que indica para o container EJB que esse Session Bean deve ser carregado no início da aplicação:
+```
+@Singleton
+@Startup
+public class Agendador{
+
+}
+```
+#### @Schedule
+- Dentro da classe Agendador criaremos um método que deve ser chamado periodicamente. Vamos chamá-lo de agendado(). O método não precisa ser público e pode ter qualquer nome. Nele colocaremos apenas um Syso para acompanhar as chamadas:
+
+```
+    void agendado() {
+        System.out.println("verificando serviço externo periodicamente");
+    }
+```
+- Para definir quando o container EJB realmente executará o método existe a anotação @Schedule. @Schedule possui vários atributos que definem o agendamento exato, ou seja, configuram o dia, mês, hora, etc.
+
+- Por exemplo, podemos configurar a chamada do método às 9hs e 18hs, bastando colocar o atributo hour="9,18". Em nosso exemplo, colocaremos o asterisco para chamar o método a qualquer hora.
+
+- Igualmente podemos definir o minuto exato, pelo atributo minute, por exemplo minute="1,30,59". Também usaremos asterisco que indica qualquer minuto.
+
+- Por fim, configuraremos os segundos. Vamos executar a cada dez segundos, o que é especificado pela expressão second="*/10".
+
+- Todo agendamento é persistido automaticamente. É obrigação do container EJB recuperar um agendamento caso o servidor tenha caído, por isso ele grava suas configurações. Podemos desabilitar isso através do atributo persistent=false.
+
+- Segue uma vez a configuração completa:
+```
+@Schedule(hour="*", minute="*", second="*/10", persistent=false)    
+void agendado() {
+    System.out.println("verificando serviço externo periodicamente");
+}
+```
+- Vamos publicar a aplicação e testar o resultado. O JBoss deve estar rodando e o projeto deployado. Quando terminar a publicação podemos ver no console que o container EJB chama o método periodicamente! Ótimo.
+
+### Deploy através de EAR (Enterprise ARchive)
+- Voltando para a aba server podemos ver que o JBoss deployou e carregou dois projetos separados. Isso pode fazer sentido pois são dois projetos isolados, mas nem sempre isso é desejado. Podemos imaginar que exista alguma dependência. Nesse caso há uma forma de agrupar projeto e deployar tudo junto.
+
+- A ideia é colocar o projeto livraria e o ejb-timerservice dentro de um outro arquivo que funciona um container. Esse tipo de arquivo é chamado Enterprise Archive, ou simples EAR.
+
+![EAR](./asserts/agenda2.png)
+
+- Para criar um EAR é preciso criar um novo projeto no Eclipse, mas antes vamos remover os dois projeto de nosso servidor.
+
+- No Menu de novos projetos vamos escolher Enterprise Application Project:
+
+![EAR](./asserts/agenda3.png)
+
+- No diálogo chamaremos o projeto livraria-ear:
+
+![EAR](./asserts/agenda4.png)
+
+- Na segunda tela escolhemos os projetos que fazem parte do EAR, livraria e ejb-timerservice"
+
+![EAR](./asserts/agenda5.png)
+
+- No final faremos o deploy do EAR. Na aba server basta adicionar o projeto livraria-ear. Ao subir o JBoss será feito o deploy dos dois sub-projetos. Repare que no console aparece o nome do livraria-ear. Também já podemos ver que o agendamento foi carregado corretamente.
+
+- Na interface web, tudo continua igual. O nosso Web Service está respondendo, e a interface web também está no ar.
+
+- Resumindo, vimos o agendamento através da anotação @Schedule dentro de um Session Bean do tipo Singleton e vimos como agrupar vários projeto dentro de um EAR. Um EAR é apenas um projeto ou arquivo que agrupa vários outros projetos.
+
+
+### (Opcional) O histórico dos EJBs remotos
+- Os EJBs, quando nasceram lá em 1999, eram todos objetos remotos! O que significa isso? Significa que qualquer acesso ao EJB, qualquer chamada de um método era feita pela rede! Não era possível chamar um EJB localmente, ou seja, dentro de mesma JVM.
+```
+EJB <---- chamada remota via rede ------> EJBCOPIAR CÓDIGO
+```
+- Isso certamente não foi uma boa ideia, já que piora muito o desempenho (muito IO na rede!) e complica desnecessariamente o desenvolvimento. Muito padrões do antigo J2EE foram criados para se sobreviver a complexidade que veio de graça com o modelo distribuído de desenvolvimento. Talvez você já ouviu falar dos padrões como DTO (Data Transfer Object), Session Facade ou Business Delegate.
+
+- [Há um artigo famoso do Martin Fowler que foi muito citado na época que fala sobre os problemas da distribuição de objetos:](http://www.drdobbs.com/errant-architectures/184414966)
+
+- (Além disso, o Martin Fowler no livro Pattern of Enterprise Application Architecture resumiu a discussão e criou uma "lei" ou regra fundamental do design de objetos distribuídos. Dê uma olhada nessa regra:)[http://martinfowler.com/bliki/FirstLaw.html]
+
+> O que a lei define?
+
+- **A regra é clara:** Não distribua seus objetos. Ou seja, não faça que alguém possa acessar os seus objetos remotamente!
+
+- Então não posso usar EJB remotos? Isso vai depender de como você irá expor seu EJB. Você deve pensar na granularidade das chamadas dos métodos.
+
+- Normalmente os objetos se associam em um nível muito fino já que definem relacionamentos e trocam pequenas mensagens. Aplicar isso no design de objetos remotos é errado pois diminui o desempenho e gera complexidade.
+
+- Vou dar um exemplo concreto: Um carrinho de compras poderia ter dois métodos, o primeiro para passar o nome do produto e segundo para passar o código. Já são duas chamadas para adicionar um produto no carrinho. Imagina se o carrinho fosse um objeto remoto e você gostaria de adicionar 3 produtos no carrinho. No total, terminaríamos com 6 chamadas remotas!
+
+- Para evitar essas chamadas em excesso seria melhor criar apenas um método que recebe um produto, dessa forma ao adicionar 3 produtos, seriam apenas 3 chamadas remotas.
+
+- Melhor ainda é oferecer um método no carrinho que pode receber um ou mais produtos, já que assim faríamos apenas uma chamada remota deixando o método menos granular.
