@@ -178,6 +178,36 @@ derive-size="from-worker-pools"
 ```
 max-pool-size="20"
 ```
+### Criação do módulo do Wildfly
+```
+jboss-cli.bat
+You are disconnected at the moment. Type 'connect' to connect to the server or 'help' for the list of supported commands.
+
+[disconnected /] connect
+[standalone@localhost:9990 /] module add --name=com.mysql --resources="C:\conectors\mysql-connector-j-8.0.32.jar" --dependencies=javax.api,javax.transaction.api
+
+[standalone@localhost:9990 /] /subsystem=datasources/jdbc-driver=mysql:add(driver-name=mysql,driver-module-name=com.mysql,driver-xa-datasource-class
+-name=com.mysql.cj.jdbc.MysqlXADataSource
+{"outcome" => "success"}
+```
+### Docker
+#### Criando a imagem
+    - docker build -t img-agenda .
+#### Criando container
+```
+docker container run --name agenda-email-container -e MYSQL_USER=andre -e MYSQL_PASSWORD=123456 -e MYSQL_ROOT_PASSWORD=123456 -d -p 3306:3306 img-agenda
+```
+- Acessando o banco
+```
+$  docker exec -it agenda-email-container bash
+root@container_id:/# mysql -u root -p
+Enter password: 123456
+
+show databases
+use agendamentoemaildb;
+show tables
+ desc agendamentoemail;
+```
 
 <a name="anc3"></a>
 
