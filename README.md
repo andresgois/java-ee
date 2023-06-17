@@ -75,6 +75,29 @@ graph TD;
 - O método createEntityManagerFactory irá gerar um EntityManagerFactory baseado nas configurações do persistence.xml. Baseado nisso, é fundamental que este método receba como argumento o nome de alguma unidade de persistência existente no arquivo
 - As configurações relacionadas ao acesso banco de dados ficam dentro da sessão persistence-unit. A JPA não limita o número de unidades de persistência (o que é útil quando precisamos de mais de um banco por aplicação, como veremos no próximo exercício) e por isso precisamos escolher um para usar no método createEntityManagerFactor
 
+- Configuração do standalone.xml
+```
+<datasources>
+    <datasource jndi-name="java:jboss/datasources/livrariaDS" pool-name="livrariaDS" enabled="true" use-java-context="true" statistics-enabled="${wildfly.datasources.statistics-enabled:${wildfly.statistics-enabled:false}}">
+        <connection-url>jdbc:mysql://localhost:3306/livraria</connection-url>
+        <driver>mysql</driver>
+        <security>
+            <user-name>root</user-name>
+            <password>123456</password>
+        </security>
+    </datasource>
+    <drivers>
+        <driver name="h2" module="com.h2database.h2">
+            <xa-datasource-class>org.h2.jdbcx.JdbcDataSource</xa-datasource-class>
+        </driver>
+        <driver name="mysql" module="com.mysql">
+            <driver-class>com.mysql.cj.jdbc.Driver</driver-class>
+            <xa-datasource-class>com.mysql.cj.jdbc.MysqlXADataSource</xa-datasource-class>
+        </driver>
+    </drivers>
+</datasources>
+```
+
 ### Módulo 02
 
 #### Estado Managed

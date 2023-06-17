@@ -167,6 +167,17 @@
 
 - Então o foco é cem por cento em regra negocial. Obviamente, pode ter ficado alguma dúvida, mas a ideia agora é sabermos qual que é a motivação de se usar o EJB e nas próximas aulas começar a codificar as nossas classes, os nossos EJB's e ver essas vantagens na prática.
 
+- No standalone-full
+    - Usa as threds do processador, a gente fica sem muito controle
+```
+derive-size="from-worker-pools"
+```
+- Trocaremos por:
+    - Terá até 20 instâncias
+    - Evitar erros de `Out of memory`
+```
+max-pool-size="20"
+```
 
 <a name="anc3"></a>
 

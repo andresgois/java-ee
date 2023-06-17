@@ -9,12 +9,12 @@
 	<name>Agendamento de e-mails</name>
 	<description>Projeto para o novo curso de EJB da alura. </description>
 
-	<properties>
+	
+  <properties>
 		<failOnMissingWebXml>false</failOnMissingWebXml>
 	</properties>
 
 	<dependencies>
-		<!-- https://mvnrepository.com/artifact/jakarta.platform/jakarta.jakartaee-api -->
 		<dependency>
 			<groupId>jakarta.platform</groupId>
 			<artifactId>jakarta.jakartaee-api</artifactId>
@@ -27,12 +27,18 @@
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>3.2.1</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>14</source>
-					<target>14</target>
-				</configuration>
-				<version>3.8.1</version>
+				<version>3.8.0</version>
+				 <configuration>
+                    <source>14</source>
+                    <target>14</target>
+                </configuration>
 			</plugin>
 		</plugins>
 	</build>
