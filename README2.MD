@@ -178,18 +178,7 @@ derive-size="from-worker-pools"
 ```
 max-pool-size="20"
 ```
-### Criação do módulo do Wildfly
-```
-jboss-cli.bat
-You are disconnected at the moment. Type 'connect' to connect to the server or 'help' for the list of supported commands.
 
-[disconnected /] connect
-[standalone@localhost:9990 /] module add --name=com.mysql --resources="C:\conectors\mysql-connector-j-8.0.32.jar" --dependencies=javax.api,javax.transaction.api
-
-[standalone@localhost:9990 /] /subsystem=datasources/jdbc-driver=mysql:add(driver-name=mysql,driver-module-name=com.mysql,driver-xa-datasource-class
--name=com.mysql.cj.jdbc.MysqlXADataSource
-{"outcome" => "success"}
-```
 ### Docker
 #### Criando a imagem
     - docker build -t img-agenda .
@@ -208,6 +197,42 @@ use agendamentoemaildb;
 show tables
  desc agendamentoemail;
 ```
+
+### Criação do módulo do Wildfly
+- Vai na pasta onde está o servidor JBOSS
+- No meu caso: `C:\server\wildfly-20.0.0.Final\bin`
+- Abre o terminal e digita
+```
+> jboss-cli.bat
+> You are disconnected at the moment. Type 'connect' to connect to the server or 'help' for the list of supported commands.
+
+> [disconnected /] connect
+> [standalone@localhost:9990 /] module add --name=com.mysql --resources="C:\conectors\mysql-connector-j-8.0.32.jar" --dependencies=javax.api,javax.transaction.api
+
+> [standalone@localhost:9990 /] /subsystem=datasources/jdbc-driver=mysql:add(driver-name=mysql,driver-module-name=com.mysql,driver-xa-datasource-class
+-name=com.mysql.cj.jdbc.MysqlXADataSource
+{"outcome" => "success"}
+```
+### Console de adinistração do Wildfly
+- [Console](http://localhost:9990/console/index.html)
+- A imagem mostra o acesso ao wildfly com o driver criado pelas linhas de comando acima.
+
+![Driver](./asserts/wildfly1.png)
+
+#### Criando o Datasource
+- Clicamos em Datasource
+    - Add datasouce
+        - Selecione o Banco de dados
+        - Defina um `name` e `JNDI name`, pra essa caso foi **AgendamentoEmailDS**
+        - Ele já inserir o driver que configuramos acima
+        - Colocar
+            - URL: jdbc:mysql://localhost:3306/agendamentoemaildb
+            - Usuário
+            - Senha
+        - Testa a conexão
+        - Finish
+
+![Novo datasource](./asserts/wildfly2.png)
 
 <a name="anc3"></a>
 
