@@ -22,7 +22,13 @@ public class AgendamentoEmailServico {
 	
 	public List<AgendamentoEmail> listar(){
 		//AgendamentoEmailDAO dao = new AgendamentoEmailDAO();
-		return dao.listar();
 		//return List.of("andre@email.com");
+		return dao.listar();
 	}
+	
+	public void inserir(AgendamentoEmail agendamentoEmail) {
+		agendamentoEmail.setAgendado(false);
+		dao.inserir(agendamentoEmail);
+	}
+	
 }

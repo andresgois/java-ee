@@ -22,6 +22,10 @@ public class AgendamentoEmailDAO {
 				.getResultList();
 	}
 	
+	public void inserir(AgendamentoEmail agendamentoEmail) {
+		em.persist(agendamentoEmail);
+	}
+	
 	
 	/*-----------------------------------
 	 * Resposabilidade do desenvolvedor
