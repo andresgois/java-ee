@@ -575,4 +575,72 @@ public class AgendamentoEmailMDB implements MessageListener {
 <a name="anc7"></a>
 
 ## Controle de transação com JTA
+- E fica aquela questão: como funciona a transação sendo que nós não configuramos nada até agora na nossa aplicação - nada relacionado a transação na nossa aplicação? É porque vamos ter uma especificação no Jakarta que se chama JTA, que é a Java Transaction API.
 
+- E quando trabalhamos com essa especificação em uma aplicação EJB todo controle da nossa transação passa automaticamente para o nosso servidor de aplicação. Então por isso que não precisamos nos preocupar em abrir uma transação ou fazer qualquer que seja configuração de transação porque tudo isso tá sendo manuseado pelo nosso servidor de aplicação.
+
+- Nós temos uma forma de explicitar essas configurações e elas são para a nossa classe aqui eu vou ter um @TransactionManagement que é o gerenciamento da transação e por padrão ela vem como CONTAINER, @TransactionManagement(TransactionManagementType.CONTAINER).
+
+- Então o container, o servidor de aplicação gerenciando essas transações e os nossos métodos também têm, por padrão, uma anotação @TransactionAttribute e ela vem como REQUIRED, @TransactionAttribute(TransactionAttributeType.REQUIRED).
+
+- Então sempre que eu faço uma chamada de um método em um EJB ele vai estar em um recurso transacional e você pode ficar na dúvida: "Porque que eu tenho configuração ali na classe?".
+
+-  Quando estamos trabalhando com transação e com essa ideia do TransactionManagement pelo CONTAINER e o TransactionAttributeType.REQUIRED eu sempre vou estar em um recurso transacional.
+
+- E em uma transação ou funciona todo mundo, ou não funciona ninguém. Então se eu tiver uma exceção em alguma parte da minha transação ele vai dar o rollback em todo mundo. E chega no ponto de porque que eu tenho o TransactionAttribute por método, porque eu posso querer que aqui no meu alterar() não esteja em um contexto transacional e eu vou botar aqui um NOT_SUPPORTED, `@TransactionAttribute(TransactionAttributeType.Not_SUPPORTED)`.
+
+- Isso no service
+
+- Nesse caso, ele vai dar erro, porém, todos os outros e-mails processados anterior a ele serão enviados e alterados o agendamento para true.
+
+- Só que nos vimos que nós podemos alterar aqui o TransactionAtribute por exemplo para NOT_SUPPORTED, que nós vimos que nossa aplicação pode ficar com um comportamento um pouco estranho com operações comitando as suas alterações e outras fazendo o rollback. Então por isso que temos que tomar muito cuidado quando está se trabalhando com transações na nossa aplicação.
+
+- E agora tem mais um tipo que nós podemos ver que é tirando esse controle transacional do `CONTAINER` e nos fazendo assumir o controle transacional da nossa aplicação. Para fazermos um exemplo, eu vou no nosso AgendamentoEmailDAO e agora eu vou falar que eu quero ter o controle da transação da minha aplicação.
+
+- E para isso eu posso usar aqui o `@TransactionManagement` e eu posso usar aqui ela do tipo BEAN, então agora o `CONTAINER` não controla mais as transações desse nosso EJB aqui e agora eu tenho que fazer esse controle.
+
+- Se eu alterar isso aqui, o nosso job quando for chamar o método de alterar nós vamos ver que vai ter um comportamento um pouco estranho.
+
+- E está aqui, quando ele vai chamar o nosso EJB que está como tipo de transação BEAN, ou seja, a transação sob nosso controle, ele já fala que "transaction is required", então na hora que ele vai chamar o alterar eu preciso de uma transação.
+
+- E é justamente porque como estamos assumindo esse controle agora precisamos fazer tudo, e o que é esse "tudo"? Eu tenho que injetar o *UserTransaction* e no meu método de alterar() eu vou precisar fazer um try e vou fazer o seguinte: userTransaction.begin() começe a minha transação.
+
+- Você vai então fazer a alteração no meu objeto e aqui eu agora comito a transação e de fato efetuo a transação. Se isso não der certo, eu pego um Exception e só vou dar um e.printStackTrace da exceção.
+
+- Está aqui, então agora com esse controle por parte do desenvolvedor das transações eu preciso iniciar uma transação, eu preciso fazer a operação e preciso comitar e isso aqui para todo método que for necessário então uma transação.
+
+- Ele vai executar, nós temos três e-mails a serem enviados e se deu tudo certo está aí o nosso controle agora manual, digamos assim, deu certo. Só que aqui é aquilo que nós temos que levar em conta. Tem que ser um cenário muito específico para você ter esse controle mais fino da transação.
+
+- Porque o que nós fizemos aqui o `CONTAINER` já faz para nós sem precisar explicitar configuração nenhuma. Então é por isso que eu deixei claro nas aulas anteriores, é melhor passarmos esse controle transacional realmente para o `CONTAINER` porque ele já foi feito para aquilo, ele já tem esse ajuste mais certinho da nossa transação.
+
+- Porque aqui se esquecermos de dar um begin ele vai dar certo, se esquecermos de dar um commit ele não vai validar a operação no nosso banco de dados. Então tem uma série de fatores que precisamos ter o controle que quando estamos com o tipo `CONTAINER` nós não nos preocupamos com isso, obviamente em alguns cenários vai precisar.
+
+- Mas na maioria dos casos o `CONTAINER` vai nos auxiliar e só mais um detalhe aqui em termos de curiosidade, se nós não tivermos trabalhando com aplicação EJB e precisássemos estar em um contexto transacional se eu tiver o controle dessa transação, se for ali com o tipo BEAN do JTA eu ainda precisaria anotar minha classe com o @Transaction.
+
+- Então eu tenho que informar para o servidor que está hospedada a minha aplicação que esse cara aqui precisa fazer as suas operações em um contexto transacional, mas aqui não é do nosso curso, nosso curso estamos utilizando o EJB.
+
+- Então além disso termos que fazer isso aqui, o EJB ainda prover essa facilidade que não precisamos indicar mais nada sobre transações, mas fica o alerta que não é recomendado, sempre que o cenário for um cenário parecido com esse aqui deixa mesmo com o controle por parte do `CONTAINER` e a aplicação vai dar tudo certo.
+
+```
+@Stateless
+@TransactionManagement(TransactionManagementType.BEAN) //transaction is required
+public class TesteTransacaoBMTAgendamentoEmailDAO {
+
+	@PersistenceContext
+	private EntityManager em;
+	
+	@Inject
+	private UserTransaction userTransaction;
+	
+    // O userTransaction será necessário pra todo método que necessitar de transação
+	public void alterar(AgendamentoEmail ag) {
+		try {
+			userTransaction.begin();
+			em.merge(ag);
+			userTransaction.commit();
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+}
+```
