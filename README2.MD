@@ -123,8 +123,6 @@
 
 ## Apresentando EJB’s e o projeto de agendamento de e-mails
 
-- Quando nós estamos trabalhando com aplicações corporativas nós temos uma série de informações que devemos dominar para que a aplicação saia entregue o valor necessário para o cliente.
-
 ![Aplicação](./asserts/jakarta1.png)
 
 - Por exemplo, eu vou ter o meu usuário fazendo a requisição para nossa aplicação, geralmente esse usuário vai fazer a requisição via browser ou via um software como o Postman, que é um software de requisição http e essa requisição vai chegar na nossa aplicação.
@@ -149,7 +147,7 @@
 
 - E aqui tem a vantagem de se trabalhar com um servidor robusto porque quando eu tenho servidor igual ao WildFly, ele passa a nos fornecer esse tipo de serviço para que o desenvolvedor não me preocupe justamente com detalhes de implementação do que acabamos de ver como "Transação", pool de Conexões, Persistência.
 
-- Então o meu WildFly vai ter esse serviço para me fornecer e todos esses que foram citados anteriormente saem da minha aplicação e passam a ser fornecidos por ele. O "protocolo http" agora é um serviço fornecido pelo WildFly, uma "transação" é aberta pelo WildFly, "persistência" também como detalhes da implementação do "JPA" vai ser do nosso WildFly, e as "Filas" também. Assim, nós temos todos os serviços configurados para nós.
+- Então o WildFly vai ter esse serviço para me fornecer e todos esses que foram citados anteriormente saem da minha aplicação e passam a ser fornecidos por ele. O "protocolo http" agora é um serviço fornecido pelo WildFly, uma "transação" é aberta pelo WildFly, "persistência" também como detalhes da implementação do "JPA" vai ser do nosso WildFly, e as "Filas" também. Assim, nós temos todos os serviços configurados para nós.
 
 - Agora nós estamos vendo a vantagem de trabalhar com um servidor mais robusto.
 
@@ -167,6 +165,12 @@
 
 - Então o foco é cem por cento em regra negocial. Obviamente, pode ter ficado alguma dúvida, mas a ideia agora é sabermos qual que é a motivação de se usar o EJB e nas próximas aulas começar a codificar as nossas classes, os nossos EJB's e ver essas vantagens na prática.
 
+> Qual a vantagem de se usar EJB?
+- *O EJB inverte o controle e passa a responsabilidade, de instanciar objetos e fornecer serviços, para o servidor de aplicação.*
+
+> Como podemos transformar esta classe em um EJB?
+- *Anotando a classe com @Stateless.*
+
 - No standalone-full
     - Usa as threds do processador, a gente fica sem muito controle
 ```
@@ -179,7 +183,15 @@ derive-size="from-worker-pools"
 max-pool-size="20"
 ```
 
+<a name="anc3"></a>
+
+## Persistência com JPA
+
+
+
 ### Docker
+
+> No Dockerfile, ele cria o banco automaticamente, pois, lá ele conpia o script do banco para o entrypoint do banco, sendo executado assim que rodar o run.
 #### Criando a imagem
     - docker build -t img-agenda .
 #### Criando container
@@ -198,7 +210,52 @@ show tables
  desc agendamentoemail;
 ```
 
+### Criando um usuário no Wildfly
+> Esses são os passos para criar um usuário no Wildfly
+- Entra na pasta bin do servidor
+    - Digita `add-user.bat`
+    - Digita "a"
+    - Coloca o username do usuário
+    - Digita o password, confirma com yes e coloca novamente o password
+    - pronto usuário criado
+- Para testar, entre em [Painel Administrativo](http://localhost:9990/console/index.html)
+- Já irá pedir usuário e senha.
+
+```
+C:\server\wildfly-20.0.0.Final\bin>add-user.bat
+
+What type of user do you wish to add?
+ a) Management User (mgmt-users.properties)
+ b) Application User (application-users.properties)
+(a): a
+
+Enter the details of the new user to add.
+Using realm 'ManagementRealm' as discovered from the existing property files.
+Username : teste
+Password recommendations are listed below. To modify these restrictions edit the add-user.properties configuration file.
+ - The password should be different from the username
+ - The password should not be one of the following restricted values {root, admin, administrator}
+ - The password should contain at least 8 characters, 1 alphabetic character(s), 1 digit(s), 1 non-alphanumeric symbol(s)
+Password :
+WFLYDM0098: The password should be different from the username
+Are you sure you want to use the password entered yes/no? yes
+Re-enter Password :
+What groups do you want this user to belong to? (Please enter a comma separated list, or leave blank for none)[  ]:
+About to add user 'teste' for realm 'ManagementRealm'
+Is this correct yes/no? yes
+Added user 'teste' to file 'C:\server\wildfly-20.0.0.Final\standalone\configuration\mgmt-users.properties'
+Added user 'teste' to file 'C:\server\wildfly-20.0.0.Final\domain\configuration\mgmt-users.properties'
+Added user 'teste' with groups  to file 'C:\server\wildfly-20.0.0.Final\standalone\configuration\mgmt-groups.properties'
+Added user 'teste' with groups  to file 'C:\server\wildfly-20.0.0.Final\domain\configuration\mgmt-groups.properties'
+Is this new user going to be used for one AS process to connect to another AS process?
+e.g. for a slave host controller connecting to the master or for a Remoting connection for server to server EJB calls.
+yes/no? yes
+To represent the user add the following to the server-identities definition <secret value="dGVzdGU=" />
+Pressione qualquer tecla para continuar. . .
+```
+
 ### Criação do módulo do Wildfly
+- O `jar` do banco está na pasta extras
 - Vai na pasta onde está o servidor JBOSS
 - No meu caso: `C:\server\wildfly-20.0.0.Final\bin`
 - Abre o terminal e digita
@@ -207,7 +264,7 @@ show tables
 > You are disconnected at the moment. Type 'connect' to connect to the server or 'help' for the list of supported commands.
 
 > [disconnected /] connect
-> [standalone@localhost:9990 /] module add --name=com.mysql --resources="C:\conectors\mysql-connector-j-8.0.32.jar" --dependencies=javax.api,javax.transaction.api
+> [standalone@localhost:9990 /] module add --name=com.mysql --resources="C:\Users\andre\eclipse-workspace\Java-ee\extras\mysql-connector-j-8.0.32.jar" --dependencies=javax.api,javax.transaction.api
 
 > [standalone@localhost:9990 /] /subsystem=datasources/jdbc-driver=mysql:add(driver-name=mysql,driver-module-name=com.mysql,driver-xa-datasource-class
 -name=com.mysql.cj.jdbc.MysqlXADataSource
@@ -224,7 +281,12 @@ show tables
     - Add datasouce
         - Selecione o Banco de dados
         - Defina um `name` e `JNDI name`, pra essa caso foi **AgendamentoEmailDS**
+            - **name** AgendamentoEmailDS
+            - **JNDI name** java:/AgendamentoEmailDS
         - Ele já inserir o driver que configuramos acima
+            - Driver name           : mysql
+            - Driver module name    : com.mysql
+            - Driver class name     : com.mysql.cj.jdbc.Driver
         - Colocar
             - URL: jdbc:mysql://localhost:3306/agendamentoemaildb
             - Usuário
@@ -234,9 +296,25 @@ show tables
 
 ![Novo datasource](./asserts/wildfly2.png)
 
-<a name="anc3"></a>
+- Agora temos que informar a aplicação qual datasource ele deve pegar as informações que foram criadas acima.
+- Dentro da pasta src>main>java , crie a META-INF e dentro crie um arquivo persistence.xml
+- E nele que devemos colocar o mapeamento JNDI
 
-## Persistência com JPA
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xml>
+<persistence>
+	<persistence-unit name="AgendamentoEmailDS">
+		<jta-data-source>java:/AgendamentoEmailDS</jta-data-source>
+	</persistence-unit>
+</persistence>
+```
+
+> Como podemos tornar o EntityManager apto a ser utilizado no nosso EJB?
+- *Utilizando a anotação @PersistenceContext na propriedade que representa a instância do EntityManager.*
+
+> Como podemos configurar este datasource no persistence.xml?
+- *Declarando a tag jta-data-source e colocando a JNDI do datasource dentro da tag.*
 
 <a name="anc4"></a>
 
