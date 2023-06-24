@@ -392,9 +392,185 @@ public class AgendamentoEmailController {
 
 ## Agendamento com TimerService
 
+- E nós precisamos definir a nossa lógica, a primeira coisa que nós vamos precisar fazer é recuperar os e-mails que não foram enviados, ou seja, que está com aquela tag de agendado como false.
+
+- Recuperar esses e-mails, envio com alguma lógica que não vai ter nada a ver com o banco de dados, nós vamos ver mais a frente e depois essa tag tem que ser setada para true e esse e-mail não vai ser enviado novamente.
+
+- O que nós precisamos fazer primeiro é criar dois novos métodos na nossa DAO que é o de listar por AgendamentoEmail agendado igual a false e um método de alterar o nosso AgendamentoEmail que vai ser para alterar a nossa tag para true.
+
+#### Criação de um JOB
+- Instância de service
+- Schedule que chamará o método de 10 em 10 segundos
+- Método que consultará no DAO e-mails não agendados
+- Envia o e-mail se tiver
+- Altera o status para true
+
+```
+@Stateless
+public class AgendamentoEmailJob {
+
+	@Inject
+	private AgendamentoEmailServico agendamentoEmailServico;
+	
+	@Schedule(hour = "*", minute = "*", second = "*/10")
+	public void enviarEmail() {
+		List<AgendamentoEmail> lista =  
+            agendamentoEmailServico.listarPorNaoAgendado();
+		lista.forEach(e -> {
+			agendamentoEmailServico.enviar(e);
+			agendamentoEmailServico.alterar(e);
+		});
+	}
+}
+```
+- Só que podemos ter a questão desse nosso EJB ser Stateless e o que isso significa? Que nós podemos ter problemas de concorrência entre os objetos criados pelo nosso Container, pelo nosso servidor de aplicação.
+
+- Mas e agora, como usamos uma única instância desse objeto? Assim como nós temos o EJB Stateless que nos devolve aquelas instâncias em um pool, nós vamos ter um EJB @Singleton que vai retornar para nós uma única instância do objeto.
+
+- Trocaremos o `@Stateless` por `@Singleton`
+
+> Porque é necessário anotar a classe como EJB para utilizar a anotação @Schedule?
+- *Porquê o Timer Service é um recurso do EJB e é controlado pelo servidor de aplicação.*
+
 <a name="anc6"></a>
 
 ## Mensageria com JMS
+
+> O que aconteceria por exemplo se esse primeiro e-mail desse um erro? Em um cenário bacana, esse e-mail deu um erro eu trato essa situação, mas esse AgendamentoEmailJob que não tem erro chegaria para o nosso cliente.
+
+- Só que da forma como nos estamos trabalhando hoje o erro do primeiro e-mail impactaria o segundo e-mail. Então ele não chegaria também para o nosso cliente, e isso não parece fazer sentido porque eu não quero que as mensagens que estejam ok sejam impactadas para as que tenham erro.
+
+- Mas para trabalharmos dessa forma nós teríamos que mudar um pouco a percepção de como funciona a nossa aplicação e teríamos que fazer um envio de forma assíncrona, como que funcionaria isso?
+
+- Vamos ver aqui no desenho para vermos se faz sentido. Então eu teria meus clientes aqui, eu vou afastar eles aqui para melhorar o nosso desenho, vamos trazer aqui. Eu vou aumentar esse desenho aqui para vermos como funcionaria essa questão da forma síncrona.
+
+![Exemplo](./asserts/jms01.png)
+
+- O meu AgendamentoEmailJob é o responsável por enviar os e-mails para o cliente, só que agora não ele enviaria esse e-mail aqui para o meu repositório. Um repositório que receberia esses e-mails em algum formato.
+
+- Se teve erro, eu trato essa mensagem a partir desse repositório, mas o que não teve erro vai estar persistida aqui com o status ok. E essas que estão com o status ok elas seriam então consumidas por outro objeto da nossa aplicação que aí sim enviaria os e-mails para o nosso cliente. Então na teoria aqui como ficaria? Eu teria meu AgendamentoEmailJob que seria um producer que produziria mensagens para esse repositório que nós definimos aqui.
+
+- Eu teria aqui na minha aplicação em um outro ponto, um consumidor que seria um "consumer" dessas mensagens desse repositório e dessa forma quando eu tivesse um erro nessa mensagem do primeiro cliente ela não seria enviada, mas a do segundo cliente, que está ok, ela chegaria para o nosso cliente sem nenhum problema.
+
+- E hoje, graças a um recurso do Jakarta EE nós conseguimos trabalhar dessa maneira. Nós vamos ter um conceito de "Fila", que é esse repositório que nós vimos que nossas mensagens serão persistidas, que nossos e-mails serão persistidos. Através da especificação JMS (Java Message Service) nós conseguiríamos fazer esse envio assíncrono.
+
+- Eu teria o meu `Producer` aqui que mandaria os e-mails para essa `Fila`, que pode ser um repositório do servidor de aplicação ou pode ser um repositório externo, algo parecido com o banco de dados e o `Consumer`, que seria aqui um recurso da nossa aplicação, pegaria as mensagens que eu tenho persistido na minha `Fila` que não tenha erro e enviaria para o meu cliente.
+
+- Então aqui eu tenho um consumidor que vai chegar agora na minha `Fila` e vai me perguntar: "Você tem mensagem?" "Tenho". "Tem algum problema?" "Não". "Então me dá que eu vou enviar para o cliente".
+
+- E assim dessa forma nós conseguimos tratar o que está com erro de forma separada e o que está ok vai chegar para os nossos clientes. Ainda pode ter surgido algumas dúvidas, mas a ideia agora é irmos para a prática e entendermos cada um desses pontos aqui e como que vai ficar a nossa aplicação com essa alteração.
+
+- Então AgendamentoEmail tem que ser um objeto serializável e para isso nós vamos precisar implementar a interface Seriallizable. Ele vai dar um "warning" pedindo para nós adicionarmos o serialVersionUID.
+
+```
+@Entity
+@Table(name = "agendamentoemail")
+public class AgendamentoEmail implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
+
+    // retsnte do código
+}
+```
+### Configurando a FILA via servidor de aplicação
+- Wildfly tem que esta rodando
+- Criação da fila pelo terminal do jboss-cli
+- Cria a fila       : `jms-queue`
+- Nome para a fila  : `--queue-address=EmailQueue `
+- JNDI da fila      : `--entries=java:/jms/queue/EmailQueue`
+```
+C:\server\wildfly-20.0.0.Final\bin>jboss-cli.bat
+You are disconnected at the moment. Type 'connect' to connect to the server or 'help' for the list of supported commands.
+[disconnected /] connect
+[standalone@localhost:9990 /] jms-queue add --queue-address=EmailQueue --entries=java:/jms/queue/EmailQueue
+
+```
+#### Criando Producer
+- Vamos alterar nosso JOB para enviar para a Fila do Wildfly
+- Fabrica default
+- Pra onde será enviado, qual fila: **queue**
+- Criando producer `context.createProducer().send(queue, e);`
+    - Fila
+    - Objeto que será passado para a fila
+```
+@Inject
+	@JMSConnectionFactory("java:/jboss/DefaultJMSConnectionFactory")
+	private JMSContext context;
+
+	@Resource(mappedName = "java:/jms/queue/EmailQueue")
+	private Queue queue;
+	
+	@Schedule(hour = "*", minute = "*", second = "*/10")
+	public void enviarEmail() {
+		List<AgendamentoEmail> lista = 
+            agendamentoEmailServico.listarPorNaoAgendado();
+		lista.forEach(e -> {
+			context.createProducer().send(queue, e);
+			agendamentoEmailServico.alterar(e);
+		});
+	}
+```
+- Messagem na fila do JBOSS
+
+![Mensagem](./asserts/jms02.png)
+
+#### Criando Consumer
+- Chegou o momento de criarmos o nosso consumidor que vai pegar essas mensagens da Fila para podermos enviar os nossos e-mails para os nossos usuários.
+
+- Para fazermos isso vamos utilizar um recurso do EJB que se chama "MDB" (Message-Driven Beans) e a ideia dele é exatamente abstrair questão de implementação. Então não vamos nos importar com detalhes de como que o MDB se conecta à Fila, como ele pega essas mensagens ficamos sem precisar saber sobre detalhes dessa implementação.
+
+- Nós só nos preocupamos em usar o MDB para pegar essas mensagens e enviar os e-mails para o nosso cliente. Para começar a trabalhar com MDB o que nós precisamos? Vamos precisar criar uma Classe que vai ser o nosso MDB. Eu crio uma classe que vai ficar dentro do pacote ‘br.com.alura.mdb’ e nós vamos dar o nome dessa Classe de `AgendamentoEmailMDB`.
+
+- MessageDriven
+    - Fila que vai escutar
+        - **destinationLookup**
+    - Informa o tipo de fila
+        - **destinationType**
+- Agora o que nós precisamos fazer e desenvolver o nosso método onMessage e a ideia aqui é o seguinte: a nossa MDB vai ficar escutando a Fila, quando tiver uma nova mensagem vai pegar essa mensagem, vai ter que transformar a mensagem para um objeto AgendamentoEmail porque é esse objeto que nós usamos para enviar para nossos usuários.
+
+- Pega o dado que está sendo passado na mensagem
+
+```
+import javax.ejb.ActivationConfigProperty;
+import javax.ejb.MessageDriven;
+import javax.inject.Inject;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageListener;
+
+@MessageDriven(activationConfig = {
+		@ActivationConfigProperty(propertyName = "destinationLookup", propertyValue = "java:/jms/queue/EmailQueue"),
+		@ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue") })
+public class AgendamentoEmailMDB implements MessageListener {
+
+	@Inject
+	private AgendamentoEmailServico servico;
+
+	@Override
+	public void onMessage(Message message) {
+		try {
+			AgendamentoEmail agendamentoEmail = message.getBody(AgendamentoEmail.class);
+			servico.enviar(agendamentoEmail);
+		} catch (JMSException e) {
+			throw new RuntimeException(e);
+		}
+	}
+}
+```
+
+- Quando a mensagem dá erro ela não fica persistida na fila EmailQueue porque senão nós teríamos um looping na nossa aplicação porque ela iria ficar persistida na nossa Fila e de tempos em tempos nós iriamos tentar enviar essa mensagem com erro.
+
+- Quando tentamos enviar que a mensagem tem um erro, essa mensagem vai ser persistida em uma Fila chamada "DLQ" que é uma Fila específica para mensagens com erro. Dessa maneira nós podemos tratar essa mensagem, após o tratamento essa mensagem volta para o nosso EmailQueue e aí ela vai conseguir ser enviada com sucesso. Então é mais ou menos esse o fluxo que funciona no nosso Consumer nessa estrutura de Producer e Consumer.
+
+> Escolha a opção que melhor explica o que é o JMS (Java Message Service):
+- *Permite a troca de mensagens assíncronas entre um ou mais clientes.*
+
+> Qual interface a classe MDB deve implementar para funcionar?
+- *Deve implementar a interface MessageListener*
+
+- `Queue` para receber as nossas mensagens. Uma característica dessa abordagem é que a mensagem será recebida, exatamente, por um consumidor.
+- `Topic` Ele implementa uma semântica de publicação e assinatura. Quando a mensagem é publicada, ela vai para todos os assinantes que estão interessados, logo, zero a n assinantes poderão receber a mensagem.
+
 
 <a name="anc7"></a>
 
