@@ -316,9 +316,77 @@ Pressione qualquer tecla para continuar. . .
 > Como podemos configurar este datasource no persistence.xml?
 - *Declarando a tag jta-data-source e colocando a JNDI do datasource dentro da tag.*
 
+> Qual método do EntityManager será necessário chamar para persistir a entidade?
+- *O método em.persist() deverá ser chamado, passando a entidade como parâmetro*
+
 <a name="anc4"></a>
 
 ## Fazendo requisição ao nosso EJB com JAX-RS
+- Graças ao Jakarta EE temos uma especificação que vai nos auxiliar de uma maneira mais elegante a trabalhar com requisições http. Essa especificação é a “JAX-RS” e nós vamos começar o desenvolvimento do nosso projeto com ela.
+
+- o nome dele vai ser “AgendamentoEmailApplication”, eu preciso desse cara aqui porque ela precisa ser uma subclasse de application que é uma do “JAX-RS”.
+
+- A partir do momento que eu transformo essa classe da minha aplicação em uma subclasse de application eu consigo ter acesso a todos os recursos que eu tenho na especificação “JAX-RS”.
+
+```
+@ApplicationPath("/")
+public class AgendamentoEmailApplication extends Application {}
+```
+
+- A `JAX-RS` é legal de trabalhar porque ela não precisa de uma biblioteca de terceiros para implementá-la, ela já me dá os recursos necessários para eu trabalhar apenas com ela.
+
+- Nossa subclasse de application nós já podemos fazer a primeira configuração que é o @ApplicationPath. Esse "Application Path" é o path que fica entre o contexto da nossa aplicação e entre o recurso.
+
+- Então no nosso caso o nosso caso é aquele “agendamento-email0.0.1.SNAPSHOT/” eu poderia ter um Path que poderia ser por exemplo API ou qualquer coisa aqui que eu quisesse colocar e depois esse example teria o "/emails" que é o nosso recurso.
+
+- Mas também se eu não quiser definir nenhum eu não preciso colocar nada só boto uma barra vazia **("/")** a nossa subclasse de AgendamentoEmailApplication está pronta e agora nós podemos utilizar os recursos do JAX-RS nas nossas classes.
+
+#### Criando a classe controller
+- Path **recurso da aplicação**
+- Injeção da dependência do serviço
+- Método que deve ser retornado
+    - tipo que será retornado no body, método de retorno
+- URL da palicação nesse momento
+    - http://localhost:8080/agendamento-email-0.0.1-SNAPSHOT/emails
+```
+@Path("emails")
+public class AgendamentoEmailController {
+
+	@Inject
+	private AgendamentoEmailServico agendamentoEmailServico;
+
+	@GET
+	@Produces(value = MediaType.APPLICATION_JSON)
+	public Response listar() {
+		return Response.ok(agendamentoEmailServico.listar()).build();
+	}
+	
+	@POST
+	@Consumes(value = MediaType.APPLICATION_JSON)
+	public Response inserir(AgendamentoEmail agendamentoEmail) {
+		agendamentoEmailServico.inserir(agendamentoEmail);
+		return Response.status(201).build();
+	}
+}
+```
+
+### Configurando o Context root
+
+- Deverá criar o arquivo para mudar a url de contexto
+- `jboss-web.xml`
+- Ficará nessa estrutura de pastas
+
+![jboss-web](./asserts/estrutura_de_pastas.png)
+
+```
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE xml>
+<jboss-web>
+	<context-root>agendamento</context-root>
+</jboss-web>
+```
+- Após a alteração do context root, nossa URL ficará assim:
+    - http://localhost:8080/agendamento/emails
 
 <a name="anc5"></a>
 
