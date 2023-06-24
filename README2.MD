@@ -644,3 +644,9 @@ public class TesteTransacaoBMTAgendamentoEmailDAO {
 	}
 }
 ```
+
+- O uso de transações é essencial para qualquer sistema que deseja garantir a durabilidade, integridade e consistência dos dados. Por esse motivo, o EJB integra uma especificação para trabalhar com transações de alto nível, o JTA (Java Transaction API). O JTA oferece duas formas de demarcação de transações, Bean-Managed (BMT), e Container-Managed (CMT).
+
+> Em relação ao JTA, quais das afirmações são corretas?
+- *CMT é a marcação implícita, ou declarativa da transação.*
+- *BMT é a marcação explícita, ou programática da transação.*
