@@ -10,15 +10,21 @@
 - [Controle de transação com JTA](#anc7)
 
 ### Módulo 5 JSF
-- [Introdução ao desenvolvimento web com JSF](#anc8)
-- [Visão geral](#anc9)
-- [Características do JSF](#anc10)
-- [Especificação Java EE](#anc11)
-- [Apresentações](#anc12)
-- [Modelo básico](#anc13)
-- [Extensões](#anc14)
+- [Introdução ao desenvolvimento web com JSF Ver primeiro vídeo](#anc8)
+- [Configuração do ambiente e os primeiros passos com JSF](#anc9)
+- [Entendendo MVC e integrando o banco de dados com JPA 2](#anc10)
+- [Completando o sistema e lidando com escopos do JSF 2](#anc11)
+- [Conversão e validação de dados](#anc12)
+- [Páginas mais dinâmicas com AJAX](#anc13)
+- [Navegação e o ciclo de vida dos componentes JSF](#anc14)
+- [Templates reutilizáveis com Facelets](#anc15)
+- [Completando o CRUD](#anc16)
+- [Atualizando para JSF 2.2](#anc17)
+- [Autenticação do usuário](#anc18)
+- [Autorização pelo PhaseListener](#anc19)
+- [Logout e o escopo Flash](#anc20)
 
-## Módulo 4
+# Módulo 4
 <a name="anc1"></a>
 
 ## Do Java EE ao Jakarta EE Ver primeiro vídeo
@@ -194,9 +200,6 @@ max-pool-size="20"
 <a name="anc3"></a>
 
 ## Persistência com JPA
-
-
-
 ### Docker
 
 > No Dockerfile, ele cria o banco automaticamente, pois, lá ele conpia o script do banco para o entrypoint do banco, sendo executado assim que rodar o run.
@@ -659,15 +662,11 @@ public class TesteTransacaoBMTAgendamentoEmailDAO {
 - *CMT é a marcação implícita, ou declarativa da transação.*
 - *BMT é a marcação explícita, ou programática da transação.*
 
-## Módulo 5
+# Módulo 5
 <a name="anc8"></a>
 
-## Introdução ao desenvolvimento web com JSF
-<a name="anc9"></a>
-
-# Livraria
-
-## Banco
+## Introdução ao desenvolvimento web com JSF Ver primeiro vídeo
+### Banco
 - mysql-farmacia
 
 ### Docker
@@ -680,8 +679,7 @@ docker container run -e MYSQL_USER=andre -e MYSQL_PASSWORD=123456 -e MYSQL_DATAB
 ```
 mysql -h localhost -u andre -p
 ```
-
-## Aplicação
+### Aplicação
 
 ![Desktop ou WEB](./asserts/01_desktopOrWeb.png)
 ### Em aplicações Desktop
@@ -690,7 +688,7 @@ mysql -h localhost -u andre -p
     - cada cliente tem uma cópia da aplicação
     - regra de negócio em cada cliente
     - atualização um a um
-##
+
 ### Aplicação WEB
 #### Cliente magro
 
@@ -720,6 +718,14 @@ mysql -h localhost -u andre -p
 - desenvolvimento orientado ao evento
 - desenvolvimento stateful
 - O servlet JSF tem o papel do controlador.
+
+- Todos eles são frameworks web baseados em componentes.
+
+ ![Todos eles são frameworks web baseados em componentes.](./asserts/componentes.png)
+
+- Analisando um pouco melhor o JSF, percebemos que ele é na verdade um padrão ou especificação que faz parte do Java Enterprise Edition (Java EE). Por ser uma especificação, ou Java Specification Request (JSR), ele é mantido dentro do Java Community Process (JCP).
+
+![Desenvolvimento Web Com Java](./asserts/devwebjava.png)
 ##### Implemantações dessa especificação
 - Mojarra (Implementação referencial)
 - Apache MyFaces
@@ -728,11 +734,30 @@ mysql -h localhost -u andre -p
 - [RichFaces](http://showcase.richfaces.org/richfaces/component-sample.jsf?demo=select)
 - [Ice Faces](http://icefaces-showcase.icesoft.org/showcase.jsf)
 
-## Detalhes da contrução do projeto
+![Extensões](./asserts/extensoes.png)
+
+### São as boas práticas do mundo orientado a objetos que o JSF tenta trazer para o mundo Web:
+
+- uso de componentes
+- desenvolvimento orientado ao evento
+- desenvolvimento stateful
+
+> Mojarra e MyFaces são:
+- Ambas, Mojarra e MyFaces, são implementações da especificação JSF. Mojarra é a implementação referencial da Oracle, MyFaces é a implementação da Apache Software Foundation.
+
+- Como as duas seguem a mesma especificação podemos escolher uma ou outra para desenvolvimento JSF.
+
+<a name="anc9"></a>
+
+## Configuração do ambiente e os primeiros passos com JSF
 - Pré-requisitos
     - Java SE 1.7
     - Eclipse Java EE
     - Apache Tomcat 7
+
+
+![Pré-requisito.png](./asserts/prerequisito.png)
+
 - Projeto Livraria
 
 ```mermaid
@@ -746,21 +771,21 @@ mysql -h localhost -u andre -p
     - Digite ctrl + 3, digite server
     - clique em new server wizard
     - digite tomcat e escolha a versão 7
+        - Se estiver na sua máquina basta apontar para ela
     - next e escolha onde salva
     - só finalizar
 - Criar projeto
-    - file 
-    - new
-    - Dynamic web project
+    - file > new > Dynamic web project
     - coloque o nome do projeto
     - em *Target runtime* coloque Tomcat 7
     - em *Dynamic web module version* coloque 3.0
     - em *Configuration* coloque JavaServer Faces v2.0 project
     - next e na segunda marque pra gerar o web.xml
-    - em *Type* coloque disable
+    - em *Type* coloque disable *Disable librery Configuration*
     - em *URL Mapping pattenrs* coloque *.xhtml
 - .JAR
     - todos os .jars devem fica em WEB-INF > lib
+- [URL](http://localhost:8080/jsf-livraria/login.xhtml)
 
 ##### ATENÇÃO: Se você estiver usando MS-Windows, altere a propriedade encoding="ISO-8859-1" do cabeçalho do arquivo .xhtml para encoding="UTF-8"
 
@@ -769,6 +794,10 @@ mysql -h localhost -u andre -p
 - O Servlet recebe a chamada e decide qual página ele vai chamar
 - O controlador ler o xhtml e instância os componentes declarados
 - No fim ele pega os componentes de apresentação e devolve para o navegador
+
+- Controlador e Visão no JSF
+
+![Controlador e Visão no JSF](./asserts/Controlador_Visao_JSF.png)
 
 ```mermaid
     sequenceDiagram
@@ -779,13 +808,30 @@ mysql -h localhost -u andre -p
     Controlador->>livro.xhtml: resposta
 ```
 
+- Ligando Managed Beans a componentes visuais
+
+![Ligando Managed Beans a componentes visuais](./asserts/LigandoManaged.png)
+
 ### Classe Livro e LivroBean
 - **Livro**: Responsabilidade de cadastrar um livro
     - atributos, getters e setters
 - **LivroBean**: Responsabilidade de ser um livro
     - getter que busca o livro da classe Livro
 
-### Model View Controller
+- Durante a criação do projeto jsf-livraria, alteramos o conteúdo de URL Mapping Patterns, na seção JSF Capabilites, para *.xhtml. Com que propósito fizemos essa alteração?
+    - *JSF Servlet é definido no arquivo web.xml e fará o papel do controlador dentro do modelo JSF. Sendo mapeado como .xhtml ele recebe qualquer requisição que termine com .xhtml, por exemplo livro.xhtml.*
+- Por ser um projeto web, em que diretório devemos importar o JAR da implementação JSF Mojarra?
+    - *WEB-INF/lib*
+- Qual é o namespace correto para utilizar os componentes HTML da especificação JSF?
+    - *http://java.sun.com/jsf/html*
+- Qual das afirmativas abaixo declara a classe LivroBean como bean gerenciado corretamente?
+    - *basta usar a anotação @ManagedBean para declarar a classe LivroBean como ManagedBean.*
+- Cada componente possui atributos especiais para criar uma ligação com uma classe. No caso do h:commandButton, que atributo devemos declarar para indicar que classe usaremos?
+    - *<h:commandButton value="Gravar" action="#{bean.metodo}" />*
+
+<a name="anc10"></a>
+
+## Entendendo MVC e integrando o banco de dados com JPA 2
 
 ```mermaid
   graph TD;
@@ -818,6 +864,9 @@ mysql -h localhost -u andre -p
       style Localhost fill:#ffffff,color:#000000
       style Livraria fill:#ffffff,color:#000000, stroke:#000000,stroke-width:2px
 ```
+
+![Arquitetura](./asserts/arquitetura.png)
+
 ### Ciclo de vida dos componentes JSF
 - controlador instância os componentes declarados
 - Árvore de componentes
@@ -838,6 +887,31 @@ mysql -h localhost -u andre -p
 
 ![Arquitetura](./asserts/02_arquitetura.png)
 
+- Em que modelo arquitetural o JSF se baseia?
+    - *MVC*
+- No padrão MVC (Model-View-Controller), qual é o papel do modelo?
+    - *Representar as regras de negócio*
+- Os componentes definidos na página xhtml serão instanciados pelo controlador. O resultado disso é a árvore de componentes que fica guardada em memória. Em que momento o controlador cria esta árvore?
+    - *Apenas na primeira requisição (no primeiro GET).*
+- Onde o controlador guarda a árvore de componentes?
+    - *HttpSession*
+
+
+<a name="anc11"></a>
+
+## Completando o sistema e lidando com escopos do JSF 2
+
+- Adicionando select do JSF
+```
+<fieldset>
+    <legend>Dados do Autor</legend>
+    <h:outputLabel value="Selecione Autor:" for="autor"/>
+    <h:selectOneMenu id="autor">
+        <f:selectItems value="#{livroBean.autores}" />
+    </h:selectOneMenu>
+    <h:commandButton value="Gravar Autor" action="#{livroBean.gravarAutor}"/>
+</fieldset>
+```
 
 ### Lidando com escopos
 - A vida do managedBean dura apenas um request
@@ -857,6 +931,35 @@ mysql -h localhost -u andre -p
     </h:column>
 </h:dataTable>
 ```
+
+- A configuração do escopo no ManagedBean também é feita através de anotações. O padrão é o escopo de requisição que podemos deixar explícito com a anotação @RequestScoped. Para configurar o ViewScoped usaremos a anotação @ViewScoped.
+```
+@ManagedBean
+@ViewScoped
+public class LivroBean {
+```
+
+![viewscorp](./asserts/viewscorp.png)
+
+- Qual componente devemos usar caso precisemos de um combobox?
+    - *h:selectOneMenu*
+- Como fazemos para popular os autores no h:selectOneMenu?
+    - *Utilizamos o componente f:selectItems dentro do h:selectOneMenu*
+- Por que utilizamos o id do autor no atributo itemValue do componente f:selectItems?
+    - *Pois precisaremos recuperar essa informação no lado do servidor.*
+- Qual é o efeito de anotar o LivroBean com @ViewScoped?
+    - *A instância de LivroBean existirá enquanto a tela existir.*
+- Qual é o escopo padrão adotado por um ManagedBean?
+    - *escopo da requisição (RequestScoped)*
+- Que componentes utilizamos para criar uma tabela de dados?
+    - *h:dataTable e h:column*
+- 
+    - **
+
+
+<a name="anc12"></a>
+
+## Conversão e validação de dados
 ### Conversão e validação de dados
 - Para manipulação de datas
 - Com essa anotação será gravado apenas a data
@@ -923,6 +1026,73 @@ FacesContext
     .addMessage("autor", new FacesMessage("Livro deve ter pelo menos um autor."));
 ```
 
+#### Validadores personalizados.
+
+- Nosso validador será um método no managedBean livroBean. O nome do método será comecaComDigitoUm. Ele recebe um FacesContext, um objeto que permite obter informações da view processada no momento. O segundo parâmetro é o UIComponent, o componente da view que está sendo validado. Por último, temos um objeto que é o valor digitado pelo usuário. Este método precisa lançar um ValidatorException, exceção que sinalizará para o JSF que algo saiu errado.
+
+```
+public void comecaComDigitoUm(FacesContext fc, UIComponent component, Object value) throws ValidatorException {
+
+    String valor = value.toString();
+    if (!valor.startsWith("1")) {
+        throw new ValidatorException(new FacesMessage("Deveria começar com 1"));
+    }
+}
+```
+
+- O JSF não sabe por padrão que formato de data usar. Que conversor devemos usar para formatar a data?
+    - *f:convertDateTime*
+
+
+<a name="anc13"></a>
+
+### Páginas mais dinâmicas com AJAX
+- Para resolver isso vamos tentar enviar apenas uma parte do formulário. Ou seja, vamos enviar apenas os dados do autor. Não enviar todas as informações também pode ser vantajoso porque o processamento dos dados no lado do servidor pode ser demorado. Nesse caso o navegador espera sincronamente até a resposta chegar. Ele fica aguardando a resposta para atualizar a tela inteira e causa a famosa tela branca. Isso cria uma experiência ruim para o usuário final.
+- Então vamos mandar uma requisição por trás da interface, que não necessita de uma atualização completa da tela, e envia apenas uma parte do formulário. O usuário nem deve sentir que houve essa requisição. Assim que a resposta chegar, atualizamos apenas a parte da tela em questão. Essa forma de enviar as requisições se chama AJAX.
+
+### Aliando JSF 2 e AJAX
+- AJAX melhora a usabilidade da interface e, graças aos componentes JSF, pode ser feito de uma forma muito simples. Não é preciso saber detalhes sobre JavaScript e a atualização programática da tela. Tudo isso é feito de forma transparente para o desenvolvedor, bastando apenas ativar o AJAX no lugar desejado. Para tal existe um componente: f:ajax
+- Vamos associar f:ajax com o h:commandButton. O botão sabe então que vai enviar uma requisição AJAX que NÃO submete o formulário inteiro. Falta então definir o que queremos enviar nessa requisição. Claro, apenas o valor do h:combobox. Para isso existe o atributo execute, nele definimos os IDs dos componentes que queremos enviar na requisição.
+
+```
+<h:commandButton value="Gravar Autor" action="#{livroBean.gravarAutor}" >
+    <f:ajax execute="autor" />
+</h:commandButton>
+```
+
+### Renderizando componentes do JSF com AJAX
+- Faltou ainda definir qual parte da página queremos atualizar. Quando selecionarmos o Autor seu nome deve aparecer na tabela abaixo do h:combobox. Aqui também é preciso configurar o componente f:ajax. O atributo render recebe os IDs dos componentes que queremos atualizar, no nosso caso o ID da tabela de autores. Como a tabela não possui ainda um ID, colocaremos um agora repetindo-o no atributo render. Pronto!
+```
+<h:commandButton value="Gravar Autor" action="#{livroBean.gravarAutor}" >
+    <f:ajax execute="autor" render="tabelaAutores"/>
+</h:commandButton>
+```
+
+### AJAX nos componentes de entrada
+- Ótimo, usamos AJAX com um h:commandButton, mas f:ajax não se limita aos comandos e também pode ser aplicado nos componentes de input. Vamos mostrar isso no h:inputText do título. O f:ajax dentro de um input significa que os dados serão enviados via AJAX. Aqui há algumas opções para definir o momento exato da requisição. Podemos declarar que cada vez que soltamos uma tecla deve ser enviado uma requisição, ou quando o input recebe (ou perde) o focus. No exemplo submetemos os dados quando o campo perde o focus, indicado pelo atributo event com o valor blur.
+- Igual a parte anterior, também podemos especificar o que queremos atualizar após a requisição. A vantagem de usar AJAX no input é que a validação é executada na hora, quando o usuário digita no campo. Novamente irá melhorar a usabilidade, mas isso só funciona se atualizarmos as mensagens para apresentar possíveis problemas de validação. Aqui também é preciso fazer a associação com o ID do componente.
+
+```
+<h:inputText id="titulo" value="#{livroBean.livro.titulo}" required="true" 
+    requiredMessage="Título obrigatório" validatorMessage="Título não pode ser superior a 40">
+            <f:validateLength maximum="40" />
+            <f:ajax event="blur" render="messages"/>
+</h:inputText>
+```
+
+### Enviando o formulário inteiro
+- Por último vamos usar AJAX também no botão que grava o livro. Enviaremos todas as informações do livro com AJAX. Aqui não há novidade, temos a tag f:ajax dentro do botão. Também precisamos declarar os IDs dos componentes que queremos incluir na requisição. No atributo render podemos usar uma lista de IDs, porém muitos IDs ficam trabalhosos, facilitando erros. Por este motivo existe um atalho, o @form, para indicar o envio do formulário inteiro. Além do @form há outras possibilidades, como por exemplo @all. Ele indica que queremos enviar a página inteira.
+
+- Além disso, é preciso definir o que queremos atualizar. Nesse exemplo é preciso atualizar o formulário, indicado pelo @form e a tabela para o mostrar o novo livro. A tabela será referenciada novamente pelo ID, como já fizemos, porém repare que elas não estão no mesmo formulário. Colocando o ID apenas, significa que o f:ajax procurará o componente no mesmo formulário. Para encontrar o componente fora do form é preciso usar o caminho absoluto indicado pelo ":" na frente do ID.
+
+```
+<h:commandButton value="Gravar" action="#{livroBean.gravar}" >
+    <f:ajax execute="@form" render="@form :tabelaLivros"/>
+</h:commandButton>
+```
+
+![Ajax](./asserts/ajax.png)
+
 ### Páginas mais dinâmicas com AJAX
 - Enviar apenas uma parte do formulário
 
@@ -971,6 +1141,37 @@ FacesContext
 - o uso apropriado de requisições AJAX possibilita uma comunicação mais rápida com o servidor, dado que o mesmo só precisará responder com a parte da página que irá realmente mudar.
 - Como o AJAX depende diretamente de JavaScript, é necessário que o JSF importe sua própria biblioteca JavaScript. Isso só será feito, caso o componente h:head esteja presente.
 
+- Qual das opções abaixo descreve uma vantagem de usarmos requisições AJAX?
+    - *Atualizar apenas uma parte da página, em vez da página inteira, melhorando assim a experiência do usuário.*
+- Que componente do JSF nos permite utilizar AJAX?
+    - *f:ajax*
+- Como indicamos os campos que serão submetidos com a requisição ajax?
+    - *Indicamos os IDs dos campos no componente f:ajax através do atributo execute.*
+- Por que é necessário utilizar o componente h:head para trabalharmos com AJAX?
+    - *Para que o JSF importe o código JavaScript necessário.*
+- Como indicamos os componentes que devem ser atualizados após a requisição AJAX?
+    - *Referenciamos os IDs dos componentes que serão atualizados através do atributo render no componente f:ajax.*
+- Como podemos referênciar a IDs de componentes que não se encontram dentro do h:form?
+    - *Introduzindo o caracter : antes da ID.*
+- Como fazemos para submeter todos os campos do formulário?
+    - *Atribuímos o valor @form ao atributo execute do componente f:ajax.*
+
+
+<a name="anc14"></a>
+
+## Navegação e o ciclo de vida dos componentes JSF
+- Continuaremos a melhorar passo a passo nossa aplicação aprendendo ainda mais sobre JSF. Ao acessar a página livro.xhtml podemos ver o formulário para cadastrar livros. Uma situação bastante comum no dia a dia será cadastrar um livro quando ainda não há autor relacionado. Nesse caso é preciso chamar o formulário do autor manualmente, digitando a página no navegador. Com certeza isso não vai agradar nenhum usuário. Vamos melhorar então o formulário e criar um link abaixo do combobox .
+
+### O componente h:commandLink
+- No eclipse, vamos abrir a página livro.xhtml e procurar o fieldset do autor. Nele, abaixo do h:commandButton adicionaremos mais um comando, mas agora do tipo link, ou seja h:commandLink.
+
+- Esse componente também recebe no atributo value o nome do link, que neste caso é Cadastrar novo autor. No atributo action podemos associar uma expressão ou colocar diretamente o nome da página que queremos chamar. Não podemos usar a extensão da página, apenas o nome sem xhtml. Só falta adicionar um nova linha para melhorar o layout, basta usar a tag HTML <br>.
+
+> Introdução ao ciclo de vida do JSF
+
+![Introdução ao ciclo de vida do JSF](./asserts/Introduçao_ciclo_vida_JSF.png)
+
+- Além dessa separação já percebemos que há um fluxo bem definido dentro desse modelo. Por exemplo, vimos que o JSF converte e valida automaticamente os parâmetros da requisição. Esses dados, caso não haja nenhum problema com conversão e validação, serão passados para o modelo. Depois os ManagedBeans usam os valores para executar um método.
 ### Fases do ciclo de vida
 
 ![Ciclo de vida](./asserts/03_ciclo_de_vida.png)
@@ -982,6 +1183,9 @@ FacesContext
     </phase-listener>		
 </lifecycle>
 ```
+### Definição do PhaseListener
+- A especificação define 6 fases. Para visualizar e acompanhar o ciclo de vida podemos plugar uma classe chamada automaticamente pelo JSF quando uma fase inicia ou acaba. Criaremos esse PhaseListener para entender o ciclo de vida.
+
 ![Ciclo de vida](./asserts/04_ciclo_de_vida.png)
 
 - Implementar a classe PhaseListener
@@ -1010,6 +1214,10 @@ public class LogPhaseListener implements PhaseListener{
 - instânciou todos os componentes
 - como foi a requisição inicial, fica claro que não tem nada a se fazer a não ser renderizar a resposta.
 
+### Criação da view e renderização: RESTORE_VIEW e RENDER_RESPONSE
+- Agora o console do Eclipse só mostra a saída do nosso PhaseListener. Podemos ver que duas fases foram acionadas, a primeira chamada RESTORE_VIEW e outra, a sexta fase, chamada RENDER_RESPONSE. Repare que o PhaseListener automaticamente numerou as fases.
+- Ao receber uma requisição HTTP do tipo GET o controlador iniciou o ciclo de vida da tela. Isso significa que ele leu o arquivo xhtml e instanciou todos os componentes. Como isso foi disparado pela requisição inicial está claro que não há nada a fazer além de renderizar a resposta.
+
 ![Ciclo de vida](./asserts/05_ciclo_de_vida.png)
 
 - A camada do controlador recebe todas as requisições e decide que tela ou árvore de componentes utilizar.
@@ -1036,13 +1244,34 @@ public class LogPhaseListener implements PhaseListener{
 <h:commandLink value="Cadastrar novo autor"
 	action="#{livroBean.formAutor}" immediate="true" />
 ```
-- 
+### Analisando as fases: APPLY_REQUEST_VALUES e PROCESS_VALIDATION
+- No Eclipse novamente limparemos o console e mais uma vez no navegador usaremos o formulário para executar uma validação. Lembrando que o campo do título automaticamente envia uma requisição AJAX ao perder foco e consequentemente é executada a validação no lado do servidor.
+Olhando o console no Eclipse podemos ver que dessa vez foram executadas 4 fases. Temos como segunda fase o APPLY_REQUEST_VALUES, e como terceira fase PROCESS_VALIDATION.
+
+- Vamos analisar também esse caso. Como sempre o controlador recebeu a requisição mas agora ela é do tipo POST. Isso significa que o controlador apenas recupera a árvore (por isso se chama RESTORE_VIEW). Após a recuperação da tela os componentes recebem o valor digitado pelo usuário que vem da requisição (dai vem o nome APPLY_REQUEST_VALUE). Nesse caso submetemos apenas o valor do título, mas em branco. Em outras palavras, o componente do título recebe um String vazio.
+
+- Na terceira fase acontece a conversão, se for preciso, e a validação. O título não precisa ser convertido pois o título é do tipo String, mas associamos uma validação com o componente. É justamente essa validação que falha. Em geral, se há um problema de conversão ou validação, o controlador pula automaticamente as fases quatro e cinco e pode renderizar o HTML com as mensagens de erro.
+
+
 ```
 public String formAutor() {
     return "autor?faces-redirect=true";
 }
 ```
 - O padrão JSF é redirecionar para página no lado do servidor. Para chamar a página pelo navegador, ou seja enviar uma segunda requisição é preciso adicionar no retorno o parâmetro faces-redirect=true
+
+![erro_conversao](./asserts/erro_conversao.png)
+
+### Todas as fases do ciclo
+- Repare que agora foram executadas todas as seis fases. Na primeira fase (RESTORE_VIEW) foi recuperada a árvore de componentes da sessão, na segunda (APPLY_REQUEST_VALUES) os componentes receberam os parâmetros da requisição e na terceira (PROCESS_VALIDATION) todos os dados foram convertidos e validados.
+
+- Como nenhum erro ocorreu na terceira fase o controlador continua com a próxima fase, que se chama UPDATE_VALUES. Aqui o modelo será atualizado com os valores convertidos na fase anterior. Neste caso, LivroBean recebe apenas o ID do autor, já que só enviamos esse parâmetro pelo AJAX. Em geral, nesta fase, tudo que definimos com a expression language nos componentes de inputs é atualizado no modelo.
+
+- Agora que o modelo já foi atualizado, nosso LivroBean já pode executar o comando definido via expression language. Este comando é um método no próprio LivroBean e opera sobre os dados convertidos. Esta fase de chamada de métodos no ManagedBean é chamada de INVOKE_APPLICATION.
+
+- Por fim, o JSF devolve uma resposta para o usuário, o que é feito na última fase, RENDER_RESPONSE.
+
+![ciclo_vida](./asserts/ciclo_vida.png)
 
 > Redirecionamento no lado do servidor (forward)
 
@@ -1059,7 +1288,9 @@ public String formAutor() {
 - Como toda requisição deve haver uma resposta, ao submetermos o formulário também precisamos de uma resposta. Só que nesse caso a resposta será o HTML de uma outra página. Por conta disso, o navegador nem sequer percebe que houve uma mudança de página e a URL na barra de endereços continua a mesma de antes da submissão.
 
 > Redirecionamento no lado do cliente (redirect)
+
 ![Redirecionamento cliente](./asserts/06_ciclo_de_vida.png)
+
 1) O cliente dispara uma requisição (submete o formulário) para o controlador;
 
 2) O método formAutor() é chamado pelo controlador;
@@ -1076,7 +1307,78 @@ public String formAutor() {
 
 - Podemos citar alguma vantagem em utilizar o redirecionamento no lado do cliente ao submeter um formulário de cadastro? Pesquise sobre a técnica Always redirect after Post e responda com suas próprias palavras.
 
-### Templates reutilizáveis com Facelets
+### Resolvendo o problema de navegação e o atributo immediate
+- Abriremos a página e testaremos novamente o link. Ao voltarmos ao Eclipse, vemos no console as fases que foram processadas. Houve um salto da fase PROCESS_VALIDATION para RENDER_RESPONSE, sendo assim, nenhum dado do modelo foi atualizado e nenhum método foi invocado, isto porque as fases UPDATE_MODEL e INVOKE_APPLICATION foram puladas.
+
+- Vamos realizar outro tipo de navegação, mas desta vez através de um método em LivroBean. Vamos alterar o atributo action que agora apontará para o método formAutor(). Fazemos isso através de expression language #{livroBean.formAutor}. Com a classe aberta, adicionaremos o método, mas agora precisamos que seu retorno seja uma String, pois o retorno é a regra de navegação que o JSF seguirá. Aqui vamos devolver apenas o nome da página, sem extensão. Adicionaremos também uma saída no console que será impressa apenas se o JSF executar a fase PROCESS_VALIDATION:
+
+```
+@ManagedBean
+@ViewScoped
+public class LivroBean implements Serializable {
+
+    //codigo omitido
+
+    public String formAutor() {
+        System.out.println("Chamando o formulário do Autor");
+        return "autor";
+    }
+
+    //codigo omitido
+}
+```
+- Vamos reiniciar o servidor, pois alteramos uma classe. Abrindo mais uma vez e testando o link, vemos que o fluxo não mudou. Olhando no console do Eclipse, percebemos que a fase INVOKE_APPLICATION não foi invocada, isto é, o JSF não executou o método formAutor().
+
+- O problema é que o nosso link com a regra de navegação está disparando a validação do formulário, quando na verdade queremos apenas seguir para outra página. Uma maneira de resolver este problema é adicionar o atributo immediate=true em nosso link. Isso fará com que o método formAutor() seja executado durante a segunda fase APPLY_REQUEST_VALUES, antes da validação. Assim a nossa regra de navegação será processada e automaticamente pularemos para última fase.
+
+```
+<h:commandLink value="Cadastrar novo autor" action="#{livroBean.formAutor}" immediate="true"/>
+```
+- Finalmente a página do autor foi chamada. Podemos verificar também na saída do console. Foram executadas a primeira, segunda e sexta fase.
+
+![fases](./asserts/fases.png)
+
+### Redirecionamento pelo controlador no lado do servidor
+- Após ter executado o link podemos reparar que na barra de endereço do navegador é mostrado o endereço do livro e não o endereço do formulário que estamos vendo. Isto acontece porque a regra de navegação padrão do JSF é feita através de forward.
+
+- Vamos visualizar novamente os acontecimentos para entender melhor. Enviamos pelo link um request do tipo POST que caiu na árvore de componentes, mas a árvore do Livro. Aqui o comando executou o método formAutor(), que devolveu a String autor. O controlador recebeu esse retorno e chamou a página autor.xhtml para instanciar os componentes. Após isso devolveu o HTML dessa tela para o navegador. Repare que o controlador fez um redirecionamento, mas tudo no lado do servidor. Enviamos apenas uma requisição e por isso o endereço no navegador ficou com livro.xhtml. A consequência disto é que o navegador sempre ficará um URL atrás.
+
+![Redirecionamento](./asserts/Redirecionamento.png)
+
+### Redirecionamento no cliente
+- Uma maneira de resolver isso é através de redirecionamento pelo navegador, no lado do cliente. Aqui o controlador devolve a resposta após ter recebido o retorno do comando. Nessa resposta avisamos o navegador para enviar um segundo request com o novo endereço /autor.xhtml. Ou seja, enviamos duas requisições. Para tal, vamos indicar ao controlador que queremos redirecionar pelo navegador. Isso é feito no método formAutor() com o retorno autor?faces-redirect=true.
+
+```
+@ManagedBean
+@ViewScoped
+public class LivroBean implements Serializable {
+
+    //codigo omitido
+
+    public String formAutor() {
+        System.out.println("Chamanda o formulario do Autor");
+        return "autor?faces-redirect=true";
+    }
+
+    //codigo omitido
+}
+```
+
+- O que acontece na terceira fase PROCESS_VALIDATION?
+    - *Na terceira fase acontece a conversão, se for preciso, e a validação.*
+- Como faremos para redirecionar no lado do cliente (pelo navegador)?
+    - *O método deve retornar o parâmetro faces-redirect=true.*
+```
+public String form() {
+      return "produto?faces-redirect=true";
+}
+```
+
+
+<a name="anc15"></a>
+
+## Templates reutilizáveis com Facelets
+
 - Por padrão, no JSF 2.0, imagens, scripts e arquivos de CSS devem estar dentro de um diretório chamado resources, que fica dentro da pasta WebContent.
 
 ```mermaid
@@ -1141,6 +1443,21 @@ public String formAutor() {
 </html>         
 ```
 
+- Qual tag do JSF usamos para adicionar uma imagem à nossa página?
+    - *h:graphicImage*
+- Qual namespace utilizamos para importar a biblioteca de facelets?
+    - *xmlns:ui="http://java.sun.com/jsf/facelets"*
+- Como fazemos a associação de uma página com um template?
+    - *Envolvendo todo o conteúdo da página que importará a template pela tag ui:composition.*
+- Dentre os itens citados abaixo, qual está relacionado com as vantagens do uso de templates?
+    - *Extrair o código repetitivo e diminuir os problemas de manutenção.*
+
+
+<a name="anc16"></a>
+
+## Completando o CRUD
+
+
 #### Implementando a exclusão
 ```
 <h:column>
@@ -1172,26 +1489,144 @@ private List<Autor> autores = new ArrayList<Autor>();
 - O comando f:setPropertyActionListener deve ficar dentro da tag h:commandLink
 - Assim não precisamos do método carregar, mas é preciso implementar o setter para o atributo livro pois o atributo target exige o setLivro no LivroBean.
 
-### Anotações
-- Indica que a classe será gerenciada pelo JSF
-    - **@ManagedBean**
-## Acesso aplicação
+### Um pouco do JPA: FetchType
+- É muito comum usarmos JSF com JPA. Contudo, o erro LazyInitializationException pode acontecer quando tentarmos acessar um relacionamento não inicializado. Uma das primeiras formas (existem outras, inclusive mais elegantes) é alterar o tipo de relacionamento seja @ManyToMany ou OneToMany. Essa alteração diz respeito ao tipo de busca que é realizada. 
+
+- O padrão é preguiçoso, contudo, se quisermos alterá-lo para um carregamento do tipo ansioso fazemos:
+    - *@ManyToMany(fetch=FetchType.EAGER) private List<Autor> autores = new ArrayList<Autor>();*
+- As anotações @OneToMany e @ManyToMany podem receber como parâmetro o tipo de busca através da propriedade fetch. Ela pode receber FetchType.LAZY (o padrão), que só busca os dados dos relacionamentos quando forem acessados pela primeira vez ou FetchType.EAGER, que já carrega os objetos do relacionamento com o objeto que contém o relacionamento.
+
+
+<a name="anc17"></a>
+
+## Atualizando para JSF 2.2
+- [Baixar o JAR](https://mvnrepository.com/artifact/org.glassfish/javax.faces/2.2.13)
+### Atualização do JSF 2.2
+- Quando começamos o nosso projeto de livraria, usamos a versão 2.1 do JSF. Nesse meio tempo já saiu uma versão mais recente, a versão 2.2, razão suficiente para uma atualização, não?
+
+- O primeiro passo é baixar o novo JAR. Pegaremos o JAR do repositório do Maven através deste link.
+
+- O link está na explicação e no exercício também. O JAR novo ficará na pasta WebContent/WEB-INF/lib, mas não podemos esquecer de apagar a versão antiga do JAR.
+
+- Uma vez copiado o JAR, devemos deixar claro no arquivo de configuração faces-config.xml que estamos usando a versão 2.2. Faremos isso pelo novo cabeçalho que indica a versão, substituindo o antigo:
+
+```
+<faces-config version="2.2"
+    xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_2_2.xsd">
+
+  <!-- resto omitido -->
+```
+### Novo namespace do JSF 2.2
+- O JSF 2.2 trouxe vários bug-fixes, comparado com a versão 2.1, mas também algumas novidades. Veremos duas aqui nesse curso, as viewActions e pass through atributes.
+
+- No entanto, antes de realmente usar uma nova feature do JSF 2.2, devemos atualizar o namespace do mesmo! O que? Se lembra que todos os componentes JSF usam um prefixo, como h: ou f:? Esse prefixo na verdade é um atalho para não escrever uma URL (ou namespace) completa.
+
+- Até a versão JSF 2.2, todas as URLs começavam com http://java.sun.com, já que foi a antiga empresa Sun que começou com o desenvolvimento JSF. O tempo passou e a Sun nem existe mais, por isso os membros da especificação mudaram a URL (o namespace) para http://xmlns.jcp.org.
+
+- Ou seja, devemos substituir o namespace http://java.sun.com/jsf/html por http://xmlns.jcp.org/jsf/html, ok?
+
+- Então a declaração no início da página ficará:
+```
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:h="http://xmlns.jcp.org/jsf/html"
+    xmlns:f="http://xmlns.jcp.org/jsf/core"
+    xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+```
+### Novidades do JSF 2.2
+- Entre as novidades do JSF 2.2, escolhemos duas que são bem úteis no dia a dia de um desenvolvedor JSF!
+
+- Já falamos em uma aula anterior que no mundo JSF toda comunicação entre navegador e servidor é feita através de requisições HTTP POST. Apenas a primeira requisição, aquela que constrói a árvore de componentes, é um HTTP GET, a partir daí tudo é um POST.
+
+### ViewAction
+- Queremos passar no formulário o autor a ser editado, e o formulário deverá vir preenchido automaticamente. Isso é algo muito comum na web e normalmente é feito através de um parâmetro na requisição GET
+
+- Ou seja, queremos enviar um GET mas já populando o formulário com o autor que possui a id 1! Como fazer isso? Bom, JSF 2.2 trouxe um recurso para tal, que foi batizado de viewAction. Podemos associar, ao construir a view, uma ação que vai carregar o autor automaticamente!
+
+- Perfeito, mas como funciona? Nada complicado, devemos adicionar no início da página um metadata, que define qual parâmetro queremos ler, e qual é a action/método a chamar:
+```
+<f:metadata>
+    <f:viewParam name="autorId" value="#{autorBean.autorId}"/>
+    <f:viewAction action="#{autorBean.carregarAutorPelaId}"/>
+</f:metadata>
+```
+- Exemplo da url
+- *http://localhost:8080/livraria/autor.xhtml?autorId=1*
+
+### Atributos passThrough
+- Tudo mundo já ouviu falar de HTML5, certo? HTML5 é a nova versão da linguagem HTML, que traz importantes mudanças, entre eles várias novas tags para criar páginas mais semânticas.
+
+- Podemos ver as novas funcionalidades e a documentação do HTML 5 diretamente no site do W3Schools: http://www.w3schools.com/html/html_form_input_types.asp
+
+- Agora temos o problema que toda nossa página HTML é renderizada através dos componentes JSF. Perdemos o controle do HTML que é um tradeoff do mundo JSF. Mas felizmente o JSF 2.2 trouxe uma solução para aproveitar algumas novas tags do HTML5. Essa nova feature se chama passThroughAttribute.
+
+- A ideia é que podemos definir um atributo no componente, que é simplesmente passado para o HTML, sem alteração. Assim, podemos incluir atributos que são ignorados no mundo JSF, mas importam dentro do HTML.
+
+- Veja o exemplo abaixo, onde definimos um inputText que recebe um atributo type=”email” usando o componente aninhado f:passThroughAttribute. Baseado nesse atributo o navegador executa uma validação do e-mail digitado, mas no mundo JSF não há nenhuma importância:
+
+```
+<h:outputLabel value="Email:" for="email" />
+<h:inputText value="#{autorBean.autor.email}" id="email">
+      <f:passThroughAttribute name="type" value="email" />
+</h:inputText>
+```
+
+- Como a empresa SUN nem existe mais, os membros da especificação JSF decidiram alterar o namespace das tags:
+
+- HTML - http://xmlns.jcp.org/jsf/html
+- Core - http://xmlns.jcp.org/jsf/core
+- Facelets - http://xmlns.jcp.org/jsf/facelets
+
+- **Vamos atualizar o JAR do JSF (Mojarra) e aproveitar para atualizar o cabeçalho do arquivo faces-config.xml!**
+
+- 1) Pare o Tomcat.
+
+- 2) Baixe o JAR do Mojarra do repositório do Maven pelo link abaixo:
+
+- [Javax.faces](http://mvnrepository.com/artifact/org.glassfish/javax.faces/2.2.12)
+
+- 3) Após download, coloque o JAR dentro da pasta WebContent/WEB-INF/lib. Apague o JAR antigo (javax.faces-2.1.14).
+
+- 4) Abre o arquivo faces-config.xml. Substitua o cabeçalho do arquivo com o seguinte conteúdo:
+
+```
+<faces-config version="2.2"
+    xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_2_2.xsd">
+```
+
+- 5) Abra os arquivos xhtml e substituia o namespace http://java.sun.com/jsf/html por http://xmlns.jcp.org/jsf/html. Isso para cada taglib (ui e core e html), sempre usando xmlns.jcp.org. Veja o namespace completo da página autor.xhtml:
+
+```
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:h="http://xmlns.jcp.org/jsf/html"
+    xmlns:f="http://xmlns.jcp.org/jsf/core"
+    xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+```
+Faça essa atualização em cada página xhtml.
+
+- 6) Após dessa atualização reinicie o Tomcat e verifique se tudo continua funcionando!
+
+- Qual é o novo namespace da taglib html da especificação JSF?
+    - *http://xmlns.jcp.org/jsf/html*
+
+
+<a name="anc18"></a>
+
+## Autenticação do usuário
+
+<a name="anc19"></a>
+
+## Autorização pelo PhaseListener
+
+<a name="anc20"></a>
+
+## Logout e o escopo Flash
+
+### Acesso aplicação
 - Principal 
-- http://localhost:8080/jsf-livraria/livro.xhtml
-- http://localhost:8080/jsf-livraria/autor.xhtml
-## Visão geral
-<a name="anc10"></a>
-
-## Características do JSF
-<a name="anc11"></a>
-
-## Especificação Java EE
-<a name="anc12"></a>
-
-## Apresentações
-<a name="anc13"></a>
-
-## Modelo básico
-<a name="anc14"></a>
-
-## Extensões
+- http://localhost:8080/livraria/livro.xhtml
+- http://localhost:8080/livraria/autor.xhtml
+- http://localhost:8080/livraria/autor.xhtml?autorId=1
