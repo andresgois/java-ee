@@ -1617,6 +1617,44 @@ Faça essa atualização em cada página xhtml.
 
 ## Autenticação do usuário
 
+### Você se lembra dos Pass Through Attributes
+
+- Uma das informações que vamos precisar pra autenticar o usuário é seu e-mail. Sabemos que o HTML5 possui um tipo de input chamado email e queremos utilizá-lo, podemos utilizar o Pass Through Attributes que já conhecemos pra isso. 
+
+- Qual das alternativas abaixo implementa corretamente?
+```
+<h:inputText id="email" value="#{loginBean.usuario.email}" required="true">
+    <f:passThroughAttribute name="type" value="email" />
+</h:inputText>
+```
+
+#### Implementar autenticação
+- 1) O primeiro passo seria criar a página pra isso, afinal o usuário precisará informar suas credenciais pra nossa aplicação. Vamos criar uma página (um novo arquivo .xhtml) chamado login.xhtml dentro da pasta WebContent. Nessa página adicione um formulário com dois inputs (para login e para senha):
+
+- 2) Tenho certeza que você se perguntou: Quem é esse tal de LoginBean e Usuario. Ainda não temos :( Vamos criá-los?
+- Crie então um novo arquivo chamado de Usuario dentro do pacote br.com.caelum.livraria.modelo:
+
+- Sabemos que precisamos mapear nossas entidades no persistence.xml
+- Precisamos ainda criar o LoginBean no pacote br.com.caelum.livraria.bean:
+- 3) Se você olhou com carinho o código do login.xhtml, percebeu que o commandButton faz um binding com um método chamado efetuaLogin() dentro de LoginBean.
+- 4) E esse UsuarioDao? Vamos criá-lo também dentro do pacote br.com.caelum.livraria.dao
+
+- 5) Quase pronto! Antes de testarmos o login, precisamos de um usuário no banco de dados. Portanto, vamos adicionar o usuário no terminal do MySQL.
+
+- Obs: Você deve rodar a aplicação uma vez e chamar, por exemplo, a página livro.xhtml. Assim o JPA a criará a tabela Usuario no banco de dados.
+
+- 6) Agora vamos testar o login. Acesse a página login.xhtml pelo navegador e tente logar com o seus usuário cadastrado. Se tudo tiver certinho você será redirecionado ao login.xhtml!
+
+- Para não mostrar a senha inserida no formulário de login podemos associar o atributo password com o componente h:inputText:
+
+```
+<h:inputText id="senha" value="#{loginBean.usuario.senha}" required="true">
+      <f:passThroughAttribute name="type" value="password" />
+</h:inputText>
+```
+
+
+
 <a name="anc19"></a>
 
 ## Autorização pelo PhaseListener
