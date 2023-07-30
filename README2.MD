@@ -1715,6 +1715,38 @@ context.renderResponse();
 
 ## Logout e o escopo Flash
 
+### Realizando o logout do usuário
+- A primeira coisa que devemos fazer é criar um botão para essa tarefa, como é um botão que terá que aparecer em todas as páginas, o colocaremos no nosso _template.xhtml, logo abaixo do logo. Como é um commandLink, ele precisa estar dentro de um formulário:
+
+```
+<h:form>
+    <h:commandLink value="Logout" action="#{loginBean.deslogar}" />
+</h:form>
+```
+
+- O LoginBean já está criado, falta implementar o método deslogar. Mas como implementá-lo? Primeiramente, o método deve redirecionar o usuário para a página de login, logo o retorno dele será "login?faces-redirect=true". E para realizar o logout do usuário, basta remover a chave usuarioLogado do sessionMap, logo, sem a chave na sessão, o nosso autorizador não permitirá o acesso às páginas do sistema, para isso o usuário precisará realizar login novamente. Ou seja:
+
+```
+public String deslogar() {
+
+    FacesContext context = FacesContext.getCurrentInstance();
+    context.getExternalContext().getSessionMap().remove("usuarioLogado");
+
+    return "login?faces-redirect=true";
+}
+```
+
+- Vimos no treinamento que o método .addMessage() de FacesContext recebe dois parâmetros. Escolha a alternativa abaixo que melhor completa uma chamada deste método que retorna uma mensagem global, com o texto "Usuário não encontrado":
+    - *.addMessage(null, new FacesMessage("Usuário não encontrado"));*
+
+- O componente do JSF que estamos usando para exibir mensagens é o <h:messages />. Se queremos configurá-lo para exibir somente mensagens globais, qual atributo devemos setar ?
+    - *<h:messages globalOnly="true" />*
+
+- Sabemos que é uma boa prática sempre fazer um redirecionamento após submeter um formulário, para limpar os dados da requisição.
+
+- Só que configurando um faces-redirect após a requisição inicial, as nossas mensagens deixam de ser exibidas já que o FacesContext só dura uma requisição. Como podemos resolver esse problema do redirecionamento sem perder nossas mensagens de validação ?
+    - *Podemos resolver isso atráves do ExternalContext(), onde possuímos um escopo flash que podemos utilizar o método setKeepMessages(true) para guardar as mensagens por duas requisições.*
+
 ### Acesso aplicação
 - Principal 
 - http://localhost:8080/livraria/livro.xhtml
