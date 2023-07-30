@@ -75,10 +75,58 @@
 
 ## Componentes ricos no formulário
 
+```
+<p:commandLink styleClass="ui-icon ui-icon-pencil" style="float:left; margin-right: 10px;"
+    update=":autor">
+    <f:setPropertyActionListener value="#{autor}" target="#{autorBean.autor}" />
+</p:commandLink>
+
+<p:commandLink styleClass="ui-icon ui-icon-trash" style="float:left; margin-right: 10px;"
+    action="#{autorBean.remover(autor)}" update="@form" />
+```
+
+## O Primefaces também oferece ícones para utilizarmos na nossa aplicação, você pode vê-los aqui. Vamos utilizá-los na nossa aplicação, no lugar dos ícones do jQuery.
+
+- Primeiramente, a ideia é copiar do exemplo e colar na nossa página, para definir o ícone de alteração, utilizamos icon="fa fa-fw fa-edit" e o de remoção é icon="fa fa-fw fa-remove":
+
+```
+<h:form id="formTabelaAutors">
+    <p:dataList value="#{autorBean.autores}" var="autor" type="definition">
+        <f:facet name="header">
+            Autores
+        </f:facet>
+
+        <p:commandButton icon="fa fa-fw fa-edit" update=":autor">
+            <f:setPropertyActionListener value="#{autor}" target="#{autorBean.autor}" />
+        </p:commandButton>
+
+        <p:commandButton icon="fa fa-fw fa-remove" action="#{autorBean.remover(autor)}" 
+            update="@form" />
+
+        #{autor.nome} - #{autor.email}
+    </p:dataList>
+</h:form>
+```
+
+- Mas não funciona... Se consultarmos a documentação dos ícones, vemos que precisamos definir um context-param no web.xml. Então vamos fazer isso:
+
+```
+<context-param>
+    <param-name>primefaces.FONT_AWESOME</param-name>
+    <param-value>true</param-value>
+</context-param>
+```
+
+- 1 - Aprendemos em JSF possui o componente `<f:passThroughtAttribute>` que permite usarmos componentes do HTML5 que não são suportados pelo framework. Contudo, com Primefaces, este recurso nem sempre funciona como esperado, porque a própria biblioteca já possui um outro recurso para conseguir a mesma finalidade. Altere seu componente que captura o e-mail do usuário e utilize f:attribute em vez de `<f:passThroughtAttribute>`.
+
+- 2 - Use o componente `<f:validateRegex>` para validar o campo e-mail. Aliás, faça que validação seja disparada quando o usuário deixar o campo (através do AJAX).
+- 3 - Lance mão do validatorMessage para exibir uma mensagem de validação do campo e-mail mais elegante.
 
 <a name="anc4"></a>
 
 ## Mais usabilidade na página de livros
+
+
 
 <a name="anc5"></a>
 

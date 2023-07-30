@@ -59,4 +59,10 @@ public class AutorBean {
 		this.autorId = autorId;
 	}
 
+	public void setAutor(Autor autor) {
+		this.autor = autor;
+	}
+	
+	
+
 }
