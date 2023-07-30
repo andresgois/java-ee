@@ -19,6 +19,7 @@ public class UsuarioDAO {
         
         try {
             Usuario result = query.getSingleResult();
+            System.out.println(result.getEmail());
         } catch (NoResultException e) {
             return false;
         }
