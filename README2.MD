@@ -24,6 +24,8 @@
 - [Autorização pelo PhaseListener](#anc19)
 - [Logout e o escopo Flash](#anc20)
 
+### [Continuação Módulo 6](./README3.MD)
+
 # Módulo 4
 <a name="anc1"></a>
 
