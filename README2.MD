@@ -1659,6 +1659,58 @@ Faça essa atualização em cada página xhtml.
 
 ## Autorização pelo PhaseListener
 
+### O PhaseListener
+- Precisamos verificar cada requisição para nossa aplicação. Ou seja, antes de fazer qualquer coisa devemos checar se o usuário já fez login, se sim, ele pode continuar, se não, o usuário será redirecionado para a página de login. Se você já assistiu algum treinamento sobre Servlets, Spring MVC ou VRaptor, por exemplo, já usou um recurso para essa autorização do usuário, esse recurso é o filtro, ou interceptador. Precisamos filtrar, interceptar todas as requisições, para checar se o usuário já fez login.
+
+- Só que nós estamos no mundo JSF, então vamos focar no que o JSF nos oferece. Vamos utilizar um recurso já visto para filtrar as requisições, o PhaseListener, nada nos impede de utilizá-lo para algo mais sofisticado, como a autorização do usuário.
+
+### Implementando o nosso Autorizador
+- Nós já utilizamos o PhaseListener uma vez, na classe LogPhaseListener, então vamos copiá-la, mas mudando o seu nome, a nova classe se chamará Autorizador. Mas um PhaseListener precisa ser cadastrado no arquivo WebContent/WEB-INF/faces-config.xml, então adicione dentro da tag <lifecycle>:
+
+```
+<phase-listener>br.com.caelum.livraria.util.Autorizador</phase-listener>
+```
+
+### Como saber se o usuário fez login?
+- Na classe LoginBean, no método efetuaLogin, verificamos em um if se o usuário existe, então a ideia é que se o usuário existe, guardamos a informação em algum lugar, para depois poder testar nas próximas requisições se o usuário se autenticou ou não. Então é dentro desse if que guardaremos essa informação, mas como?
+
+- Geralmente, em uma aplicação web, usamos a sessão HTTP para guardar essa informação sobre o usuário, e aqui não será diferente. Mas como acessar essa sessão? Primeiro pegamos a instância do facesContext, e como já vimos anteriormente, pegamos-o em qualquer lugar através do método getCurrentInstance().
+
+- Com o context em mãos, podemos acessar objetos que rodam ao nível das servlets, através do método getExternalContext(). E com isso podemos pegar a sessão HTTP, utilizando o método getSessionMap(). A sessão HTTP na verdade é um mapa que podemos guardar dados através da relação chave-valor.
+
+- Então, na session map, adicionaremos através do método put, uma chave usuarioLogado, e o seu valor, que será o usuário que fez o login:
+
+```
+public class LoginBean {
+
+    // restante do código
+
+    public String efetuaLogin() {
+        System.out.println("Fazendo login do usuário "
+                + this.usuario.getEmail());
+
+        FacesContext context = FacesContext.getCurrentInstance();
+
+        if (existe) {
+            context.getExternalContext().getSessionMap()
+                    .put("usuarioLogado", this.usuario);
+
+            return "livro?faces-redirect=true";
+        }
+
+        return null;
+    }
+}
+```
+
+- Qual das alternativas abaixo usa corretamente o NavigationHandler para redirecionar o usuário para login.xhtml?
+```
+NavigationHandler handler = context.getApplication().getNavigationHandler();
+handler.handleNavigation(context, null, "/login?faces-redirect=true");
+
+context.renderResponse();
+```
+
 <a name="anc20"></a>
 
 ## Logout e o escopo Flash
