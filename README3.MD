@@ -125,8 +125,15 @@
 <a name="anc4"></a>
 
 ## Mais usabilidade na página de livros
-
-
+- atualizando tela de livros com primefaces
+- Máscara para ISBN: 123-4-56-789101-1
+```
+<p:inputMask> E atributo mask="999-9-99-999999-9"
+```
+- Queremos que o Calendar também siga um padrão, e que seja mais fácil para o usuário inserir o dado.
+```
+<p:calendar id="data" pattern="dd/MM/yyyy" mask="true">
+```
 
 <a name="anc5"></a>
 
