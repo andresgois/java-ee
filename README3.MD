@@ -10,6 +10,9 @@
 - [Aplicando temas](#anc7)
 - [Gráfico com Primefaces](#anc8)
 
+
+### [Continuação Módulo 7](./README4.MD)
+
 # Módulo 6
 
 ## Resultado do sistema
@@ -25,7 +28,7 @@
     - Paginação
     - Filtro
     - Ordenação
-    
+
 ![Login](./asserts/jsf2_datatable.png)
 
 - Página de autores
