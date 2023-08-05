@@ -11,6 +11,27 @@
 - [Gráfico com Primefaces](#anc8)
 
 # Módulo 6
+
+## Resultado do sistema
+- Página de login
+
+![Login](./asserts/jsf2_login.png)
+
+- Página de livros
+
+![Login](./asserts/jsf2_criacao_livro.png)
+
+- DataTable
+    - Paginação
+    - Filtro
+    - Ordenação
+    
+![Login](./asserts/jsf2_datatable.png)
+
+- Página de autores
+
+![Login](./asserts/jsf2_pagina_autores.png)
+
 <a name="anc1"></a>
 
 ## Apresentação e teste de avaliação Ver primeiro vídeo
