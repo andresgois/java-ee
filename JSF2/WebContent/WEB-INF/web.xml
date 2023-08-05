@@ -8,6 +8,15 @@
     <load-on-startup>1</load-on-startup>
   </servlet>
   
+  <!-- 
+  ELIMINA O ERROR:
+  java.lang.ClassCastException: com.sun.faces.facelets.compiler.UIInstructions não pode ser convertido para org.primefaces.model.menu.MenuElement
+   -->
+  <context-param>
+   <param-name>facelets.SKIP_COMMENTS</param-name>
+   <param-value>true</param-value>
+</context-param>
+  
   <servlet-mapping>
     <servlet-name>Faces Servlet</servlet-name>
     <url-pattern>*.xhtml</url-pattern>

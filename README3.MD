@@ -275,6 +275,32 @@ public List<Livro> load(int inicio, int quantidade, String campoOrdenacao, SortO
 <a name="anc6"></a>
 
 ## Melhorando a navegação com menus
+- Navegação com p:menuButton
+- Adicione a lib:
+```xmlns:p="http://primefaces.org/ui"```
+- Adicione o formulário
+```
+<h:form>
+  <p:menuButton value="Menu">
+    <p:menuitem value="Livros" action="livro?faces-redirect=true"  />
+    <p:menuitem value="Autores" action="autor?faces-redirect=true"  />
+    <p:separator />
+    <p:menuitem value="Logout" action="#{loginBean.deslogar}"  />
+  </p:menuButton>
+</h:form>
+```
+- `p:growl` é um componente que mostrar as mensagens de maneira sobreposta (overlay) na tela. É uma forma mais elegante de notificar o usuário da sua aplicação.
+```    <p:growl id="growl" showDetail="true" autoUpdate="true" /> ```
+
+- **IMPORTANTE**
+- ELIMINA O ERROR: java.lang.ClassCastException: com.sun.faces.facelets.compiler.UIInstructions não pode ser convertido para org.primefaces.model.menu.MenuElement
+- Aidcione isso ao `web.xml`
+```
+  <context-param>
+   <param-name>facelets.SKIP_COMMENTS</param-name>
+   <param-value>true</param-value>
+</context-param>
+```
 
 <a name="anc7"></a>
 
