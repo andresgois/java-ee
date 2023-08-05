@@ -305,6 +305,50 @@ public List<Livro> load(int inicio, int quantidade, String campoOrdenacao, SortO
 <a name="anc7"></a>
 
 ## Aplicando temas
+### O que são temas?
+- Com o menu da aplicação pronto, veremos neste capítulo os temas do Primefaces. Todos os componentes do Primefaces já têm um design, mas não existe um só design, existem vários tipos de temas. E uma coisa legal é que o usuário pode mudar dinamicamente esses temas através de uma simples ação. 
+
+![Theme](./asserts/themeswitcher.png)
+
+- Para baixar o jar com os outros temas, devemos ir até a página [Theme Gallery](https://repository.primefaces.org/org/primefaces/themes/) e ir até o site do [	all-themes-1.0.10.jar](https://repository.primefaces.org/org/primefaces/themes/all-themes/1.0.10/) do Primefaces. Lá há a pasta all-themes
+
+### Adicionando tema dinâmico, dados vem do bean
+```
+<context-param>
+    <param-name>primefaces.THEME</param-name>
+    <param-value>#{temaBean.tema}</param-value>
+</context-param>
+```
+- Guardando a configuração no bean
+- Repare que a expression language chama o tema, da classe TemaBean, então vamos criar essa classe. Ela terá o atributo tema, com seus getters e setters, já pré-inicializado como vader, ou seja, a aplicação iniciará com o design desse tema. Lembrando que esse bean deverá ser anotado com @ManagedBean e ele terá que sobreviver durante várias requisições, ele tem que ser válido durante a sessão, logo ele também será anotado com `@SessionBean` para manter o espoco enquanto estiver no sistema.
+
+```
+@ManagedBean
+@SessionScoped
+public class TemaBean {
+
+    private String tema = "vader";
+
+    public String getTema() {
+        return tema;
+    }
+
+    public void setTema(String tema) {
+        this.tema = tema;
+    }
+}
+```
+
+- Aplicando no `_template`
+```
+<h:form rendered="#{usuarioLogado != null}">
+    <p:themeSwitcher id="basic" style="width:165px" value="#{temaBean.tema}">
+        <f:selectItem itemLabel="Choose Theme" itemValue="" />
+        <f:selectItems value="#{temaBean.temas}" var="tema" itemLabel="#{tema}" itemValue="#{tema}" />
+        <f:ajax />
+    </p:themeSwitcher>
+</h:form>
+```
 
 <a name="anc8"></a>
 

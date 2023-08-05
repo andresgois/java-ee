@@ -9,10 +9,10 @@
 	<h:head />
 	<h:body>
 		<div id="cabecalho">
+		<p:panelGrid columns="3">
 			<h:graphicImage library="img" name="logo.png" />
-		    <p:growl id="messages" showDetail="true"/>
 			
-			 <h:form rendered="#{usuarioLogado != null}">
+			<h:form rendered="#{usuarioLogado != null}">
 			    <p:menuButton value="Menu">
 			        <p:menuitem value="Livros" action="livro?faces-redirect=true" icon="fa fa-fw fa-edit" />
 			        <p:menuitem value="Autores" action="autor?faces-redirect=true" icon="fa fa-fw fa-edit" />
@@ -20,10 +20,21 @@
 			        <p:menuitem value="Logout" action="#{loginBean.deslogar}" icon="fa fa-fw fa-sign-out" />
 			    </p:menuButton>
 			</h:form>
-						
-			 <h:form rendered="#{usuarioLogado != null}">
+			
+			<h:form rendered="#{usuarioLogado != null}">
+			    <p:themeSwitcher id="basic" style="width:165px" value="#{temaBean.tema}">
+			        <f:selectItem itemLabel="Choose Theme" itemValue="" />
+			        <f:selectItems value="#{temaBean.temas}" var="tema" itemLabel="#{tema}" itemValue="#{tema}" />
+			        <f:ajax />
+			    </p:themeSwitcher>
+			</h:form>		
+		</p:panelGrid>
+			
+		    <p:growl id="messages" showDetail="true"/>
+			
+			<!--  <h:form rendered="#{usuarioLogado != null}">
 				<h:commandLink value="logout" action="#{loginBean.deslogar}" />
-			</h:form> 
+			</h:form>  -->
 
 			<h1>
 				<ui:insert name="titulo"></ui:insert>
