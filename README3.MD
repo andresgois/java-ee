@@ -354,4 +354,46 @@ public class TemaBean {
 
 ## Gráfico com Primefaces
 
+- No mundo Java temos uma classe que possui a responsabilidade de criar números pseudoaleatórios, o [java.util.Random](https://docs.oracle.com/javase/8/docs/api/java/util/Random.html)
 
+```
+ public static void main(String[] args) {
+
+    Random gerador = new Random();
+
+    int resultado = gerador.nextInt(10);
+    System.out.println(resultado);
+
+    int resultado2 = gerador.nextInt(10);
+    System.out.println(resultado2);
+}
+```
+
+- Pelo atributo type podemos perceber que o tipo por ser Bar exige um BarChartModel.
+- As outras opções são encontradas abaixo e cada uma delas possui um type condizente com o tipo do ChartModel:
+
+- [DonutChartModel](http://www.primefaces.org/showcase/ui/chart/donut.xhtml)
+- [PieChartModel](http://www.primefaces.org/showcase/ui/chart/pie.xhtml)
+- [BubbleChartModel](http://www.primefaces.org/showcase/ui/chart/bubble.xhtml)
+- [LineChartModel](http://www.primefaces.org/showcase/ui/chart/line.xhtml)
+
+- No primefaces temos tanto a representação do modelo de gráfico, feito por um ChartModel como temos que representar os dados desse modelo.
+- Dado que estamos usando um BarChartModel é correto afirmar que os dados são representados por um:
+ - *ChartSeries apresenta duas subclasses possíveis: BarChartSeries e LineChartSeries*
+```
+public BarChartModel getVendasModel() {
+
+    BarChartModel model = new BarChartModel();
+    ChartSeries vendaSerie = new ChartSeries();
+    vendaSerie.setLabel("Vendas 2016");
+
+    List<Venda> vendas = getVendas();
+
+    for (Venda venda : vendas) {
+        vendaSerie.set(venda.getLivro().getTitulo(), venda.getQuantidade());
+    }
+    model.addSeries(vendaSerie);
+    return model;
+}
+```
+[Referência](http://www.primefaces.org/docs/api/5.3/org/primefaces/model/chart/ChartSeries.html)
