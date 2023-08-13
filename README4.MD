@@ -13,7 +13,32 @@
 <a name="anc1"></a>
 
 ## Integração do CDI com JSF 2 Ver primeiro vídeo
-- cap 1
+### Configuração do CDI
+- O primeiro passo é baixar o JAR. A implementação do CDI se chama WELD e como estamos dentro de um servlet container, usaremos o: 
+- [weld-servlet.jar](https://mvnrepository.com/artifact/org.jboss.weld.servlet/weld-servlet/2.3.2.Final)
+
+- O CDI também precisa de uma configuração inicial, na verdade são duas pequenas configurações. 
+    - A primeira é o arquivo context.xml, que fica no diretório WebContent/META-INF:
+
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<Context>
+    <Resource name="BeanManager"
+        auth="Container"
+        type="javax.enterprise.inject.spi.BeanManager"
+        factory="org.jboss.weld.resources.ManagerObjectFactory"/>
+</Context>
+```
+ - A segunda configuração é o arquivo especifico do CDI. 
+    - A especificação servlet tem web.xml, JSF tem o seu faces-config.xml e o CDI tem o seu beans.xml.
+    - Esse arquivo deve ser criado na pasta WebContent/WEB-INF (ao lado dos "irmãos" web.xml e faces-config.xml):
+
+```
+<!-- WebContent/WEB-INF/beans.xml -->
+<beans>
+</beans>
+```
+
 <a name="anc2"></a>
 
 ## Injeção de dependências com CDI
