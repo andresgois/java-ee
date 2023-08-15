@@ -104,7 +104,71 @@ public void close(@Disposes EntityManager em) {
 <a name="anc3"></a>
 
 ## Gerenciando transações com CDI
-- cap 3
+### Centralizar o gerenciamento da transação
+- Vamos tentar criar essa classe, que se chamará GerenciadorDeTransacao, no pacote br.com.caelum.livraria.tx, com um método executaTX, que executa o begin e commit:
+
+- Quando criamos uma anotação, deve ficar claro que ela representa uma configuração e não uma implementação. A anotação @Transacional existe para configurar no método que é preciso ter uma transação. Nada mais do que isso, quem realmente vai chamar begin e commit é a nossa classe GerenciadorDeTransacao.
+
+- O CDI passará um parâmetro no método executaTX, que guarda a informação de quem precisa da transação. Esse objeto tem um nome “bonito”: contexto de invocação ou em inglês InvocationContext. Através dele, podemos pedir para chamar o método, mas como não sabemos diretamente o nome do método foi dado um nome bem genérico, proceed():
+
+- Mas como o CDI, ao ver a anotação @Transacional, saberá qual método deve executar? É executado algo antes e depois da chamada do método. O mundo do CDI chama o antes e depois de Around (ao redor), por isso devemos usar a anotação @AroundInvoke em cima do método:
+
+```
+@Transacional
+@Interceptor
+public class GerenciadorDeTransacao implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+	@Inject
+	private EntityManager em;
+	
+	@AroundInvoke
+	public Object executaTX(InvocationContext context) throws Exception {
+		em.getTransaction().begin();
+		// chama o dao
+		Object obj = context.proceed();
+		em.getTransaction().commit();
+		return obj;
+	}
+}
+```
+### Criando a anotação @Transacional
+- Quando definimos uma nova anotação, algumas outras configurações genéricas são necessárias. A JVM deve saber onde esse anotação pode ser utilizada. Existem anotações que podem ser utilizadas em cima da classe (por exemplo @Named), existem outras que funcionam em cima do atributo (como @Inject). A nossa anotação deve funcionar em cima do método, certo? Então vamos deixar isso explicito:
+- A nossa anotação é diferente e não há um impacto no compilador, ela deve funcionar na hora de executar (RUNTIME):
+
+```
+@InterceptorBinding
+@Target( {ElementType.METHOD, ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Transacional {
+
+}
+```
+### Associar a anotação com a transação
+- É essa a tarefa do CDI, ajudar a criar essa ligação. Uma vez feito, o CDI sabe que, ao encontrar a anotação @Transacional, deve chamar o método executaTX do GerenciadorDeTransacao
+
+### Configuração do interceptador no beans.xml
+- A implementação do método já está perfeita, mas não esqueça de anotar também com @Transacional os métodos gravar e remover de AutorBean.
+
+- Por fim, precisamos configurar o configurar o GerenciadorDeTransacao no arquivo WebContent/WEB-INF/beans.xml:
+
+```
+<beans>
+    <interceptors>
+        <class>br.com.caelum.livraria.tx.GerenciadorDeTransacao</class>
+    </interceptors>
+</beans>
+```
+
+### Interceptadores
+- O Interceptador é um dos padrões de projetos (Design Pattern) bem importante do mundo Java e não é exclusividade do CDI. Eles também existem para EJB, Spring e vários outros frameworks do mundo Java!
+
+- Os Interceptadores ajudam a separar as responsabilidades da cada classe. Por exemplo, em vez de o DAO cuidar das chamadas de persistência e transação, tiramos a parte de transação e centralizamos dentro de um interceptador. Isso facilita a manutenção das nossas classes.
+
+- Claro, há desvantagens: podemos dizer que nosso código se torna mais difícil de entender, só olhando no DAO não é suficiente para saber como a transação está sendo gerenciada.
+
+![Interceptadores](./asserts/interceptador.png)
+
 <a name="anc4"></a>
 
 ## Completando a aplicação
