@@ -19,24 +19,23 @@ public class AutorBean implements Serializable{
 	private Integer autorId;
 	
 	@Inject
-	private AutorDAO dao;
-	
+	private AutorDAO autorDao;
 
 	public Autor getAutor() {
 		return autor;
 	}
 
 	public List<Autor> getAutores() {
-		return this.dao.listaTodos();
+		return this.autorDao.listaTodos();
 	}
 
 	public String gravar() {
 		System.out.println("Gravando autor " + this.autor.getNome());
 
 		if (this.autor.getId() == null) {
-			this.dao.adiciona(this.autor);
+			this.autorDao.adiciona(this.autor);
 		} else {
-			this.dao.atualiza(this.autor);
+			this.autorDao.atualiza(this.autor);
 		}
 
 		this.autor = new Autor();
@@ -45,7 +44,7 @@ public class AutorBean implements Serializable{
 	}
 	
 	public void carregarAutorPorId() {
-		this.autor = this.dao.buscaPorId(autorId);
+		this.autor = this.autorDao.buscaPorId(autorId);
 	}
 
 	public void carregar(Autor autor) {
@@ -55,7 +54,7 @@ public class AutorBean implements Serializable{
 
 	public void remover(Autor autor) {
 		System.out.println("Removendo autor");
-		this.dao.remove(autor);
+		this.autorDao.remove(autor);
 	}
 
 	public Integer getAutorId() {

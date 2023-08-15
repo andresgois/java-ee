@@ -8,8 +8,12 @@ import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.validator.ValidatorException;
 import javax.faces.view.ViewScoped;
+import javax.inject.Inject;
 import javax.inject.Named;
+
+import br.com.caelum.livraria.dao.AutorDAO;
 import br.com.caelum.livraria.dao.DAO;
+import br.com.caelum.livraria.dao.LivroDAO;
 import br.com.caelum.livraria.modelo.Autor;
 import br.com.caelum.livraria.modelo.Livro;
 
@@ -22,6 +26,10 @@ public class LivroBean implements Serializable {
 	private Livro livro = new Livro();
 
 	private Integer autorId;
+	@Inject
+	private LivroDAO dao;
+	@Inject
+	private AutorDAO autorDao;
 
 	private List<Livro> livros;
 
@@ -38,15 +46,14 @@ public class LivroBean implements Serializable {
 	}
 
 	public List<Livro> getLivros() {
-		DAO<Livro> dao = new DAO<Livro>(Livro.class);
 		if(this.livros == null) {
-			this.livros = dao.listaTodos();
+			this.livros = this.dao.listaTodos();
 		}
 		return livros;
 	}
 
 	public List<Autor> getAutores() {
-		return new DAO<Autor>(Autor.class).listaTodos();
+		return this.autorDao.listaTodos();
 	}
 
 	public List<Autor> getAutoresDoLivro() {
@@ -54,7 +61,7 @@ public class LivroBean implements Serializable {
 	}
 
 	public void gravarAutor() {
-		Autor autor = new DAO<Autor>(Autor.class).buscaPorId(this.autorId);
+		Autor autor = this.autorDao.buscaPorId(this.autorId);
 		this.livro.adicionaAutor(autor);
 		System.out.println("Escrito por: " + autor.getNome());
 	}
@@ -68,12 +75,11 @@ public class LivroBean implements Serializable {
 			return;
 		}
 		
-		DAO<Livro> dao = new DAO<Livro>(Livro.class);
 		if (this.livro.getId() == null) {
-			dao.adiciona(this.livro);
-			this.livros = dao.listaTodos();
+			this.dao.adiciona(this.livro);
+			this.livros = this.dao.listaTodos();
 		} else {
-			dao.atualiza(this.livro);
+			this.dao.atualiza(this.livro);
 		}
 
 		this.livro = new Livro();
@@ -86,7 +92,7 @@ public class LivroBean implements Serializable {
 
 	public void remover(Livro livro) {
 		System.out.println("Removendo livro " + livro.getTitulo());
-		new DAO<Livro>(Livro.class).remove(livro);
+		this.dao.remove(livro);
 	}
 
 	public void removerAutorDoLivro(Autor autor) {
@@ -100,13 +106,10 @@ public class LivroBean implements Serializable {
 
 	public void comecaComDigitoUm(FacesContext fc, UIComponent component,
 			Object value) throws ValidatorException {
-
 		String valor = value.toString();
 		if (!valor.startsWith("1")) {
 			throw new ValidatorException(new FacesMessage(
 					"ISBN deveria começar com 1"));
 		}
-
 	}
-
 }

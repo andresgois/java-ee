@@ -1,11 +1,14 @@
 package br.com.caelum.livraria.dao;
 
+import java.io.Serializable;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaQuery;
 
-public class DAO<T> {
+public class DAO<T>  implements Serializable{
+
+	private static final long serialVersionUID = 1L;
 
 	private final Class<T> classe;
 	private EntityManager em;
