@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import javax.faces.view.ViewScoped;
+import javax.inject.Inject;
 import javax.inject.Named;
 
 import br.com.caelum.livraria.dao.DAO;
@@ -16,22 +17,26 @@ public class AutorBean implements Serializable{
 	private static final long serialVersionUID = 1L;
 	private Autor autor = new Autor();
 	private Integer autorId;
+	
+	@Inject
+	private DAO<Autor> dao;
+	
 
 	public Autor getAutor() {
 		return autor;
 	}
 
 	public List<Autor> getAutores() {
-		return new DAO<Autor>(Autor.class).listaTodos();
+		return this.dao.listaTodos();
 	}
 
 	public String gravar() {
 		System.out.println("Gravando autor " + this.autor.getNome());
 
 		if (this.autor.getId() == null) {
-			new DAO<Autor>(Autor.class).adiciona(this.autor);
+			this.dao.adiciona(this.autor);
 		} else {
-			new DAO<Autor>(Autor.class).atualiza(this.autor);
+			this.dao.atualiza(this.autor);
 		}
 
 		this.autor = new Autor();
@@ -40,7 +45,7 @@ public class AutorBean implements Serializable{
 	}
 	
 	public void carregarAutorPorId() {
-		this.autor = new DAO<Autor>(Autor.class).buscaPorId(autorId);
+		this.autor = this.dao.buscaPorId(autorId);
 	}
 
 	public void carregar(Autor autor) {
@@ -50,7 +55,7 @@ public class AutorBean implements Serializable{
 
 	public void remover(Autor autor) {
 		System.out.println("Removendo autor");
-		new DAO<Autor>(Autor.class).remove(autor);
+		this.dao.remove(autor);
 	}
 
 	public Integer getAutorId() {
