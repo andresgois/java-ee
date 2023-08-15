@@ -7,7 +7,7 @@ import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import br.com.caelum.livraria.dao.DAO;
+import br.com.caelum.livraria.dao.AutorDAO;
 import br.com.caelum.livraria.modelo.Autor;
 
 @Named
@@ -19,7 +19,7 @@ public class AutorBean implements Serializable{
 	private Integer autorId;
 	
 	@Inject
-	private DAO<Autor> dao;
+	private AutorDAO dao;
 	
 
 	public Autor getAutor() {
@@ -69,7 +69,5 @@ public class AutorBean implements Serializable{
 	public void setAutor(Autor autor) {
 		this.autor = autor;
 	}
-	
-	
 
 }

@@ -47,7 +47,31 @@ Trocando @ManagedBean por @Named, @ViewScoped passa a vir de javax.faces.view.Vi
 <a name="anc2"></a>
 
 ## Injeção de dependências com CDI
-- cap 2
+- Source > Delegate method `Eclipse`
+```
+// AutorDAO
+@Inject
+private EntityManager em;
+// Chama o método produtor desse método
+// JPAUtil
+@Produces
+@RequestScoped  // Abre em cada requisição
+public EntityManager getEntityManager() {
+    return emf.createEntityManager();
+}
+// fecha em cada requisição
+public void close(@Disposes EntityManager em) {
+    em.close();
+}
+
+```
+
+![Sem CDI](./asserts/sem_cdi.png)
+
+![Com CDI 1](./asserts/com_cdi1.png)
+
+![Com CDI 2](./asserts/com_cdi2.png)
+
 <a name="anc3"></a>
 
 ## Gerenciando transações com CDI
