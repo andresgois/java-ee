@@ -14,6 +14,7 @@
 
 ## Integração do CDI com JSF 2 Ver primeiro vídeo
 ### Configuração do CDI
+- O CDI é uma especificação relativamente nova, mas os conceitos, principalmente a inversão de controle, são discutidos e usados há muito tempo na plataforma Java.
 - O primeiro passo é baixar o JAR. A implementação do CDI se chama WELD e como estamos dentro de um servlet container, usaremos o: 
 - [weld-servlet.jar](https://mvnrepository.com/artifact/org.jboss.weld.servlet/weld-servlet/2.3.2.Final)
 
@@ -37,6 +38,10 @@
 <!-- WebContent/WEB-INF/beans.xml -->
 <beans>
 </beans>
+```
+- Queremos utilizar o CDI na nossa aplicação para gerenciar os Beans.
+```
+Trocando @ManagedBean por @Named, @ViewScoped passa a vir de javax.faces.view.ViewScoped e @SessionScoped passa a vir de javax.enterprise.context.SessionScoped.
 ```
 
 <a name="anc2"></a>
