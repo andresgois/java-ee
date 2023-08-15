@@ -19,21 +19,15 @@ public class DAO<T>  implements Serializable{
 	}
 
 	public void adiciona(T t) {
-		em.getTransaction().begin();
 		em.persist(t);
-		em.getTransaction().commit();
 	}
 
 	public void remove(T t) {
-		em.getTransaction().begin();
 		em.remove(em.merge(t));
-		em.getTransaction().commit();
 	}
 
 	public void atualiza(T t) {
-		em.getTransaction().begin();
 		em.merge(t);
-		em.getTransaction().commit();
 	}
 
 	public List<T> listaTodos() {
