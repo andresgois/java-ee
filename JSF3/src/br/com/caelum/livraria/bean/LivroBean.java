@@ -89,8 +89,8 @@ public class LivroBean implements Serializable {
 	}
 
 	public void carregar(Livro livro) {
+		this.livro = dao.buscaPorId(livro.getId());
 		System.out.println("Carregando livro " + livro.getTitulo());
-		this.livro = livro;
 	}
 
 	@Transacional

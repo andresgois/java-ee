@@ -165,14 +165,64 @@ public @interface Transacional {
 
 - Os Interceptadores ajudam a separar as responsabilidades da cada classe. Por exemplo, em vez de o DAO cuidar das chamadas de persistência e transação, tiramos a parte de transação e centralizamos dentro de um interceptador. Isso facilita a manutenção das nossas classes.
 
-- Claro, há desvantagens: podemos dizer que nosso código se torna mais difícil de entender, só olhando no DAO não é suficiente para saber como a transação está sendo gerenciada.
+- Há desvantagens: podemos dizer que nosso código se torna mais difícil de entender, só olhando no DAO não é suficiente para saber como a transação está sendo gerenciada.
 
 ![Interceptadores](./asserts/interceptador.png)
 
 <a name="anc4"></a>
 
 ## Completando a aplicação
-- cap 4
+
+### Produzindo e injetando o FacesContext
+- Classe da injeção
+```
+ @Inject
+FacesContext context;
+```
+- Classe produtora
+```
+public class JsfUtil {
+
+    @Produces
+    @RequestScoped // javax.enterprise.context.RequestScoped
+    public FacesContext getFacesContext() {
+        return FacesContext.getCurrentInstance();
+    }
+
+}
+```
+
+### Relacionamento 
+
+#### EAGER
+- Automaticamente carrega os autores
+```
+@ManyToMany(fetch=FetchType.EAGER) 
+```
+#### LAZY
+- Padrão, não trás os autores
+```
+@ManyToMany(fetch=FetchType.LAZY)
+```
+- Erro ao carregar autores quando o LAZY ativado
+```
+Type Exception Report
+Message could not initialize proxy - no Session
+Description The server encountered an unexpected condition that prevented it from fulfilling the request.
+Exception
+```
+
+- Para utilizar o Lazy e deixar em uma condição melhor, quando se clicar em `Alterar` na página de livros, ele chama o método carregar no `livroBean`, a partir dai podemos fazer uma busca pelo id do autor enviado.
+```
+public void carregar(Livro livro) {
+    this.livro = dao.buscaPorId(livro.getId());
+    System.out.println("Carregando livro " + livro.getTitulo());
+}
+```
+- Quando tornamos uma de nossa classes uma entidade JPA precisamos no mínimo:
+    - Anotar a classe com @Entity e definir algum de seus atributos como chave através da anotação @Id. Além disso, precisamos adicionar a classe no arquivo persistence.xml. O uso de @GeneratedValue é opcional, mas altamente recomendado para atributos numéricos que anotados com @Id
+### 
+
 <a name="anc5"></a>
 
 ## Integração com outras tecnologias: Maven, Spring e EJB

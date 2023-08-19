@@ -31,7 +31,7 @@ public class LoginBean implements Serializable{
     public String efetuarLogin() {
         System.out.println("fazendo login do usuário: "+this.usuario.getEmail());
         boolean existe = this.dao.existe(this.usuario);
-        if(existe ) {
+        if(existe) {
             context.getExternalContext().getSessionMap().put("usuarioLogado", this.usuario);
             return "livro?faces-redirect=true";
         }
