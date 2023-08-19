@@ -247,18 +247,16 @@ public void carregar(Livro livro) {
 clean compile package
 ```
 
-
-
 ### Caso der erro de bloqueio no no repository do maven
 - Adicione isso ao arquivo `settings.xml` que fica na pasta .m2
 ```
 <mirrors>
-        <mirror>
-            <id>maven-default-http-blocker</id>
-            <mirrorOf>dummy</mirrorOf>
-            <name>Dummy mirror to override default blocking mirror that blocks http</name>
-            <url>http://0.0.0.0/</url>
-        </mirror>
+    <mirror>
+        <id>maven-default-http-blocker</id>
+        <mirrorOf>dummy</mirrorOf>
+        <name>Dummy mirror to override default blocking mirror that blocks http</name>
+        <url>http://0.0.0.0/</url>
+    </mirror>
 </mirrors>
 ```
 - Se tiver esse erro:
@@ -268,4 +266,123 @@ You need either to explicitly disable SSL by setting useSSL=false, or set useSSL
 - Pra resolver basta adicionar isso no persistence.xml, na conexão
 ```
 <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/livraria?autoReconnect=true&amp;useSSL=false" />
+```
+
+### Integração com o Spring
+- Da mesma forma que o CDI, o Spring é um container que irá criar nosso bean, os DAOs e inicializar o JPA. Além disso, também possui interceptadores para transação, log e há até sofisticados interceptadores sobre segurança, que é o Spring Security.
+
+- A diferença dele é que as configurações são um pouco diferentes e vem mais preparado para a utilização, sem a necessidade de criarmos producers e interceptadores da transação, por exemplo, além de outras coisas. Devemos ficar atentos para as anotações que também mudam: o bean se torna um @Controller, apesar de @Named (usado no CDI) também funcionar, e os DAOs se tornam um @Repository. Para as amarrações, temos algumas alternativas, embora o mais comum é utilizarmos um @Inject (similar ao do CDI), atente-se que no caso de um EntityManager devemos usar um @PersistenceContext, em vez de @Inject.
+
+![Spring](./asserts/livraria-spring.png)
+
+
+#### Web.xml
+- Note que há uma configuração de dois listeners, usados justamente para o servidor iniciar o container do Spring. Essa configuração é análoga ao usada no CDI, com o bean.xml e o context.xml.
+
+- Esse filtro, OpenEntityManagerInViewFilter, é usado para abertura e fechamento de um EntityManager no início e fim de uma requisição, respectivamente. Fazendo um comparativo com o CDI, nós tínhamos utilizado um producer, onde implementávamos essa forma de abrir e fechar o EntityManager. Com o Spring, já temos esses facilitadores prontos e nos preocupamos somente em configurá-lo.
+
+
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:web="http://java.sun.com/xml/ns/javaee"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+    version="3.0">
+
+    <display-name>livraria</display-name>
+
+    <listener>
+        <listener-class>
+            org.springframework.web.context.ContextLoaderListener
+        </listener-class>
+    </listener>
+    <listener>
+        <listener-class>
+            org.springframework.web.context.request.RequestContextListener
+        </listener-class>
+    </listener>
+
+    <!-- restante do arquivo -->
+
+</web-app>
+```
+
+#### faces-config.xml
+- Esse el-resolver, como pode-se imaginar, serve justamente para que as Strings das Expression Languages utilizadas nas nossas views do JSF possam ser processadas por um bean. Lembre-se que quem faz essa ligação é o próprio Spring.
+
+```
+<?xml version="1.0" encoding="UTF-8"?>
+
+<faces-config version="2.2" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_2_2.xsd">
+
+    <application>
+        <message-bundle>resources.application</message-bundle>
+        <el-resolver>org.springframework.web.jsf.el.SpringBeanFacesELResolver</el-resolver>
+        <locale-config>
+            <default-locale>en</default-locale>
+        </locale-config>
+    </application>
+
+    <lifecycle>
+        <phase-listener>br.com.caelum.livraria.util.Autorizador</phase-listener>
+        <phase-listener>br.com.caelum.livraria.util.LogPhaseListener</phase-listener>
+    </lifecycle>
+
+</faces-config>
+```
+
+#### bean.xml
+
+- Por último, mas não menos importante, temos o arquivo applicationContext.xml, que é bem similar ao arquivo bean.xml do CDI
+
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc-4.1.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-4.1.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx-4.1.xsd">
+
+    <!-- For Scanning the packages net.javaonline.spring.inventory & net.javaonline.web.jsf.inventory 
+        and registering the beans with the applicationContext -->
+    <context:component-scan base-package="br.com.caelum.livraria" />
+    <context:annotation-config />
+    <tx:annotation-driven />
+
+
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactory" />
+    </bean>
+
+    <bean id="entityManagerFactory"
+        class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="persistenceUnitName" value="livraria" />
+    </bean>
+
+</beans>
+```
+- Esse bean é o responsável por ler as informações do nosso persistence.xml. A property de name persistenceUnitName recebe como livraria como valor, que é o mesmo valor usado no src/main/resources/META-INF/persistence.xml:
+
+- Logo que a aplicação é inicializada pelo servidor, essa configuração sobe a JPA com essa unidade de persistência.
+
+#### applicationContext.xml
+
+- Ainda no applicationContext.xml, encontramos a configuração do gerenciador de transação. Nele fazemos uso de uma própria classe do Spring, que resolve isso para nós:
+
+- Perceba que além das configurações vistas acima, temos ainda as que habilitam o uso de anotações:
+
+```
+<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+    <property name="entityManagerFactory" ref="entityManagerFactory" />
+</bean>
 ```
