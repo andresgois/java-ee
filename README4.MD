@@ -221,8 +221,51 @@ public void carregar(Livro livro) {
 ```
 - Quando tornamos uma de nossa classes uma entidade JPA precisamos no mínimo:
     - Anotar a classe com @Entity e definir algum de seus atributos como chave através da anotação @Id. Além disso, precisamos adicionar a classe no arquivo persistence.xml. O uso de @GeneratedValue é opcional, mas altamente recomendado para atributos numéricos que anotados com @Id
-### 
 
 <a name="anc5"></a>
 
 ## Integração com outras tecnologias: Maven, Spring e EJB
+
+### Integração com o Maven
+- O Maven vem para ajudar no gerenciamento do projeto, não é perfeito, porém é muito utilizado no mercado. Para aprender melhor a como fazer essa integração e a integração com outros projetos
+
+#### Criando um novo projeto
+- Vamos criar um novo projeto, que terá a integração com o Maven. Para isso, iremos em New -> Project -> Maven Project. Selecionamos Create a simple project (skip archetype selection), pois iremos criar tudo do zero.
+
+- Algumas configurações na próxima página e depois Finish:
+    - Group Id: Esse é o nosso pacote, que no caso é br.com.caelum;
+    - Artifact Id: Esse é o nome do projeto. Já temos livraria no workspace, então vamos - colocar livraria-maven;
+    - Version: 0.0.1-SNAPSHOT;
+    - Packaging: war;
+    - Name: Livraria Alura;
+#### pom.xml
+- O pom.xml é o arquivo XML do Maven. Vamos lembrar que queremos que o Maven gerencie nossos .jar e acabe com o trabalho manual. Para isso, precisamos informar ao Maven quais dependências ele irá gerenciar. Dentro do XML, nós informamos isso ao Maven através da tag `<dependencies></dependencies>`
+
+#### Rodando com o Maven
+- Como falado no início, podemos também rodar a aplicação através do Maven, para assim não ficarmos tão ligados ao Eclipse. Para isso, botão direito no projeto, e Run As... -> Maven Build. Em goals, ou seja, quando executarmos com o Maven, queremos que ele, por exemplo, dê um clean, compile o projeto e gere um WAR para deploy, para isso, colocamos:
+```
+clean compile package
+```
+
+
+
+### Caso der erro de bloqueio no no repository do maven
+- Adicione isso ao arquivo `settings.xml` que fica na pasta .m2
+```
+<mirrors>
+        <mirror>
+            <id>maven-default-http-blocker</id>
+            <mirrorOf>dummy</mirrorOf>
+            <name>Dummy mirror to override default blocking mirror that blocks http</name>
+            <url>http://0.0.0.0/</url>
+        </mirror>
+</mirrors>
+```
+- Se tiver esse erro:
+```
+You need either to explicitly disable SSL by setting useSSL=false, or set useSSL=true and provide truststore for server certificate verification.
+```
+- Pra resolver basta adicionar isso no persistence.xml, na conexão
+```
+<property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/livraria?autoReconnect=true&amp;useSSL=false" />
+```
