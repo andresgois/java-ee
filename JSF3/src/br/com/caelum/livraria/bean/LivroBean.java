@@ -12,7 +12,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import br.com.caelum.livraria.dao.AutorDAO;
-import br.com.caelum.livraria.dao.DAO;
 import br.com.caelum.livraria.dao.LivroDAO;
 import br.com.caelum.livraria.modelo.Autor;
 import br.com.caelum.livraria.modelo.Livro;
@@ -31,6 +30,8 @@ public class LivroBean implements Serializable {
 	private LivroDAO dao;
 	@Inject
 	private AutorDAO autorDao;
+	@Inject
+	private FacesContext context;
 
 	private List<Livro> livros;
 
@@ -72,7 +73,7 @@ public class LivroBean implements Serializable {
 		System.out.println("Gravando livro " + this.livro.getTitulo());
 
 		if (livro.getAutores().isEmpty()) {
-			FacesContext.getCurrentInstance().addMessage("autor",
+			context.addMessage("autor",
 					new FacesMessage("Livro deve ter pelo menos um Autor."));
 			return;
 		}
