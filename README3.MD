@@ -1,7 +1,7 @@
 # JAVA EE
 
 ### Módulo 6 JSF 2
-- [Apresentação e teste de avaliação Ver primeiro vídeo](#anc1)
+- [Apresentação e teste de avaliação](#anc1)
 - [Começando com Primefaces](#anc2)
 - [Componentes ricos no formulário](#anc3)
 - [Mais usabilidade na página de livros](#anc4)
@@ -37,7 +37,7 @@
 
 <a name="anc1"></a>
 
-## Apresentação e teste de avaliação Ver primeiro vídeo
+## Apresentação e teste de avaliação
 
 ### Apresentação do projeto a criar
 - Nesse curso vamos focar os componentes da biblioteca famosa Primefaces! Com ela, não só iremos melhorar a interface da nossa aplicação, como também melhoraremos a sua usabilidade.

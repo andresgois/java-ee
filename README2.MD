@@ -1,7 +1,7 @@
 # JAVA EE
 
 ### Módulo 4
-- [Do Java EE ao Jakarta EE Ver primeiro vídeo](#anc1)
+- [Do Java EE ao Jakarta EE](#anc1)
 - [Apresentando EJB’s e o projeto de agendamento de e-mails](#anc2)
 - [Persistência com JPA](#anc3)
 - [Fazendo requisição ao nosso EJB com JAX-RS](#anc4)
@@ -10,7 +10,7 @@
 - [Controle de transação com JTA](#anc7)
 
 ### Módulo 5 JSF
-- [Introdução ao desenvolvimento web com JSF Ver primeiro vídeo](#anc8)
+- [Introdução ao desenvolvimento web com JSF](#anc8)
 - [Configuração do ambiente e os primeiros passos com JSF](#anc9)
 - [Entendendo MVC e integrando o banco de dados com JPA 2](#anc10)
 - [Completando o sistema e lidando com escopos do JSF 2](#anc11)
@@ -29,7 +29,7 @@
 # Módulo 4
 <a name="anc1"></a>
 
-## Do Java EE ao Jakarta EE Ver primeiro vídeo
+## Do Java EE ao Jakarta EE
 - Boas-vindas ao curso de EJB com Jakarta EE. Antes de partimos para o desenvolvimento da aplicação que será apresentada aqui no curso eu gostaria de passar com vocês nos slides e mostrar o que é o Jakarta EE.
 
 - Tem tido muitas dúvidas sobre o assunto e sempre leva aquela famosa pergunta: o Java morreu? O Java vai morrer? 
@@ -667,7 +667,7 @@ public class TesteTransacaoBMTAgendamentoEmailDAO {
 # Módulo 5
 <a name="anc8"></a>
 
-## Introdução ao desenvolvimento web com JSF Ver primeiro vídeo
+## Introdução ao desenvolvimento web com JSF
 ### Banco
 - mysql-farmacia
 

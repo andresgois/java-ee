@@ -1,18 +1,19 @@
 # JAVA EE
 
 ### Módulo 3 JSF III
-- [Integração do CDI com JSF 2 Ver primeiro vídeo](#anc1)
+- [Integração do CDI com JSF 2](#anc1)
 - [Injeção de dependências com CDI](#anc2)
 - [Gerenciando transações com CDI](#anc3)
 - [Completando a aplicação](#anc4)
 - [Integração com outras tecnologias: Maven, Spring e EJB](#anc5)
 
 
+### [MAVEN](./MAVEN.MD)
 # Módulo 7
 
 <a name="anc1"></a>
 
-## Integração do CDI com JSF 2 Ver primeiro vídeo
+## Integração do CDI com JSF 2
 ### Configuração do CDI
 - O CDI é uma especificação relativamente nova, mas os conceitos, principalmente a inversão de controle, são discutidos e usados há muito tempo na plataforma Java.
 - O primeiro passo é baixar o JAR. A implementação do CDI se chama WELD e como estamos dentro de um servlet container, usaremos o: 
@@ -387,6 +388,8 @@ You need either to explicitly disable SSL by setting useSSL=false, or set useSSL
 </bean>
 ```
 
+- A diferença do Spring é que ele possui vários outros projetos ao redor dele, como por exemplo o Spring MVC, Spring Security ou Spring Boot (e tem muito mais). Enquanto o CDI é "apenas" um container de inversão de controle, o Spring Framework tem muitos outros recursos a oferecer.
+
 ###  JBoss WildFly 
 - [Aplicação](http://localhost:8081/livraria-wildfly-0.0.1-SNAPSHOT/login.xhtml)
 - O que faremos agora é utilizar o JBoss WildFly para rodar nosso projeto. O que será que iremos precisar alterar no projeto? Vamos continuar usando JSF e o CDI, mas em um servidor de aplicação quem gerencia a JPA e as transações é um container, mais sofisticado que o CDI, chamado EJB. Então no nosso código, pra injetar oEntityManager vamos utilizar o EJB container que fará a injeção para nós. Contudo, não mexeremos em nada de JSF e CDI.
@@ -401,6 +404,9 @@ You need either to explicitly disable SSL by setting useSSL=false, or set useSSL
 
 #### EJB Stateless
 - Se olharmos no nosso AutorDao vemos que agora temos a anotação @Stateless, que significa que esse DAO agora é um EJB, o que nos diz que agora ele pode receber um EntityManager aonde anotamos com @PersistenceContext.
+
+- Talvez o Enterprise Java Bean (EJB) seja o padrão Java EE mais famoso e talvez também o mais importante. Mas qual é a responsabilidade dos EJBs dentro de uma aplicação JavaEE?
+    - Inversão de Controle: Oferecendo vários serviços para a aplicação como Persistência, Transação, Segurança ou Remotabilidade
 
 #### Preparando o DataSource
 - Se tentarmos rodar agora, vamos ver que o nosso servidor irá quebrar. Vemos nos erros que ele já encontra nossos DAO's, e carrega eles corretamente, mas vemos que ele dá um erro em uma livraria-ds, acusando uma dependência não satisfeita. Mas o que será isso ? Bom, o que mudou no projeto foi a nossa camada de persistência, então vamos dar uma olhada no nosso persistence.xml. Observamos que ele não tem mais nenhuma configuração, não tem mais usuários, url's de banco de dados e nem mais nada disso. Mas podemos notar que aqui encontramos a nossa configuração de datasource, que é exatamente o livraria-ds.
@@ -472,3 +478,18 @@ You need either to explicitly disable SSL by setting useSSL=false, or set useSSL
     </security>
 </datasource>
 ```
+
+### Maven
+- O Maven é uma ferramenta para gerenciar as dependências e fazer o build do projeto. O Maven faz parte da Apache e está presente na grande maioria dos projetos Java.
+
+[Maven](https://maven.apache.org/)
+
+- A grande vantagem disso é, que o Maven define vários padrões para projetos Java. Uma vez aprendido esses padrões você sabe criar o projeto, mesmo não conhecendo ou conhecendo pouco sobre o mesmo.
+
+- Por exemplo, o código fonte (as classes) sempre estão na pasta src/main/java, os arquivos de configuração sempre estão na pasta src/main/resources, os testes sempre estão na pasta src/main/test e assim para frente. Isso é bom pois não precisamos aprender a estrutura de cada projeto específico!
+
+- Além disso, o Maven padroniza o build em si. Com Maven sempre usamos o comando clean para limpar o projeto, sempre usamos compile para compilar, sempre o comando package para empacotar. Tanto faz se o projeto é um JAR, WAR ou outro tipo!
+
+- Com Maven também ganhamos a independência da IDE de desenvolvimento. Um projeto configurado com Maven funciona na linha de comando, funciona no Eclipse, Netbeans ou IntelliJ. É só importar e a IDE se configura baseado no pom.xml!
+
+- O Maven também é a base de várias outras ferramentas ligadas ao ciclo de vida do projeto. Com ele podemos plugar ferramentas de qualidade de código e começar a usar servidores de integração contínua. Enfim, o Maven é uma ferramenta extremamente útil (mas claro, não é perfeito) e vale muito investir nele.
