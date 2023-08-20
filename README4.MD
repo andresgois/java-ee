@@ -386,3 +386,89 @@ You need either to explicitly disable SSL by setting useSSL=false, or set useSSL
     <property name="entityManagerFactory" ref="entityManagerFactory" />
 </bean>
 ```
+
+###  JBoss WildFly 
+- [Aplicação](http://localhost:8081/livraria-wildfly-0.0.1-SNAPSHOT/login.xhtml)
+- O que faremos agora é utilizar o JBoss WildFly para rodar nosso projeto. O que será que iremos precisar alterar no projeto? Vamos continuar usando JSF e o CDI, mas em um servidor de aplicação quem gerencia a JPA e as transações é um container, mais sofisticado que o CDI, chamado EJB. Então no nosso código, pra injetar oEntityManager vamos utilizar o EJB container que fará a injeção para nós. Contudo, não mexeremos em nada de JSF e CDI.
+
+#### Provided
+- Isso significa que a dependência fará parte do projeto apenas na hora de compilar (e não no WAR), porque ela será fornecida pelo servidor de aplicação. JSF, CDI, JPA e toda especificação JavaEE será suprimida pelo nosso servidor de aplicação WildFly.
+
+#### Entendendo o projeto
+- Agora que como usamos EJB no projeto, nossa camada de persistência mudou um pouco. Se olharmos o pocote br.com.caelum.livraria.bean , vemos que não precisamos mexer em nada. A única coisa que mudou é que agora não temos mais nosso pacote br.com.caelum.livraria.tx, pois assim como o Spring, agora nós temos um servidor mais sofisticado, que assume o gerenciamento da transação e assume essa responsabilidade.
+
+![EJB](./asserts/ejb.png)
+
+#### EJB Stateless
+- Se olharmos no nosso AutorDao vemos que agora temos a anotação @Stateless, que significa que esse DAO agora é um EJB, o que nos diz que agora ele pode receber um EntityManager aonde anotamos com @PersistenceContext.
+
+#### Preparando o DataSource
+- Se tentarmos rodar agora, vamos ver que o nosso servidor irá quebrar. Vemos nos erros que ele já encontra nossos DAO's, e carrega eles corretamente, mas vemos que ele dá um erro em uma livraria-ds, acusando uma dependência não satisfeita. Mas o que será isso ? Bom, o que mudou no projeto foi a nossa camada de persistência, então vamos dar uma olhada no nosso persistence.xml. Observamos que ele não tem mais nenhuma configuração, não tem mais usuários, url's de banco de dados e nem mais nada disso. Mas podemos notar que aqui encontramos a nossa configuração de datasource, que é exatamente o livraria-ds.
+
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
+    version="2.0">
+
+    <persistence-unit name="livraria" transaction-type="JTA"><!-- aqui temos o datasource -->
+
+        <jta-data-source>java:/livraria-ds</jta-data-source>
+
+        <class>br.com.caelum.livraria.modelo.Usuario</class>
+        <class>br.com.caelum.livraria.modelo.Livro</class>
+        <class>br.com.caelum.livraria.modelo.Autor</class>
+        <class>br.com.caelum.livraria.modelo.Venda</class>
+
+        <properties>
+            <property name="hibernate.hbm2ddl.auto" value="update" />
+            <property name="hibernate.show_sql" value="true" />
+            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5InnoDBDialect" />
+        </properties>
+    </persistence-unit>
+
+</persistence>
+```
+
+- Um dos recursos que o Wildfly nos oferece é um datasource. Um datasource é normalmente um provedor de conexões, um pool de conexões. Quando o Wildfly inicializa, ele inicializa esses provedores de conexões, e a nossa aplicação faz uma solicitação a esse datasource através do nome livrariads. Só que quando subimos a aplicação, ela solicitou um datasource que ainda não configuramos. Ou seja, temos essa dependência a configurar.
+
+#### Configurando o modulo
+- Vamos acesar o JBoss Wildflay fora do Eclipse. Entrando em wildfly -> modules -> system -> layers -> base -> com, vamos criar uma nova pasta: mysql. A ideia é que cadastremos o driver dentro do JBoss, e esse driver é o módulo que o JBoss irá carregar. Dentro da pasta mysql, vamos criar outra: main, e dentro dela colocaremos o .jar do mysql. Para que o JBoss interprete essa pasta e esse arquivo como módulo, é necessário um arquivo de configuração module.xml, que disponibilizamos para você aqui. O que esse arquivo faz é cadastrar o .jar como módulo do JBoss.
+
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<module xmlns="urn:jboss:module:1.1" name="com.mysql">
+  <resources>
+    <resource-root path="mysql-connector-java-5.1.38.jar"/>
+  </resources>
+  <dependencies>
+    <module name="javax.api"/>
+  </dependencies>
+</module>
+```
+
+#### Configurar o datasource
+- Porém agora temos um módulo do JBoss, como se fosse uma biblioteca disponível para ele usar. O que queremos é um dizer para o JBoss que esse módulo é um Driver. Por isso, voltamos a pasta raiz do Wildfly -> standalone -> configuration, e vamos mexer no arquivo standalone.xml. Vamos procurar por um elemento <drivers>, e cadastrar o nosso novo driver. Devemos adicionar:
+
+```
+<driver name="com.mysql" module="com.mysql">
+    <xa-datasource-class>com.mysql.jdbc.jdbc2.optional.MysqlXADataSource</xa-datasource-class>
+</driver>
+```
+- Após isso, só falta configurar o datasource, adicione o seguinte xml dentro do elemento <datasources>:
+
+```
+<datasource jndi-name="java:/livraria-ds" pool-name="livrariaDS" enabled="true" use-java-context="true">
+    <connection-url>jdbc:mysql://localhost:3306/livrariadb</connection-url>
+    <driver>com.mysql</driver>
+    <pool>
+        <min-pool-size>10</min-pool-size>
+        <max-pool-size>100</max-pool-size>
+        <prefill>true</prefill>
+    </pool>
+    <security>
+        <user-name>root</user-name>
+    </security>
+</datasource>
+```
