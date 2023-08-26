@@ -96,7 +96,118 @@ Mode=false -DarchetypeArtifactId=maven-archetype-quickstart
 <a name="anc4"></a>
 
 ## Relatórios de qualidade e cobertura
-cap 5
+### As fases que um ciclo de vida build apresenta:
+    - 1. Validação: verificamos se projeto possui todas as informações necessárias
+    - 2. Compilação: compilar os conteúdos
+    - 3. Teste: realizar testes diferentes no projeto
+    - 4. Pacote: geração de um pacote do projeto
+    - 5. Teste de integração: realizar testes de integração
+    - 6. Verificação: checagem do pacote gerado
+    - 7. Instalação: realizar a instalação do pacote no repositório local
+    - 8. Implantação: realizar a implantação no ambiente adequado
+
+- Quando acionamos o seguinte comando no terminal estamos executando duas fases do ciclo: validação e compilação.
+
+```
+cd Documents/guilherme/workspace/produtos
+mvn compile
+```
+
+- Podemos forçar a ordem de etapas com opções da linha de comando, como não gerar testes, por meio do comando -DskipTests=true:
+```
+mvn -DskipTests=true package
+```
+
+### O  PMD, que analisa o código fonte e detecta possíveis margens de bug no código. Para gerar este relatório utilizamos o comando pmd:pmd no terminal
+- [PMD](https://maven.apache.org/plugins/maven-pmd-plugin/)
+
+```
+mvn pmd:pmd
+```
+- Ao final, será gerado um arquivo pmd.html, armazenado no diretório: `produtos > target > site`
+
+- [Documentação do Maven relativa ao relatório PDM](https://maven.apache.org/plugins/maven-pmd-plugin/pmd-mojo.html)
+
+-Na documentação do Maven relativa ao relatório PDM encontraremos as configurações possíveis e exemplos de uso, tais como análise de código JavaScript, Java Server Pages (JSP), como usar Rule Sets, ou regras determinadas. Esse recurso pode ser usado de diferentes maneiras para detectar possíveis pontos problemáticos no programa em desenvolvimento.
+
+- Com o comando pmd:pmd conseguimos gerar relatórios, mas de que forma verificamos a qualidade do nosso projeto? Lembrando que a verificação é uma fase do ciclo de vida do build.
+
+- Se simplesmente utilizarmos o comando `mvn verify` no terminal, não teremos uma verificação efetiva, afinal não configuramos o PMD para ser utilizado no momento da verificação. Para isso, utilizaremos o comando `pmd:check`, que realiza uma varredura no build à procura de erros, inclusive interrompendo o projeto caso as regras definidas para o código não sejam cumpridas.
+
+- Todas as vezes em que quisermos executar o PMD precisamos utilizar `pmd:check` no terminal, o que pode se tornar cansativo ao longo do desenvolvimento do programa. No arquivo pom.xml, podemos realizar configurações que permitam a execução automática do PDM durante o build do projeto.
+
+- Indicando que ele alterará o ciclo de vida do projeto. No arquivo pom.xml, adicionaremos a tag <executions> para especificarmos quando o plugin deverá ser executado, afinal podem haver múltiplas execuções ao longo do build. Em nosso caso, será apenas uma execução na fase (<phase>) de verificação (verify), cujo objetivo (<goals>) é check.
+
+```
+<project>
+  <!-- ... -->
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <version>3.10.0</version>
+        <executions>
+            <execution>
+                <phase>verify</phase>
+                    <goals>
+                        <goal>check</goal>
+                    </goals>
+            </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+  <!-- ... -->
+</project>
+```
+
+### JACOCO
+- O JaCoCo é o plugin padrão de cobertura de testes em Java.
+- Adicione o plugin do JaCoCo ao projeto para que seja possível gerar relatórios sobre a cobertura de testes do projeto. Esse tipo de relatório é interessante pois é possível ver de uma forma fácil o que não testamos em nossa aplicação.
+#### Usagem
+```
+...
+<plugin>
+    <groupId>org.jacoco</groupId>
+    <artifactId>jacoco-maven-plugin</artifactId>
+    <version>0.8.10</version>
+    <executions>
+        <execution>
+        <goals>
+            <goal>prepare-agent</goal>
+            <goal>report</goal>
+        </goals>
+        </execution>
+    </executions>
+</plugin>
+...
+```
+- Em nosso terminal executaremos o goal help — todos os goals do plugin estão registrados na documentação — por meio do comando `mvn jacoco:help`.
+- Para o plugin gerar a cobertura do nosso código, existem duas fases a serem cumpridas: preparação do agente (**prepare-agent**) e a geração do relatório (**report**).
+- Fase padrão dele é o `verify`
+- No Eclipse, teremos o seguinte aviso de erro na parte inferior da tela: Maven Problems (1 item) > Project configuration is not up-to-date with pom.xml.. Ou seja, configuração do projeto não está atualizada com o arquivo pom.xml.
+- Para resolvermos este problema acionaremos o atalho "Ctrl + 3" e acessaremos o buscador do Eclipse. Procuraremos pela opção "Update Project" e clicaremos sobre ela.
+
+- Executaremos a verificação novamente, na linha de comando, por meio de mvn verify. Poderemos acessar o relatório de cobertura que foi armazenado em "produtos > target > site > jacoco > index.hrml".
+
+![Relatório Jacoco](./asserts/relatorio_jacoco.png)
+- Após inclusão de um teste
+![Relatório Jacoco](./asserts/relatorio_jacoco_testes.png)
+
+### Em projetos com muitas dependências, com o passar do tempo elas podem ficar desatualizadas, caso você queira atualizar as dependências para suas versões mais atuais, poderá utilizar o seguinte comando:
+```
+mvn versions:use-latest-versions
+```
+
+- [Doc](https://www.mojohaus.org/versions/versions-maven-plugin/use-latest-versions-mojo.html)
+
+- Existe um outro goal que verifica por atualizações sem de fato alterar o pom.xml:
+
+```
+mvn versions:display-dependency-updates
+```
+- [Versions Maven Plugin](https://www.mojohaus.org/versions/versions-maven-plugin/index.html)
 
 
 <a name="anc5"></a>
