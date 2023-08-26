@@ -57,13 +57,24 @@ mvn surefire-report:report
 <a name="anc2"></a>
 
 ## Maven no Eclipse
-cap 2
+### Importando projeto maven existente
+- File > Import
+    - Maven > Existing Maven Projects
+- Atalho Eclipse
+    - Ctrl + 3
+        - Quick Access do Eclipse". Digite "IEMP"
+             - Import Existing Maven Projects
+
+- [Xstream](https://mvnrepository.com/artifact/com.thoughtworks.xstream/xstream)
+
+> Uma alternativa para o gerenciamento de dependências
+- ivy
 
 
 <a name="anc3"></a>
 
 ## Repositório remoto e local
-cap 3
+
 
 
 <a name="anc4"></a>
