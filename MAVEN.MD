@@ -75,6 +75,22 @@ mvn surefire-report:report
 
 ## Repositório remoto e local
 
+- [Dependência do GSON](http://mvnrepository.com/artifact/com.google.code.gson/gson)
+
+- Quando fazemos o comando com a flag `-o` ele não faz uma busca pelas dependência na internet, ela busca apenas local, deixando o processo bem mais rápido.
+```
+mvn -o test
+mvn -o compile
+```
+
+- Imaginemos a criação de um projeto chamado blog. Nós já baixamos todos esses plugins do Maven, portanto ele não irá realizar o download novamente, e criará o projeto pulando essa etapa.
+
+```
+mvn archetype:generate -DartifactId=blog -DgroupId=br.com.alura.maven -Dinteractive
+Mode=false -DarchetypeArtifactId=maven-archetype-quickstart 
+```
+- Repositorio local onde ficam todas as dependências baixadas `.m2/repository`
+
 
 
 <a name="anc4"></a>
