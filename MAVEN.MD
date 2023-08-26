@@ -213,8 +213,95 @@ mvn versions:display-dependency-updates
 <a name="anc5"></a>
 
 ## Criando um projeto web
+- Na área "Project Explorer" clicaremos com o botão direito e selecionaremos as opções "New > Project". Na caixa de diálogo que se abre selecionaremos a opção "Maven > Maven Project".
 
-cap 6
+- Na caixa de diálogo encontraremos o item "Catalog", que fornece diversas opções de catálogos, e nos escolheremos "All Catalogs".
+- Escolheremos o arquétipo org.apache.maven.archetypes maven-archetype-webapp
+- Uma Web App é uma aplicação web baseada na API Servlet do Java, que podemos "deployar" em um servidor que tenha suporte para ela, como Tomcat, Jetty ou JBoss. Assim feito, pressionaremos o botão "Next".
+- Na próxima etapa teremos campos a serem preenchidos: "Group Id", em que escreveremos a informação br.com.alura.maven, e "Artifact Id", que chamaremos de lojaweb, isto é, o nome do nosso site. Em seguida, na opção "Package" escolheremos a versão 1.0.0-SNAPSHOT
+
+- Dos três servidores mencionados, o Jetty é o mais leve, e por este motivo o usaremos em nosso projeto. Sua documentação possui alguns goals em destaque, sendo um deles jetty:run.
+
+- [Jetty Doc](https://eclipse.dev/jetty/documentation/jetty-9/index.html)
+
+> Config maven
+
+```
+<dependencies>
+    <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>3.8.1</version>
+        <scope>test</scope>
+    </dependecy>
+<dependencies>
+<build>
+    <finalName>lojaweb</finalName>
+    <plugins>
+        <plugin>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-maven-plugin</artifactId>
+            <version>9.3.7.v20160115</version>
+            <configuration>
+                <scanIntervalSeconds>10</scanIntervalSeconds>
+                <webApp>
+                    <contextPath>/loja</contextPath>
+                </webApp>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+```
+
+- Na linha de comando, acessaremos o diretório lojaweb. Em seguida compilaremos o projeto utilizando o comando mvn compile.
+- Por enquanto não temos nenhuma classe, portanto não há nada para ser compilado. Executaremos o comando mvn jetty:run para instalar o plugin em nosso projeto. Ao final do procedimento de instalação, seremos avisados de que o Jetty pode ser executado na porta 8080. No browser, acessaremos o endereço localhost:8080, e veremos a mensagem "Hello World!".
+
+### Adicionando servlet
+
+```
+<dependency>
+    <groupId>javax.servlet</groupId>
+    <artifactId>javax.servlet-api</artifactId>
+    <version>3.1.0</version>
+    <scope>provided</scope>
+</dependency>
+```
+
+- Modificando versão do `web.xml` par ser igual a dependencia no pom.xml
+```
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee 
+    http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+    version="3.1">
+</web-app>
+```
+- Executaremos o comando mvn jetty:run. O servidor está funcionando perfeitamente, e a mensagem é exibida no localhost.
+
+- Na source folder src/main/java, dentro do pacote br.com.alura.maven.lojaweb, crie a Servlet ContatoServlet (Botão direito em src/main/java, "New > Class").
+
+```
+import java.io.IOException;
+import java.io.PrintWriter;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+@WebServlet(urlPatterns={"/contato"})
+public class ContatoServlet extends HttpServlet {
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        PrintWriter writer = resp.getWriter();
+        writer.println("<html><h2>Entre em contato</h2></html>");
+        writer.close();
+    }
+}
+```
+
+- [Acesso](http:localhost:8080/loja/contato)
 <a name="anc6"></a>
 
 ## Projeto web
