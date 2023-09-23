@@ -97,14 +97,14 @@ Mode=false -DarchetypeArtifactId=maven-archetype-quickstart
 
 ## Relatórios de qualidade e cobertura
 ### As fases que um ciclo de vida build apresenta:
-    - 1. Validação: verificamos se projeto possui todas as informações necessárias
-    - 2. Compilação: compilar os conteúdos
-    - 3. Teste: realizar testes diferentes no projeto
-    - 4. Pacote: geração de um pacote do projeto
-    - 5. Teste de integração: realizar testes de integração
-    - 6. Verificação: checagem do pacote gerado
-    - 7. Instalação: realizar a instalação do pacote no repositório local
-    - 8. Implantação: realizar a implantação no ambiente adequado
+    - 1. **validate** Validação: verificamos se projeto possui todas as informações necessárias
+    - 2. **compile** Compilação: compilar os conteúdos
+    - 3. **test** Teste: realizar testes diferentes no projeto
+    - 4. **package** Pacote: geração de um pacote do projeto
+    - 5. **integration-test** Teste de integração: realizar testes de integração
+    - 6. **verify** Verificação: checagem do pacote gerado
+    - 7. **install** Instalação: realizar a instalação do pacote no repositório local
+    - 8. **deploy** Implantação: realizar a implantação no ambiente adequado
 
 - Quando acionamos o seguinte comando no terminal estamos executando duas fases do ciclo: validação e compilação.
 
@@ -212,7 +212,7 @@ mvn versions:display-dependency-updates
 
 <a name="anc5"></a>
 
-## Criando um projeto web
+### Criando um projeto web
 - Na área "Project Explorer" clicaremos com o botão direito e selecionaremos as opções "New > Project". Na caixa de diálogo que se abre selecionaremos a opção "Maven > Maven Project".
 
 - Na caixa de diálogo encontraremos o item "Catalog", que fornece diversas opções de catálogos, e nos escolheremos "All Catalogs".
