@@ -253,6 +253,11 @@ mvn versions:display-dependency-updates
 </build>
 ```
 
+- Rodar Jetty
+```
+nvm jetty:run
+```
+
 - Na linha de comando, acessaremos o diretório lojaweb. Em seguida compilaremos o projeto utilizando o comando mvn compile.
 - Por enquanto não temos nenhuma classe, portanto não há nada para ser compilado. Executaremos o comando mvn jetty:run para instalar o plugin em nosso projeto. Ao final do procedimento de instalação, seremos avisados de que o Jetty pode ser executado na porta 8080. No browser, acessaremos o endereço localhost:8080, e veremos a mensagem "Hello World!".
 
@@ -301,7 +306,116 @@ public class ContatoServlet extends HttpServlet {
 }
 ```
 
+> Erro no index.jsp
+- O problema ocorre porque o .jsp é uma Servlet, e precisamos que a classe HttpServlet esteja disponível no classpath. Nas nossas dependências, existe somente a dependência do JUnit. A solução é adicionar a API de Servlets como dependência do projeto.
+
+- No pom.xml
+```
+ <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <!-- informações sobre o projeto  -->
+    <dependencies>
+        <!-- junit -->
+
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+    </dependencies>
+    <!-- build -->
+</project>
+```
+
+- o nosso arquivo web.xml, que você encontra em src/main/webapp/WEB-INF/, está com as configurações da versão 2.3. Você pode encontrar o conteúdo da versão 3.1
+
+```
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee 
+         http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+         version="3.1">
+</web-app>
+```
+
+- Adicionando contexto
+- Adicionando path
+```
+<plugin>
+    <groupId>org.eclipse.jetty</groupId>
+    <artifactId>jetty-manven-plugin</artifactId>
+    <version>9.3.7.v2016115</version>
+  <configuration>
+    <scanIntervalSeconds>10</scanIntervalSeconds>
+        <webApp>
+            <contextPath>/loja</contextPath>
+        </webApp>
+    </configuration>
+</plugin>
+```
+
 - [Acesso](http:localhost:8080/loja/contato)
 <a name="anc6"></a>
 
 ## Projeto web
+
+- Adicione o projeto produtos como dependência para o projeto lojaweb. Nesse momento temos acesso às classes deste projeto a partir do Eclipse, mas se executarmos o jetty:run, por exemplo, receberemos um erro. Por que isso ocorre, e como resolvê-lo?
+    - Isso ocorre porque o artefato não está instalado localmente e não pode ser encontrado nos repositórios remotos. O Eclipse reconhece como um projeto aberto, por isso funciona na IDE. Para resolver o problema devemos executar o comando mvn install no projeto produtos, que instalará o artefato no repositório local do Maven.
+
+- Podemos observar a árvore de dependências selecionando a opção "Dependency Hierarchy", localizada na parte inferior da área de edição do Eclipse. Conseguiremos visualizar a dependência do JUnit para a realização de testes, e do XStream para compilação.
+
+![Árvore de dependência](./asserts/arvore_dependencias.png)
+
+- Usaremos o comando mvn `dependency:tree` para baixarmos o plugin de dependência. Uma vez que download for concluído, veremos em nossa linha de comando a árvore de dependências. 
+
+### Scopos
+- compile
+ -  Este é o escopo padrão quando nenhum outro escopo é fornecido.
+ - As dependências com este escopo estão disponíveis no caminho de classe do projeto em todas as tarefas de construção. Eles também são propagados para os projetos dependentes.
+- provided
+    - Usamos esse escopo para marcar dependências que devem ser fornecidas em tempo de execução pelo JDK ou por um contêiner.
+
+    - Um bom caso de uso para esse escopo seria uma aplicação web implantada em algum contêiner, onde o próprio contêiner já fornece algumas bibliotecas. Por exemplo, pode ser um servidor web que já fornece a API Servlet em tempo de execução.
+- runtime
+    - As dependências com este escopo são necessárias em tempo de execução. Mas não precisamos deles para compilar o código do projeto. Por causa disso, as dependências marcadas com o escopo de tempo de execução estarão presentes no tempo de execução e no caminho de classe de teste, mas estarão ausentes no caminho de classe de compilação.
+- test
+    - Usamos esse escopo para indicar que a dependência não é necessária no tempo de execução padrão do aplicativo, mas é usada apenas para fins de teste.
+- System
+    - O escopo do sistema é muito semelhante ao escopo *provided* . A principal diferença é que o sistema exige que apontemos diretamente para um jar específico no sistema.
+
+    - Vale a pena mencionar que o escopo do sistema está obsoleto.
+- import
+    - Está disponível apenas para o tipo de dependência pom .
+
+    - import indica que esta dependência deve ser substituída por todas as dependências efetivas declaradas em seu POM.
+
+### Exclusão de dependência da dependência
+- Iremos definir uma exclusão por vez, e no caso deletaremos xmlpull e manteremos xpp3_mim:
+
+```
+<dependency>
+    <groupId>com.thoughtworks.xstream</groupId>
+    <artifactId>xstream</artifactId>
+    <version>1.4.1</version>
+        <exclusions>
+            <exclusion>
+                <groupId>xmlpull</groupId>
+                <artifactId>xmlpull</artifactId>
+            </exclusion>
+        </exclusions>
+</dependency>
+```
+
+> O que significa declararmos uma dependência com o escopo provided?
+- Significa que a dependência estará disponível para compilar e testar as classes, mas que é esperado que o JDK ou o container disponibilize-a, e por esse motivo a biblioteca não é adicionada ao artefato final quando geramos o pacote do nosso projeto.
+
+> O que significa declararmos uma dependência com o escopo compile?
+- Significa que a dependência estará em todos os classpaths: de compilação, teste e execução. Esse é o escopo padrão utilizado quando não declaramos um escopo na dependência.
+
+> O que significa quando declaramos uma dependência com o escopo runtime?
+- Significa que a dependência não estará disponível para compilar. Estará disponível apenas no momento da execução e também no classpath dos testes.
+
+- Em "Java Resources > Libraries > Maven Dependencies", há algumas bibliotecas que não declaramos como dependências no pom.xml. Elas são resolvidas pelo Maven, pois cada dependência que adicionamos pode conter outras.
+
+![Dependency three](./asserts/mvn_dependecy_tree.png)
+
