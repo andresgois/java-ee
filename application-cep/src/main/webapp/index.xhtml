@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+	<ui:composition template="_template.xhtml">
+
+		<ui:define name="titulo">
+				<p:outputPanel>Buscar Cidade</p:outputPanel>
+		</ui:define>
+
+		<ui:define name="conteudo">
+		
+			<p:messages globalOnly="true" />
+		
+			<h:form id="cep">
+				<p:fieldset legend="Busca CEP">
+					<h:panelGrid columns="3">
+						
+						<p:outputPanel styleClass="ui-grid-row">
+							<div class="ui-grid-col-3">
+								<h:outputText value="CEP:" styleClass="required" />
+								<p:graphicImage id="imgEnd" style="cursor:pointer; width:14px; margin-left:5px;" library="default">
+								</p:graphicImage>
+								<p:overlayPanel id="overlayPanelEnd" for="imgEnd" showEffect="blind"	appendToBody="true">
+									Digite um <strong>CEP</strong> e aperte as teclas ENTER ou TAB para o endereço ser preenchido.
+								</p:overlayPanel>
+								<br />
+								<p:inputMask id="cepLogradouro" label="CEP" styleClass="width90"
+				  					value="#{cepBean.cep}" required="true" maxlength="9" mask="99999-999">
+				  					<p:ajax event="blur" 
+				  							listener="#{cepBean.preencherEnderecoPorCEP(cepBean.cep)}"
+				  							update="@form, messages, municipioAtual, municipio"/>
+				  				</p:inputMask>
+							</div>
+							
+							<br /><br /><br />
+							
+							<h:outputText value="Município: #{cepBean.municipio}" styleClass="required" id="municipio" />
+							
+							<br /><br /><br />
+							
+							<div class="ui-grid-col-4">
+								<h:outputText value="Município:" styleClass="required" /><br />
+								<p:selectOneMenu id="municipioAtual" label="Município" disabled="true"
+										value="#{cepBean.municipio}" required="true" styleClass="width90">
+											<f:selectItem itemLabel="-- Selecione --" itemValue="" />
+											<f:selectItems value="#{cepBean.municipio}"
+												var="municipio" itemLabel="#{municipio}"
+												itemValue="#{municipio}" />
+										
+								</p:selectOneMenu>
+							</div>
+						</p:outputPanel>
+						
+
+					</h:panelGrid>
+				</p:fieldset>
+			</h:form>
+		</ui:define>
+
+	</ui:composition>
+
+</html>
