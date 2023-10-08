@@ -99,6 +99,9 @@ com/
     - acesse o Mysql: no terminal faça : mysql -u root
     - create database casadocodigo_javaee; para criar o banco.
 
+> Qual a vantagem de utilizarmos o CDI no JavaEE? O que ganhamos com seu uso no projeto?
+- Com o CDI ganhamos injeção de dependências entre as classes da aplicação e também o controle de escopo, que nos permite manter uma classe viva pelo tempo que precisarmos.
+
 ### Ferramentas utilizadas
 - [JBOSS Forge](https://forge.jboss.org/download)
 - [Wildfly](https://www.wildfly.org/downloads/)
@@ -106,6 +109,28 @@ com/
 <a name="anc2"></a>
 
 ## Relacionando Livro com Autores
+- Adicione a div e o <h:selectManyListbox> referente a seleção dos autores, exibindo o nome do autor e relacionando o valor do select pelo id do autor. Também já vamos colocar o converter javax.faces.Integer para que os ID sejam enviados como Integer e não String.
+
+- Insert de autores
+```
+insert into Autor (nome) values ('Paulo Silveira'), ('Sérgio Lopes'), ('Guilherme Silveira'), ('Alberto Souza');
+```
+
+### Converters
+- Todos os valores que são enviados da tela para o ManagedBean são enviados como texto. O JSF não consegue converter automaticamente, o que seria possível fazer em uma lista. O generics não é identificado pelo JSF, o que nos obriga a fazer uso de conversores que explicitamente convertem o valor de texto para inteiro. Assim, sempre que utilizamos uma lista é importante converter os valores para o tipo que precisamos com os converters do JSF.
+
+- Lembre-se de implementar o converter na sua view, ele vai ficar parecido com isso:
+
+```
+<h:selectManyListbox value="#{adminLivrosBean.autoresId}" converter="javax.faces.Integer">
+    <f:selectItems value="#{adminLivrosBean.autores}"
+         var="autor"
+         itemValue="#{autor.id}"
+         itemLabel="#{autor.nome}" />
+</h:selectManyListbox>
+```
+
+- [Doc Converters](https://docs.oracle.com/javaee/7/tutorial/jsf-page-core001.htm)
 
 <a name="anc3"></a>
 
