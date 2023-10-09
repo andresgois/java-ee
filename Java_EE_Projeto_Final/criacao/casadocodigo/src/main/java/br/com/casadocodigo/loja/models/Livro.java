@@ -2,6 +2,7 @@ package br.com.casadocodigo.loja.models;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import javax.persistence.Entity;
@@ -10,6 +11,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
@@ -34,6 +37,9 @@ public class Livro {
     private BigDecimal preco;
 	@Min(50)
     private Integer numeroPaginas;
+	
+	@Temporal(TemporalType.DATE)
+	private Calendar dataPublicacao = Calendar.getInstance(); // Pegamos uma instância de Calendar
     
     @ManyToMany
     @Size(min=1)
@@ -95,6 +101,14 @@ public class Livro {
 
 	public void setAutores(List<Autor> autores) {
 		this.autores = autores;
+	}
+
+	public Calendar getDataPublicacao() {
+		return dataPublicacao;
+	}
+
+	public void setDataPublicacao(Calendar dataPublicacao) {
+		this.dataPublicacao = dataPublicacao;
 	}
     
 	
