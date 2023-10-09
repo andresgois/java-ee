@@ -201,6 +201,21 @@ public class FacesContextProducer{
 }
 ```
 
+### Validações
+- Faremos então uma validação especifica que o Java EE já possui e que é feita diretamente na classe Java, esta validação é chamada de Bean Validation. A Bean Validation é uma especificação do JavaEE e toda especificação precisa ter uma implementação, o WildFly já tem um framework que implementa esta especificação internamente no próprio servidor, que é o Hibernate Validator.
+
+- Usando o Hibernate Validator, quando queremos dizer que o Título não pode ser nulo, nem vazio e nem possuir espaços em branco, usamos a annotation @NotBlank em cima do atributo.
+
+- Porém, existem outras coisas que queremos validar, por exemplo, o valor mínimo aceito pelo preço e número de páginas, o tamanho mínimo preenchido para o campo descrição, e por aí vai. Para vários desses casos, temos annotations específicas da Bean Validation, e para os casos não cobertos pela Bean Validation o Hibernate Validator veio para cobrir.
+
+- As mensagens ligadas aos componentes do JSF estão melhores, porém as mensagens de validação da Bean Validation ainda estão genéricas. Seria muito bom poder deixá-las mais específicas para nosso sistema. Lembrando que elas só aparecem em português por que o Hibernate Validator possui internacionalização para várias línguas, porém mesmo assim, ainda não está como gostaríamos.
+
+- Vamos acessar o [endereço](http://bit.ly/1DsZKvf) . Nesse endereço, encontramos o arquivo .properties do Hibernate Validator. Como queremos exatamente esses nomes, vamos copiar todas as mensagens e salva-las em um novo arquivo dentro da pasta src/main/resources/.
+
+- Validação no JSF é ligada ao componente porém possui algumas limitações a tipos de validações que o JSF já possui, enquanto que na Bean Validation temos uma variedade maior de validações, inclusive para regras de negócio como CPF, Título de Eleitor e até número do cartão de crédito. Por isso a Bean Validation acaba sendo mais poderosa e você ainda fica desacoplado do JSF.
+
+
+
 
 <a name="anc4"></a>
 
