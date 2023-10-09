@@ -28,6 +28,14 @@ public class AdminLivroBean {
 	@Inject
 	private AutorDao autorDao;
 	
+	@Inject
+	private FacesContext context;
+	
+	/*public AdminLivroBean() {
+		context = FacesContext.getCurrentInstance();
+	}*/
+	
+	
 	private List<Integer> autoresId = new ArrayList<>(); // fazemos new para evitar NullPointerException
 	
 	@Transactional
@@ -42,10 +50,9 @@ public class AdminLivroBean {
         this.autoresId = new ArrayList<>();
         
         // chamada do livroDao.salvar acima
-        FacesContext.getCurrentInstance().getExternalContext()
-            .getFlash().setKeepMessages(true); // Aqui estamos ativando o FlashScope
-        FacesContext.getCurrentInstance()
-            .addMessage(null, new FacesMessage("Livro cadastrado com sucesso!"));
+        context.getExternalContext().getFlash().setKeepMessages(true); 
+        // Aqui estamos ativando o FlashScope
+        context.addMessage(null, new FacesMessage("Livro cadastrado com sucesso!"));
         
         return "/livro/lista?faces-redirect=true";
     }

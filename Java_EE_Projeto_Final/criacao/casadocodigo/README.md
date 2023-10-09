@@ -180,6 +180,28 @@ public String salvar() {
 > De que serve o Escopo de Flash que temos no JSF?
 - Serve para guardar valores na sessão, porém duram apenas de um request para o outro, sendo automaticamente retirados da sessão.
 
+### Ensinando o CDI a instanciar o FacesContext
+- O problema é que o CDI e o JSF ainda não estão totalmente integrados e, por isso, a solução não funciona diretamente. Para que funcione, indicaremos para o CDI como criar o objeto que será injetado em nosso código. Por hora, ele não sabe criar o context sozinho, mas podemos ensiná-lo.
+
+- Vamos criar uma nova classe chamada FacesContextProducer no pacote conf. Nesta classe, teremos o método getFacesContext que retornará uma instância de FacesContext para cada request, ou seja, no escopo da requisição.
+
+- Isto é tudo que a nossa classe que cria objetos de contexto precisa fazer, porém precisamos indicar para o CDI que este método faz exatamente isso: produz um objeto. Para isso utilizamos a anotação @Produces.
+
+```
+br.com.casadocodigo.loja.conf
+
+public class FacesContextProducer{
+
+        @RequestScoped
+        @Produces
+        public FacesContext getFacesContext(){
+                return FacesContext.getCurrentInstance();
+        }
+
+}
+```
+
+
 <a name="anc4"></a>
 
 ## Data de Publicação e Converters
