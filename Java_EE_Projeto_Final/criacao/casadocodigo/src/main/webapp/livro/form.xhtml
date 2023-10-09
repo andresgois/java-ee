@@ -2,40 +2,45 @@
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <html xmlns="http://www.w3.org/1999/xhtml"
-    xmlns:h="http://xmlns.jcp.org/jsf/html"
-    xmlns:f="http://xmlns.jcp.org/jsf/core">
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core">
 
 <h:form>
-        <div>
-            <div>
-            <h:outputLabel value="Título" />
-            <h:inputText value="#{adminLivrosBean.livro.titulo}" />
-        </div>
-        <div>
-            <h:outputLabel value="Descrição"/>
-            <h:inputTextarea value="#{adminLivrosBean.livro.descricao}" />
-        </div>
-        <div>
-            <h:outputLabel value="Número de Páginas"/>
-            <h:inputText value="#{adminLivrosBean.livro.numeroPaginas}" />
-        </div>
-        <div>
-            <h:outputLabel value="Preço"/>
-            <h:inputText value="#{adminLivrosBean.livro.preco}" />
-        </div>
-        <div>
-		    <h:outputLabel value="Autores" />
-		    <!-- Adicionamos o converter aqui - CÓDIGO NOVO -->
-			<h:selectManyListbox value="#{adminLivrosBean.autoresId}" 
-				converter="javax.faces.Integer">
-			    <f:selectItems value="#{adminLivrosBean.autores}"
-			         var="autor"
-			         itemValue="#{autor.id}"
-			         itemLabel="#{autor.nome}" />
-			</h:selectManyListbox>
-		</div>
-        <h:commandButton value="Cadastrar" action="#{adminLivrosBean.salvar}" />
-        </div>
-    </h:form>
-    
+	<h:messages />
+	<div>
+		<h:outputLabel value="Título" />
+		<h:inputText value="#{adminLivrosBean.livro.titulo}" required="true"
+			requiredMessage="O Título é um campo obrigatório!" />
+	</div>
+	<div>
+		<h:outputLabel value="Descrição" />
+		<h:inputTextarea rows="4" cols="20"
+			requiredMessage="A Descrição é Obrigatória" required="true"
+			value="#{adminLivrosBean.livro.descricao}" />
+	</div>
+	<div>
+		<h:outputLabel value="Número de Páginas" />
+		<h:inputText value="#{adminLivrosBean.livro.numeroPaginas}"
+			required="true" requiredMessage="O Número de Páginas é Obrigatório">
+			<f:validateLongRange minimum="80" />
+		</h:inputText>
+	</div>
+	<div>
+		<h:outputLabel value="Preço" />
+		<h:inputText value="#{adminLivrosBean.livro.preco}" required="true"
+			requiredMessage="O Preço é Obrigatório">
+			<f:validateDoubleRange minimum="20" maximum="150" />
+		</h:inputText>
+	</div>
+	<div>
+		<h:outputLabel value="Autores" />
+		<h:selectManyListbox value="#{adminLivrosBean.autoresId}"
+			converter="javax.faces.Integer">
+			<f:selectItems value="#{adminLivrosBean.autores}" var="autor"
+				itemValue="#{autor.id}" itemLabel="#{autor.nome}" />
+		</h:selectManyListbox>
+	</div>
+	<h:commandButton value="Cadastrar" action="#{adminLivrosBean.salvar}" />
+</h:form>
+
 </html>
