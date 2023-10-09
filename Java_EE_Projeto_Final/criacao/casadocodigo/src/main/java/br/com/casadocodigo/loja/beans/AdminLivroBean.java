@@ -29,7 +29,7 @@ public class AdminLivroBean {
 	private List<Integer> autoresId = new ArrayList<>(); // fazemos new para evitar NullPointerException
 	
 	@Transactional
-	public void salvar() {
+	public String salvar() {
 		for(Integer autorId : autoresId){
 	         livro.getAutores().add(new Autor(autorId));
 	        }
@@ -38,6 +38,7 @@ public class AdminLivroBean {
         System.out.println("Livros = "+livro);
         this.livro = new Livro();
         this.autoresId = new ArrayList<>();
+        return "/livro/lista?faces-redirect=true";
     }
 	
 	public List<Autor> getAutores(){

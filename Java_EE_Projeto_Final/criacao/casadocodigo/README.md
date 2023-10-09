@@ -132,6 +132,20 @@ insert into Autor (nome) values ('Paulo Silveira'), ('Sérgio Lopes'), ('Guilher
 
 - [Doc Converters](https://docs.oracle.com/javaee/7/tutorial/jsf-page-core001.htm)
 
+### Problema ao redicionar
+- Ao redicionar do form para a lista e atualizar a página, faz o reenvio do form
+- Para resolver isso:
+- Resolveremos isto através de recursos do protocolo HTTP chamado de redirect. O redirect passa um http status - - - para o navegador carregar uma outra página e esquecer dos dados da requisição anterior. O http status que o navegador recebe é um 302.
+
+- Para isso devemos mudar o retorno do método salvar, que além do caminho que já retornava, retornará um parametro informando ao JSF para enviar um redirect ao navegado.
+
+```
+return "/livros/lista?faces-redirect=true";
+```
+
+> Para que ela serve e qual e quem é responsável por ela no JavaEE?
+- Garante que os dados enviados para o banco de dados serão salvos, abrindo e fechando a transação no momento correto. O JTA é a especificação responsável pelas transações no JavaEE.
+
 <a name="anc3"></a>
 
 ## Validando e Exibindo Mensagens no Formulário
