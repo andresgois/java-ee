@@ -149,6 +149,36 @@ return "/livros/lista?faces-redirect=true";
 <a name="anc3"></a>
 
 ## Validando e Exibindo Mensagens no Formulário
+- O JSF já tem um objeto responsável por mensagens, que é o FacesMessages. Temos que pegar este objeto e adicionar nele a nossa mensagem. Para adicionar uma mensagem no FacesMessage vamos precisar fazer uso de um outro objeto do JSF, o FacesContext, que é um objeto que nos dá todo o contexto do JSF e nos permitirá adicionar nossa mensagem, assim, usamos o FacesContext para adicionar um FacesMessage
+
+```
+@Transactional
+public String salvar() {
+      for (Integre autorID : autoresId) {
+        livro.getAutores().add(new Autro(autorId));
+    }
+    dao.salvar(livro);
+    FacesContext.getCurrentInstance()
+        .addMessage(null, new FacesMessage("Livro cadastrado com sucesso!"));
+
+    return "/livros/lista?faces-redirect=true";
+  }
+
+```
+- O JSF e qualquer framework MVC atual possui um escopo especial (muito rápido) que chamamos de Flash Scope. O Flash Scope começa em um request e termina no request seguinte.
+
+- Indo um pouco mais a fundo no Flash Scope, ele consegue aumentar o tempo de vida de um objeto usando a sessão do usuário, adicionando no primeiro request o objeto na sessão e ao fim do segundo request o próprio JSF se encarrega de remover o objeto da sessão. Para fazer uso do Flash Scope, precisamos setar uma informação no contexto do JSF. Dentro do método salvar, faremos o seguinte:
+
+```
+    // chamada do livroDao.salvar acima
+    FacesContext.getCurrentInstance().getExternalContext()
+        .getFlash().setKeepMessages(true); // Aqui estamos ativando o FlashScope
+    FacesContext.getCurrentInstance()
+        .addMessage(null, new FacesMessage("Livro cadastrado com sucesso!"));
+```
+
+> De que serve o Escopo de Flash que temos no JSF?
+- Serve para guardar valores na sessão, porém duram apenas de um request para o outro, sendo automaticamente retirados da sessão.
 
 <a name="anc4"></a>
 

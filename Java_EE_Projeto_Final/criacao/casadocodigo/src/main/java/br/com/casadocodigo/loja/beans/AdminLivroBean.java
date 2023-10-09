@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.transaction.Transactional;
@@ -38,6 +40,13 @@ public class AdminLivroBean {
         System.out.println("Livros = "+livro);
         this.livro = new Livro();
         this.autoresId = new ArrayList<>();
+        
+        // chamada do livroDao.salvar acima
+        FacesContext.getCurrentInstance().getExternalContext()
+            .getFlash().setKeepMessages(true); // Aqui estamos ativando o FlashScope
+        FacesContext.getCurrentInstance()
+            .addMessage(null, new FacesMessage("Livro cadastrado com sucesso!"));
+        
         return "/livro/lista?faces-redirect=true";
     }
 	
