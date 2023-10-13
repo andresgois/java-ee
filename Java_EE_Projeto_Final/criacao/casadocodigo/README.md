@@ -214,7 +214,25 @@ public class FacesContextProducer{
 
 - Validação no JSF é ligada ao componente porém possui algumas limitações a tipos de validações que o JSF já possui, enquanto que na Bean Validation temos uma variedade maior de validações, inclusive para regras de negócio como CPF, Título de Eleitor e até número do cartão de crédito. Por isso a Bean Validation acaba sendo mais poderosa e você ainda fica desacoplado do JSF.
 
+### Datas
+- Na entidade de Livri
+    - Já incia com a data atual
+```
+@Temporal(TemporalType.DATE)
+private Calendar dataPublicacao = Calendar.getInstance(); 
+```
 
+- O JSF não conhece o formato das datas
+```
+<div>
+    <h:outputLabel value="Data de Publicação" />
+    <h:inputText value="#{adminLivrosBean.livro.dataPublicacao.time}"
+            id="dataPublicacao">
+        <f:convertDateTime pattern="dd/MM/yyyy" />
+    </h:inputText>
+    <h:message for="dataPublicacao" />
+</div>
+```
 
 
 <a name="anc4"></a>
