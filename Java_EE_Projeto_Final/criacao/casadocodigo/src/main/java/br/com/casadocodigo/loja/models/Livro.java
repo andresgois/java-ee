@@ -39,12 +39,15 @@ public class Livro {
     private Integer numeroPaginas;
 	
 	@Temporal(TemporalType.DATE)
-	private Calendar dataPublicacao = Calendar.getInstance(); // Pegamos uma instância de Calendar
-    
+	private Calendar dataPublicacao;
+	//private Calendar dataPublicacao = Calendar.getInstance(); // Pegamos uma instância de Calendar
+	
     @ManyToMany
     @Size(min=1)
     @NotNull
     private List<Autor> autores = new ArrayList<>();
+    
+    private String capaPath;
     
 	public Livro() {
 	}
@@ -109,6 +112,14 @@ public class Livro {
 
 	public void setDataPublicacao(Calendar dataPublicacao) {
 		this.dataPublicacao = dataPublicacao;
+	}
+
+	public String getCapaPath() {
+		return capaPath;
+	}
+
+	public void setCapaPath(String capaPath) {
+		this.capaPath = capaPath;
 	}
     
 	

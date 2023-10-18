@@ -214,6 +214,11 @@ public class FacesContextProducer{
 
 - Validação no JSF é ligada ao componente porém possui algumas limitações a tipos de validações que o JSF já possui, enquanto que na Bean Validation temos uma variedade maior de validações, inclusive para regras de negócio como CPF, Título de Eleitor e até número do cartão de crédito. Por isso a Bean Validation acaba sendo mais poderosa e você ainda fica desacoplado do JSF.
 
+
+<a name="anc4"></a>
+
+## Data de Publicação e Converters
+
 ### Datas
 - Na entidade de Livri
     - Já incia com a data atual
@@ -228,20 +233,111 @@ private Calendar dataPublicacao = Calendar.getInstance();
     <h:outputLabel value="Data de Publicação" />
     <h:inputText value="#{adminLivrosBean.livro.dataPublicacao.time}"
             id="dataPublicacao">
-        <f:convertDateTime pattern="dd/MM/yyyy" />
-    </h:inputText>
+        <f:convertDateTime pattern="dd/MM/yyyy" timeZone="America/Sao_Paulo"/>    </h:inputText>
     <h:message for="dataPublicacao" />
 </div>
 ```
+### Criando o Proprio converter
+- Deixamos nosso campo de data normal com um input
+```
+<!-- Só o input simples -->
+<h:inputText value="#{adminLivrosBean.livro.dataPublicacao}"
+        id="dataPublicacao" />
+```
+
+- Esses dois métodos funcionam assim. Quando a informação está na tela, ela é uma String, nesse ponto o JSF chama o método **getAsString()** do nosso Converter. Quando está no ManagedBean é um Objeto que queremos, desta forma o JSF chama o método **getAsObject()**.
+```
+@FacesConverter(forClass=Calendar.class)
+public class CalendarConverter implements Converter {
+
+    private DateTimeConverter converter = new DateTimeConverter();
+
+    public CalendarConverter() {
+        converter.setPattern("dd/MM/yyyy");
+        converter.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
+    }
+
+    @Override
+    public Object getAsObject(FacesContext context,
+                UIComponent component, String dataTexto) {
+        Date data = (Date) converter.getAsObject(context, component, dataTexto);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(data);
+        return calendar;
+    }
+
+    @Override
+    public String getAsString(FacesContext context,
+                UIComponent component, Object dataObject) {
+        if (dataObject == null)
+            return null;
+
+        Calendar calendar = (Calendar) dataObject;
+        return converter.getAsString(context, component, calendar.getTime());
+    }
+}
+```
+
+- O que mais ganhamos com essa implementação do Converter? Ganhamos o uso de Calendar em qualquer entidade do sistema, sendo transformada para texto automaticamente pelo JSF, sem que tenhamos que nos preocupar com o formato e timeZone. Criamos um único objeto que já serve para todo o sistema.
+
+### Converter para Autor
+- Começaremos pelo método getAsObject()... Queremos recuperar o autor como um objeto, então faremos new Autor e da instância obtida, chamaremos o setId que recebe o id - basta transformar de String para Integer com Integer.valueOf. Já temos a ideia principal, só iremos verificar antes, se a String recebida não é nula ou vazia. O método ficará assim:
 
 
-<a name="anc4"></a>
+```
+public Object getAsObject(FacesContext context, UIComponent component, String id) {
+    if (id == null || id.trim().isEmpty()) 
+        return null;
 
-## Data de Publicação e Converters
+    Autor autor = new Autor();
+    autor.setId(Integer.valueOf(id));
+
+    return autor;
+}
+```
+- Seguiremos para o método getAsString() que fará justamente o inverso. Queremos recuperar o id do autor no formato String. Já recebemos o objeto Autor como Object, agora, faremos um casting de volta para Autor. Deste, chamaremos o getId e depois o toString() - para transformá-lo em texto. Se o objeto recebido estiver null, teremos uma NullPointerException, então, evitaremos esse caso desde o início do método.
+
+```
+public String getAsString(FacesContext context, UIComponent component, Object autorObject) {
+    if (autorObject == null)
+        return null;
+
+    Autor autor = (Autor) autorObject;
+    return autor.getId().toString();
+}
+```
+
+
 
 <a name="anc5"></a>
 
 ## Adicionando e Exibindo a Capa do Livro
+- É precisamos dizer no nosso formulário que queremos enviar arquivo por ele e não em formato de texto. Para isso, no formulário, adicionaremos o atributo enctype dentro do form. O código ficará assim:
+```
+<h:form enctype="multipart/form-data">
+```
+- Desejamos transferir arquivos, mas, anteriormente tínhamos que trabalhar com base em arrays de bytes ou FileInputStream - tudo feito manualmente. O JavaEE 7 nos trouxe um novo objeto que já tem a capacidade de salvar um arquivo dentro dele: o Part. Usaremos o tipo Part e, no método salvar(), realizaremos a transferência do arquivo recebido pelo formulário para o sistema operacional.
+
+- O tipo **Part** possui um método chamado write() que recebe uma String com o caminho onde queremos salvar o arquivo dentro do S.O.. Por isso, vamos passar o seguinte caminho: /casadocodigo/livros/, concatenando a isso o nome original do arquivo que nos foi enviado e pode ser obtido pelo código arquivo.getSubmittedFileName().
+
+```
+public class AdminLivrosBean {
+    // Os demais atributos ficam aqui, não alterar!
+    private Part capaLivro;
+    @Transactional
+    public String salvar() throws IOException {
+        dao.salvar(livro);
+        capaLivro.write("/casadocodigo/livros" + capaLivro.getSubmittedFileName());
+        // Mantenha o restante do método aqui
+    }
+    // Demais getter's e setter's, não alterar
+}
+```
+
+
+> Como ficou facilitado o upload de arquivos no JavaEE 7?
+- Através da tag <h:inputFile> que envia o arquivo selecionado para um objeto do tipo Part, facilitando a manipulação de arquivos no Bean.
+
 
 <a name="anc6"></a>
 
