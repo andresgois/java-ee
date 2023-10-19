@@ -18,7 +18,9 @@ import br.com.casadocodigo.loja.infra.FileSaver;
 @WebServlet("/file/*")
 public class FileServlet extends HttpServlet {
 
-    @Override
+    private static final long serialVersionUID = 1L;
+
+	@Override
     protected void service(HttpServletRequest req, HttpServletResponse res) 
                 throws ServletException, IOException {
         // código do tratamento do arquivo irá aqui!

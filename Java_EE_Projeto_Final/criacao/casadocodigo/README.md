@@ -501,3 +501,6 @@ public static void transfer(Path source, OutputStream outputStream) {
 <a name="anc6"></a>
 
 ## Criando a Home e o Detalhe do Livro
+
+- [Lista](http://localhost:8080/casadocodigo/livro/lista.xhtml)
+- [index](http://localhost:8080/casadocodigo/index.xhtml)
