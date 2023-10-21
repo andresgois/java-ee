@@ -12,6 +12,7 @@
 - [Adicionando e Exibindo a Capa do Livro](#anc5)
 - [Criando a Home e o Detalhe do Livro](#anc6)
 
+- [Site](http://localhost:8080/casadocodigo/index.xhtml)
 ##
 
 <a name="anc1"></a>
@@ -504,3 +505,83 @@ public static void transfer(Path source, OutputStream outputStream) {
 
 - [Lista](http://localhost:8080/casadocodigo/livro/lista.xhtml)
 - [index](http://localhost:8080/casadocodigo/index.xhtml)
+
+-  JSF carregar os detalhes do Livro antes de prosseguir com a página. Ainda dentro de <f:metadata>, coloque uma nova tag chamada <f:viewAction> com o atributo action apontando para #{livroDetalheBean.carregaDetalhe()}.
+
+```
+<f:metadata>
+    <f:viewParam id="id" name="id" value="#{livroDetalheBean.id}"/>
+    <f:viewAction action="#{livroDetalheBean.carregarDetalhe()}"/>
+</f:metadata>
+```
+
+-  Erro
+    - Caused by: org.hibernate.LazyInitializationException: failed to lazily initialize a collection of role: br.com.casadocodigo.loja.models.Livro.autores, could not initialize proxy - no Session
+- Resolução
+- Antes
+
+```
+public Livro buscarPorId(Integer id) {
+    return manager.find(Livro.class, id);
+}
+ 
+```
+- Depois
+
+```
+public Livro buscarPorId(Integer id) {
+		String jpql = "select l from Livro l join fetch l.autores "
+				+ " where l.id = :id";
+		return manager.createQuery(jpql, Livro.class)
+				.setParameter("id", id)
+				.getSingleResult();
+	}
+ 
+```
+
+- Para esse caso, precisamos fazer uso de um recurso que temos na especificação do JPA, que estende o contexto por mais tempo do que o normal, também conhecido como Extended Entity Manager.
+
+- Para ativar o contexto estendido do Entity Manager, vamos abrir nosso LivroDao, e dentro da annotation **@PersistenceContext** vamos colocar um atributo chamado type com o valor PersistenceContextType.EXTENDED. Pela especificação do JavaEE, para usar o EXTENDED, o nosso LivroDao precisará ser um EJB do tipo Statefull. Essa é uma dependência da especificação.
+
+- Assim, nosso LivroDao ficará assim:
+```
+@Stateful
+public class LivroDao {
+
+    @PersistenceContext(type=PersistenceContextType.EXTENDED)
+    private EntityManager manager;
+
+    // demais métodos abaixo
+}
+```
+
+- Essa annotation @Stateful torna nossa classe um Enterprise Java Bean. Os EJB's eram o centro das especificações JavaEE até a versão 6.0, quando chegou o CDI para ser essa camada intermediária que liga as partes do nosso sistema com o servidor.
+
+- Desde então o pessoal da Oracle vem tirando o poder concentrado nos EJB's e dividindo em pequenas outras especificações como a própria JPA, CDI, JMS, JTA e etc.
+
+- Dessa forma, estamos resolvendo o problema da conexão ser fechada, já que o incrementamos o contexto do Entity Manager. Essa é outra forma que temos de resolver o LazyInitializationException. Mas junto disso ganhamos mais uma coisa. Por exemplo, da forma como estamos fazendo, verifique no console a quantidade de selects que o Hibernate está fazendo para nós, e percebemos que temos apenas um select já com o join dos autores:
+
+- com isso, 2 selects, um em autor e outro no livro
+```
+public Livro buscarPorId(Integer id) {
+        return manager.find(Livro.class, id);
+}
+```
+
+![Quantidade de selects](../asserts/join-fetch-um-select.png)
+
+- Assim, planejar suas queries sempre tem um ganho a mais, nesse caso, menos consultas até o banco de dados, tornando a aplicação mais performática. Por isso é bem importante saber usar os recursos que temos disponíveis nas especificações, sabendo que JSF e JPA, apesar de ser relativamente fácil começar a programar nessas especificações, é importante saber o que está sendo feito. Não saber o correto funcionamento de uma especificação e quando usar certos recursos ou não, pode ser motivo de grandes problemas futuros.
+
+- Utilize os recursos do JavaEE com consciência e obtenha o máximo de produtividade no desenvolvimento do seu sistema.
+
+- Melhor maneira, apenas um select
+```
+public Livro buscarPorId(Integer id) {
+        String jpql = "select l from Livro l order by l.autores"
+                        + "where l.id = :id";
+        return manager.createQuery(jpql, Livro.class)
+                .setFirstResult("id", id);
+                .getSingleResult();
+
+}
+```

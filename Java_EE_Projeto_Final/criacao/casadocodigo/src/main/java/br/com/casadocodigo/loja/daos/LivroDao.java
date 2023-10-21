@@ -2,14 +2,17 @@ package br.com.casadocodigo.loja.daos;
 
 import java.util.List;
 
+import javax.ejb.Stateful;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
 
 import br.com.casadocodigo.loja.models.Livro;
 
+@Stateful
 public class LivroDao {
 
-	@PersistenceContext
+	@PersistenceContext(type = PersistenceContextType.EXTENDED)
     private EntityManager manager;
 	
     public void salvar(Livro livro) {
@@ -33,8 +36,16 @@ public class LivroDao {
 	public List<Livro> demaisLivros() {
         String jpql = "select l from Livro l order by l.dataPublicacao desc";
         return manager.createQuery(jpql, Livro.class)
-        		.setFirstResult(6)
+        		.setFirstResult(5)
                 .getResultList();
     }
+
+	public Livro buscarPorId(Integer id) {
+		String jpql = "select l from Livro l join fetch l.autores "
+				+ " where l.id = :id";
+		return manager.createQuery(jpql, Livro.class)
+				.setParameter("id", id)
+				.getSingleResult();
+	}
     
 }
