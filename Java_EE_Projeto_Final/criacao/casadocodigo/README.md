@@ -585,3 +585,6 @@ public Livro buscarPorId(Integer id) {
 
 }
 ```
+
+> O que são Planned Queries e porque usá-las em nossos sistemas?
+- São queries planejadas, onde já trazemos o objeto principal e os relacionamentos diretos que vamos fazer uso, junto do objeto principal. Usamos elas em nossos sistemas para evitar carregar dados depois de fechar uma conexão, por exemplo, otimizando inclusive a performance de busca.
