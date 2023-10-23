@@ -50,6 +50,8 @@ jsf:action="#{carrinhoComprasBean.add(livroDetalheBean.id)}"
 <input class="formularioDoCarrinho-item-quantidade" type="number" min="0" jsf:value="#{carrinhoCompras.itens[loop.index].quantidade}" />
 ```
 
+> Qual atributo da tag ui:repeat podemos utilizar para obter informações sobre a iteração, como o índice?
+- [varStatus](https://docs.oracle.com/javaee/7/javaserver-faces-2-2/vdldocs-facelets/ui/repeat.html)
 
 <a name="anc4"></a>
 
