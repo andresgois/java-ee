@@ -41,6 +41,15 @@ jsf:action="#{carrinhoComprasBean.add(livroDetalheBean.id)}"
 <a name="anc3"></a>
 
 ## Salvando a Compra com JSON
+- Como o CDI vai saber quais itens estão no carrinho? itens.quantidade é um array, então precisamos de um índice que nos é entregue por meio do **varStatus**
+```
+<ui:repeat value="#{carrinhoCompras.item}" var="carrinhoItem" varStatus="loop">
+```
+- Desse modo conseguimos ter o status (índice) atual em que o loop está iterado, logo:
+```
+<input class="formularioDoCarrinho-item-quantidade" type="number" min="0" jsf:value="#{carrinhoCompras.itens[loop.index].quantidade}" />
+```
+
 
 <a name="anc4"></a>
 

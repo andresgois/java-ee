@@ -45,7 +45,13 @@ public class CarrinhoCompras implements Serializable {
 	public void setItens(Set<CarrinhoItem> itens) {
 		this.itens = itens;
 	}
+
+	public void remover(CarrinhoItem item) {
+		this.itens.remove(item);
+	}
     
-    
+    public Integer getquantidadeTotal(){
+    	return itens.stream().mapToInt(item -> item.getQuantidade()).sum();
+    }
     
 }

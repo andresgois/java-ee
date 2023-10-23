@@ -7,7 +7,7 @@ public class CarrinhoItem {
 
     public CarrinhoItem(Livro livro) {
         this.setLivro(livro);
-        this.setQuantidade(1);
+        this.quantidade = 1;
     }
 
     public Livro getLivro() {
@@ -48,8 +48,6 @@ public class CarrinhoItem {
         } else if (!getLivro().equals(other.getLivro()))
             return false;
         return true;
-    }
-
-	
+    }	
 
 }
