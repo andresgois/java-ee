@@ -8,7 +8,11 @@ import java.util.List;
 import java.util.Set;
 
 import javax.enterprise.context.SessionScoped;
+import javax.inject.Inject;
 import javax.inject.Named;
+
+import br.com.casadocodigo.loja.daos.CompraDao;
+import br.com.casadocodigo.loja.daos.UsuarioDao;
 
 @SessionScoped
 @Named
@@ -16,6 +20,13 @@ public class CarrinhoCompras implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private Set<CarrinhoItem> itens = new HashSet<>();
+	
+    @Inject
+    private UsuarioDao usuarioDao;
+    
+    @Inject
+	private CompraDao compraDao;
+
 
     public void add(CarrinhoItem item) {
         itens.add(item);
@@ -53,5 +64,17 @@ public class CarrinhoCompras implements Serializable {
     public Integer getquantidadeTotal(){
     	return itens.stream().mapToInt(item -> item.getQuantidade()).sum();
     }
+
+	public void finalizar(Usuario usuario) {
+		Compra compra = new Compra();
+	    compra.setUsuario(usuario);
+	    //compra.setItens(getItens());
+	    compra.setItens(this.toJson());
+	    usuarioDao.salvar(usuario);
+	    compraDao.salvar(compra);	
+	}
     
+	public String toJson() {
+		return "{}";
+	}
 }
