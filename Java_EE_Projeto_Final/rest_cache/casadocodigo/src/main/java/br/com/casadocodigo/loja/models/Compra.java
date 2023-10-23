@@ -19,7 +19,8 @@ public class Compra {
     @ManyToOne(cascade=CascadeType.PERSIST)// salva usuário junto
     private Usuario usuario;
 
-    private List<CarrinhoItem> itens; 
+    //private List<CarrinhoItem> itens; 
+    private String itens;
     
     public Compra() {}
     
@@ -39,11 +40,11 @@ public class Compra {
         this.usuario = usuario;
     }
 
-    public List<CarrinhoItem> getItens() {
+    public String getItens() {
         return itens;
     }
 
-    public void setItens(List<CarrinhoItem> itens) {
+    public void setItens(String itens) {
         this.itens = itens;
     }
 }

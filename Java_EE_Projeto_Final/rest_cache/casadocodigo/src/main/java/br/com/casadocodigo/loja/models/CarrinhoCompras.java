@@ -10,6 +10,8 @@ import java.util.Set;
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
 
 import br.com.casadocodigo.loja.daos.CompraDao;
 import br.com.casadocodigo.loja.daos.UsuarioDao;
@@ -70,11 +72,22 @@ public class CarrinhoCompras implements Serializable {
 	    compra.setUsuario(usuario);
 	    //compra.setItens(getItens());
 	    compra.setItens(this.toJson());
-	    usuarioDao.salvar(usuario);
+	    //usuarioDao.salvar(usuario);
 	    compraDao.salvar(compra);	
 	}
     
 	public String toJson() {
-		return "{}";
+		JsonArrayBuilder builder = Json.createArrayBuilder();
+	    for (CarrinhoItem item : itens) {
+	        builder.add(Json.createObjectBuilder()
+	                .add("titulo", item.getLivro().getTitulo())
+	                .add("preco", item.getLivro().getPreco())
+	                .add("quantidade", item.getQuantidade())
+	                .add("total", getTotal(item)));
+	    }
+	    String json = builder.build().toString();
+	    System.out.println(json);
+
+	    return json;
 	}
 }

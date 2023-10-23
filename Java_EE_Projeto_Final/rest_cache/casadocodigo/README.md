@@ -49,6 +49,41 @@ jsf:action="#{carrinhoComprasBean.add(livroDetalheBean.id)}"
 ```
 <input class="formularioDoCarrinho-item-quantidade" type="number" min="0" jsf:value="#{carrinhoCompras.itens[loop.index].quantidade}" />
 ```
+-  vamos transformar os itens em JSON. Para isso será utilizada uma API disponível no [Java EE 7](https://javaee.github.io/jsonp/)
+
+- Para que seja possível acessar as APIs enquanto desenvolvemos (o Wildfly possui uma implementação para quando formos executar o projeto), adicione a seguinte dependência no pom.xml:
+
+```
+<dependency>
+    <groupId>javax</groupId>
+    <artifactId>javaee-api</artifactId>
+    <version>7.0</version>
+    <scope>provided</scope>
+</dependency>
+```
+
+- O primeiro passo é criar um JsonArrayBuilder por meio da chamada Json.createArrayBuilder().
+
+- Em seguida é necessário iterar pelos itens do carrinho e adicioná-los ao builder. Para cada item do carrinho criamos um objeto JSON, e adicionamos os valores por meio de chamadas ao método add().
+
+- Por fim construímos o builder por meio da chamada ao método build() e convertemos para String por meio da chamada ao toString():
+
+```
+private String toJson() {
+    JsonArrayBuilder builder = Json.createArrayBuilder();
+
+    for (CarrinhoItem item : itens) {
+        builder.add(Json.createObjectBuilder()
+            .add("titulo", item.getLivro().getTitulo())
+            .add("preco", item.getLivro().getPreco())
+            .add("quantidade", item.getQuantidade())
+            .add("total", getTotal(item))
+        );
+    }
+
+    return builder.build().toString();
+}
+```
 
 > Qual atributo da tag ui:repeat podemos utilizar para obter informações sobre a iteração, como o índice?
 - [varStatus](https://docs.oracle.com/javaee/7/javaserver-faces-2-2/vdldocs-facelets/ui/repeat.html)
