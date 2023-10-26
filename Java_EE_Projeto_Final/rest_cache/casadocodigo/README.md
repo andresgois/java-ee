@@ -92,6 +92,25 @@ private String toJson() {
 
 ## Usando serviços REST e requisições Assíncronas
 
+### Fazendo a requisição para um servidor externo
+- Primeiro precisamos de um cliente que faça tal requisição. Então, no CarrinhoCompras.java, dentro do finalizar()
+- Vamos pegar esse client do JAX-RS e realizar o pagamento:
+- Já já vamos trabalhar em cima desse Pagamento. Agora iremos dizer qual o target dele, que seria o endereço que utilizamos no DHC:
+- A Classe "Entity" do JAX-RS é quem faz a transformação de um determinado objeto para Json para assim ser enviado:
+- para que possamos fazer a ligação do alvo (target) com o Json, precisamos de uma requisição (request):
+
+```
+Client client = ClientBuilder.newClient();
+Pagamento pagamento = new Pagamento(getTotal());
+String target = "http://book-payment.herokuapp.com/payment";
+Entity<Pagamento> json = Entity.json(pagamento);
+WebTarget webTarget = client.target(target);
+Builder request = webTarget.request();
+request.post(json, String.class);
+Builder request = webtarget.request();
+String response = request.post(json, String.class);
+
+```
 
 <a name="anc5"></a>
 
