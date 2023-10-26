@@ -111,6 +111,16 @@ Builder request = webtarget.request();
 String response = request.post(json, String.class);
 
 ```
+- Refatorando
+
+```
+public String pagar(BigDecimal total) {
+    Pagamento pagamento = new Pagamento(total);
+    String target = "http://book-payment.herokuapp.com/payment";
+    Client client = ClientBuilder.newClient();
+    return client.target(target).request().post(Entity.json(pagamento), String.class);
+}
+```
 
 <a name="anc5"></a>
 
