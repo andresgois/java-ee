@@ -12,15 +12,9 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.client.WebTarget;
 
 import br.com.casadocodigo.loja.daos.CompraDao;
 import br.com.casadocodigo.loja.daos.UsuarioDao;
-import br.com.casadocodigo.loja.service.PagamentoGateway;
 
 @SessionScoped
 @Named
@@ -35,10 +29,6 @@ public class CarrinhoCompras implements Serializable {
     @Inject
 	private CompraDao compraDao;
     
-    @Inject
-    private PagamentoGateway pagamentoGateway;
-
-
     public void add(CarrinhoItem item) {
         itens.add(item);
     }
@@ -76,9 +66,8 @@ public class CarrinhoCompras implements Serializable {
     	return itens.stream().mapToInt(item -> item.getQuantidade()).sum();
     }
 
-	public void finalizar(Usuario usuario) {
-		Compra compra = new Compra();
-	    compra.setUsuario(usuario);
+	public void finalizar(Compra compra) {
+		
 	    //compra.setItens(getItens());
 	    compra.setItens(this.toJson());
 	    //usuarioDao.salvar(usuario);
@@ -91,8 +80,9 @@ public class CarrinhoCompras implements Serializable {
 	    WebTarget webTarget = client.target(target);
 	     Builder request = webTarget.request();
 	    request.post(json, String.class);*/
-	    String response = pagamentoGateway.pagar(getTotal());
-	    System.out.println(response);
+	    //String response = pagamentoGateway.pagar(getTotal());
+	    //System.out.println(response);
+	    
 	}
     
 	public String toJson() {

@@ -17,7 +17,8 @@ public class LivroDetalheBean {
 	private Integer id;
 	
 	public void carregarDetalhe() {
-		this.setLivro(dao.buscarPorId(getId()));
+		Livro livro = dao.buscarPorId(getId());
+		this.setLivro(livro);
 	}
 
 	public Integer getId() {

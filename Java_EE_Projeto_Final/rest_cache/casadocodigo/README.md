@@ -122,6 +122,46 @@ public String pagar(BigDecimal total) {
 }
 ```
 
+- Quando clicamos em "Finalizar compra" após inserir os dados do cliente, as informações são enviadas para o banco de dados, a requisição é feita em um sistema externo de pagamento e retornando para nosso sistema. Este é um fluxo ao qual damos o nome de síncrono. A ideia aqui será transformá-lo em assíncrono.
+
+- Acontece que o JSF não suporta esse tipo de fluxo, a não ser que criemos uma nova *Thread utilizando a criação de objeto dinâmico do Java 8:
+
+- Essa solução é bem primitiva então não vamos utilizá-la. Em vez disso, façamos algumas alterações no código:
+- A parte que retiramos do código irá para o CheckoutBean.java:
+- o service/pagamento não será uma página do JSF. Não é pagamento.xhtml e o JSF só trata chamadas de um outro serviço se este for gerenciado pelo servlet do próprio JSF. Logo, o que queremos fazer de fato, é pegar o response, tratá-lo e enviá-lo para outro local. Para isso podemos usar o facesContext:
+- Mas iremos utilizar o JSF para que ele possa nos entregar o response:
+- O próximo passo é dizer para o response qual a URL:
+- Para que o navegador não apresente para o usuário essa URL com o Id, podemos utilizar um código:
+- O código 307 vai nos permitir fazer um redirect temporário mantendo o método que foi invocado.
+
+- Apesar de não termos o serviço que atende a requisição service/pagamento - ficará para um segundo momento - vamos testar essa chamada de serviço. Passando por todo o processo de compra novamente caimos nessa tela:
+
+![404](../../../asserts/404.png)
+
+- Perceba que se temos ali na URL id=7, provavelmente existirá ids com numeração mais baixa, por exemplo. Ou seja, podemos modificar a URL com outros ids e descobrir informações de pagamentos de outros usuários!
+
+- Para resolver este problema de segurança podemos utilizar outro tipo de identificador, o uuid (Universally Unique Identifier):
+
+- O UUID será gerado no momento em que pedimos para que o objeto compra persista. Existe uma Classe "UUID" no Java:
+- Dessa forma será gerado o UUID de maneira aleatória e transformá-lo em String.
+
+- Agora precsamos informar para o Entity Manager que, antes de persistir, é necessário chamar o método que acabamos de criar:
+
+```
+@PrePersist
+public void createUUID() {
+    this.uuid = UUID.randomUUID().toString();
+}
+```
+
+- Isso é feito através da API de callback do Entity Manager, a qual possui outras diversas anotations.
+
+- Testando e passando novamento por todo o processo de finalizar compra, temos o UUID na URL:
+
+### COnfigurando o JAX-RS
+- O @ApplicationPath indica o caminho que será atendido. E em finalizar(), não precisamos chamar manualmente o 307:
+
+
 <a name="anc5"></a>
 
 ## Conhecendo e Utilizando Cache no JavaEE
