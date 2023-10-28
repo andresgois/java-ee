@@ -14,7 +14,6 @@ import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 
 import br.com.casadocodigo.loja.daos.CompraDao;
-import br.com.casadocodigo.loja.daos.UsuarioDao;
 
 @SessionScoped
 @Named
@@ -22,10 +21,7 @@ public class CarrinhoCompras implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private Set<CarrinhoItem> itens = new HashSet<>();
-	
-    @Inject
-    private UsuarioDao usuarioDao;
-    
+	    
     @Inject
 	private CompraDao compraDao;
     
@@ -71,6 +67,7 @@ public class CarrinhoCompras implements Serializable {
 	    //compra.setItens(getItens());
 	    compra.setItens(this.toJson());
 	    //usuarioDao.salvar(usuario);
+	    //compra.setTotal(getTotal());
 	    compraDao.salvar(compra);
 	    
 	    /*Client client = ClientBuilder.newClient();

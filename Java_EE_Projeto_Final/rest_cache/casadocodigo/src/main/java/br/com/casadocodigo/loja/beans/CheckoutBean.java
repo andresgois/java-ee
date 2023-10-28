@@ -13,29 +13,25 @@ import br.com.casadocodigo.loja.models.Usuario;
 @Model
 public class CheckoutBean {
 
-	@Inject
-    private Usuario usuario;
+    private Usuario usuario = new Usuario();
 
     @Inject
-    private CarrinhoCompras carrinhoCompras;
+    private CarrinhoCompras carrinho;
     
     @Inject
     private FacesContext facesContext;
 
     @Transactional
     public void finalizar() {
-    	Compra compra = new Compra();
-	    compra.setUsuario(usuario);
-    	carrinhoCompras.finalizar(compra);
-    	
-    	String contextName = facesContext.getExternalContext().getRequestContextPath();    
-	    HttpServletResponse response = (HttpServletResponse) 
-	    	facesContext.getExternalContext().getResponse();
-	    //response.setStatus(307);
-	    response.setStatus(HttpServletResponse.SC_TEMPORARY_REDIRECT);
-	    //response.setHeader("Location", "/"+contextName+"/service/pagamento?id="+compra.getId());
-	    response.setHeader("Location", "/"+contextName
-	    		+"/services/pagamento?uuid="+compra.getUuid());
+    	Compra compra = new Compra(); 
+		compra.setUsuario(usuario);
+		carrinho.finalizar(compra);
+		
+		String contextName = facesContext.getExternalContext().getRequestContextPath();
+		HttpServletResponse response = (HttpServletResponse) facesContext.getExternalContext().getResponse();
+		response.setStatus(HttpServletResponse.SC_TEMPORARY_REDIRECT);
+		response.setHeader("Location", contextName+"/services/pagamento?uuid="+compra.getUuid());
+		System.out.println(contextName+"/services/pagamento?uuid="+compra.getUuid());
     }
     
     public Usuario getUsuario() {
