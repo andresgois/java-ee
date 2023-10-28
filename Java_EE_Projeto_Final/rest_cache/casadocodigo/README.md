@@ -286,3 +286,12 @@ public class Livro {
     //...
 }
 ```
+
+- Ok, conseguimos cachear os livros na página inicial. Porém ao entrarmos na página de detalhes de um livro, percebemos que é feito um SELECT fazendo join de autor. O livro não foi carregado novamente, mas o autor sim.
+
+- Mudando completamente de assunto: habilitamos no video anterior, para o JPA, um shared-cache-mode marcado como ENABLE_SELECTIVE porque quisemos selecionar quem queremos cachear. Acontece que nós queremos cachear todas as entidades do sistema, logo:
+
+```
+<shared-cache-mode>ALL</shared-cache-mode>
+```
+- Dessa forma não precisamos ficar marcando uma a uma as entidades com o @Cacheable. Mas será que é uma boa? E se alguma entidade não pode ser cacheada por ter um tempo de atualização maior e necessita ter o dado sempre "fresco" (fresh data) do banco de dados?
