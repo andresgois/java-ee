@@ -79,13 +79,14 @@ public class PagamentoService {
 	@POST
     public void pagar(@Suspended final AsyncResponse ar,@QueryParam("uuid") String uuid) {
         Compra compra = compraDao.buscaPorUuid(uuid);
+        String contextPath = context.getContextPath();
         
         executor.submit(() -> {
             	try {
 					pagamentoGateway.pagar(compra.getTotal());
 					// pra onde vai
 					URI reposnseUri = UriBuilder
-							.fromPath("http://localhost:8080" + context.getContextPath() + "/index.xhtml")
+							.fromPath("http://localhost:8080" + contextPath + "/index.xhtml")
 							.queryParam("msg", "Compra realizada com sucesso!").build();
 					Response response = Response.seeOther(reposnseUri).build();
 					// encerrou, então envia a resposta
