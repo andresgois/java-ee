@@ -83,10 +83,12 @@ public class PagamentoService {
         executor.submit(() -> {
             	try {
 					pagamentoGateway.pagar(compra.getTotal());
+					// pra onde vai
 					URI reposnseUri = UriBuilder
 							.fromPath("http://localhost:8080" + context.getContextPath() + "/index.xhtml")
 							.queryParam("msg", "Compra realizada com sucesso!").build();
 					Response response = Response.seeOther(reposnseUri).build();
+					// encerrou, então envia a resposta
 					ar.resume(response);
 				} catch (Exception e) {
 					ar.resume(new WebApplicationException(e));
