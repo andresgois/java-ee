@@ -187,6 +187,37 @@ public Response pagar(@QueryParam("uuid") String uuid) {
 }
 ```
 
+- Veremos como deixar o service executando de forma assíncrona! Para isso usaremos a API de assíncrono do Java EE 7. Ele já disponibiliza um objeto chamado Executor Service que nos deixará executar por meio de um pool de conexões.
+- O 50 é a quantidade de Threads que queremos que sejam criadas pelo executor. Ele permite criar esse Pool de threads autogerenciável pelo Java.
+```
+private static ExecutorService executor = Executors.newFixedThreadPool(50);
+```
+- Porém, por si só, o executor não faz toda essa mágica. Precisamos chamá-lo dentro do método pagar() com um método submit() com um Runnable:
+- Foi criado automaticamente o método run() através da classe anônima. No java 8 podemos fazer tudo isso através de Lambda Expressions:
+- Agora que essa execução está sendo feita de forma assíncrona, precisamos notificar o servidor de que a requisição acabou. Fazemos isso atrave´s de um novo objeto que o método pagar()recebe como parâmetro: **@Suspended final AsyncResponse ar**
+- Estamos integrando, de forma automática, a API de ocorrência do Java com o JAX-RS. Temos que dizer também que a Response pode controlar a suspenção:
+- O **@Suspended** notifica o sevidor que tota a execução desse método deve ser feita em um contexto assíncrono, ou seja, vai liberar o servidor para executar outras tarefas. Depois de ser feita toda a requisição é chamado o ar.resume(response).
+
+
+```
+@POST
+public void pagar(@Suspended final AsyncResponse ar,@QueryParam("uuid") String uuid) {
+    Compra compra = compraDao.buscaPorUuid(uuid);
+    executor.submit(() -> {
+        try {
+            pagamentoGateway.pagar(compra.getTotal());
+            URI reposnseUri = UriBuilder
+                    .fromPath("http://localhost:8080" + context.getContextPath() + "/index.xhtml")
+                    .queryParam("msg", "Compra realizada com sucesso!").build();
+            Response response = Response.seeOther(reposnseUri).build();
+            ar.resume(response);
+        } catch (Exception e) {
+            ar.resume(new WebApplicationException(e));
+        }
+    });
+}
+```
+
 <a name="anc5"></a>
 
 ## Conhecendo e Utilizando Cache no JavaEE
