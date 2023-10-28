@@ -6,6 +6,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
 
+import javax.persistence.Cacheable;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -23,6 +24,7 @@ import javax.validation.constraints.Size;
 import org.hibernate.validator.constraints.Length;
 
 @Entity
+@Cacheable
 public class Livro {
 
 	@Id

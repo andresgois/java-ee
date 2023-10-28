@@ -221,3 +221,68 @@ public void pagar(@Suspended final AsyncResponse ar,@QueryParam("uuid") String u
 <a name="anc5"></a>
 
 ## Conhecendo e Utilizando Cache no JavaEE
+
+### Cacheando a aplicação
+- Em LivroDao.java temos dois métodos, o ultimosLancamentos() e o demaisLivros(). Podemos fazer com que as queries vão para o cache, usando o setHint().
+
+```
+public List<Livro> ultimosLancamentos() {
+    String jpql = "select l from Livro l order by l.id desc";
+    return manager.createQuery(jpql, Livro.class)
+    .setMaxResults(5)
+    .setHint(QueryHintsHINT_CACHEABLE, true).getResultList();
+}
+```
+- O JPA é o responsável por pegar os dados na nossa aplicação, mas a especificação é o Hibernate e ele precisa saber que queremos fazer cache desses dados na memória da aplicação. Por isso pedimos para que o resultado da query seja mantido. A Classe "QueryHints" não foi carregada, devemos então fazer isso no pom.xml colocando mais algumas dependências:
+
+```
+<dependency>
+    <groupId>org.hibernate.javax.persistence</groupId>
+    <artifactId>hibernate-jpa-2.1-api</artifactId>
+    <version>1.0.0.Draft-16</version>
+    <scope>provided</scope>
+</dependency>
+
+<dependency>
+    <groupId>javax.transaction-api</groupId>
+    <artifactId>javax.transaction-api</artifactId>
+    <version>1.2</version>
+    <scope>provided</scope>
+</dependency>
+
+<dependency>
+    <groupId>org.hibernate</groupId>
+    <artifactId>hibernate-core</artifactId>
+    <version>4.3.10.Final</version>
+    <scope>provided</scope>
+</dependency>
+
+<dependency>
+    <groupId>org.hibernate</groupId>
+    <artifactId>hibernate-entitymanager</artifactId>
+    <version>4.3.10.Final</version>
+    <scope>provided</scope>
+</dependency>
+```
+- Todas as APIs que iremos carregar em cima das dependências já as temos de fato na aplicação porque o Wildfly já faz isso.
+
+- Fazendo um teste, ainda vemos duas queries por acesso, o que queremos será sempre duas queries não importando quantos acessos existam. O Hibernate precisa que digamos explicitamente que queremos fazer cache com as queries.
+
+- Vamos abrir o persistence.xml, que é onde fazemos as configurações de cache, e falar para o Hibernate que queremos fazer cache dessas queries, dentro de uma property:
+- Dessa forma usaremos o cache para query. Mas o JPA também precisa saber que queremos cachear, então usamos a opção shared-cache-mode habilitando seletivamente:
+
+``````
+<shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
+<properties>
+    <property name="hibernate.cache.use_query_cache" value="true"/>
+    //...
+</property>
+``````
+- Para resolver esse problema precisamos falar que as entidades serão cacheadas, ou seja, os Livros. Logo, abrimos o Livro.java e anotamos a Classe "Livro" com @Cacheable:
+```
+@Entity
+@Cacheable
+public class Livro {
+    //...
+}
+```
