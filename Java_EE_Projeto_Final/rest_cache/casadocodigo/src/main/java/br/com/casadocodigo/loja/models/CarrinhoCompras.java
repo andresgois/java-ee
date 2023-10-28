@@ -67,7 +67,7 @@ public class CarrinhoCompras implements Serializable {
 	    //compra.setItens(getItens());
 	    compra.setItens(this.toJson());
 	    //usuarioDao.salvar(usuario);
-	    //compra.setTotal(getTotal());
+	    compra.setTotal(getTotal());
 	    compraDao.salvar(compra);
 	    
 	    /*Client client = ClientBuilder.newClient();

@@ -161,6 +161,31 @@ public void createUUID() {
 ### COnfigurando o JAX-RS
 - O @ApplicationPath indica o caminho que será atendido. E em finalizar(), não precisamos chamar manualmente o 307:
 
+### Em Pagamento service
+- Primeira parte, enviando o total para pagamentoGateway
+- Enviar de onde estamos, no caso tela de "checkout" para o index
+    - *fromPath* : de qual path vai enviar
+- *seeOther* : para outra URI
+- Isso tudo faz, pega a API do JAX-RS e cria uma resposta
+
+```
+@POST
+public Response pagar(@QueryParam("uuid") String uuid) {
+    System.out.println("Aqui");
+    System.out.println(uuid);
+    
+    Compra compra = compraDao.buscaPorUuid(uuid);
+    pagamentoGateway.pagar(compra.getTotal());
+    
+    URI reposnseUri = UriBuilder.fromPath("http://localhost:8080"+
+            context.getContextPath()+"/index.xhtml")
+            .queryParam("msg","Compra realizada com sucesso!")
+            .build();
+    Response response = Response.seeOther(reposnseUri).build();
+            
+    return response;
+}
+```
 
 <a name="anc5"></a>
 
