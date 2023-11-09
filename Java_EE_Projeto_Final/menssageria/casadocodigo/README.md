@@ -38,6 +38,69 @@ Could not find MessageBodyWriter for response object of type: java.util.ArrayLis
 <a name="anc2"></a>
 
 ## Envie e-mails para o usuário
+```
+public class MailSender {
+
+	@Resource(mappedName = "java:/jboss/mail/gmail")
+	private Session session;
+
+	public void send(String from, String to, String subject, String body) {
+		MimeMessage message = new MimeMessage(session);
+		try {
+			message.setRecipients(javax.mail.Message.RecipientType.TO, 
+					InternetAddress.parse(to));
+			message.setFrom(new InternetAddress(from));
+			message.setSubject(subject);
+			message.setContent(body, "text/html");
+			
+			Transport.send(message);
+		} catch (MessagingException e) {
+			e.printStackTrace();
+		}
+	}	
+}
+```
+- Crie um MimeMessage que recebe um Session no construtor.
+- Iremos receber o Session como um recurso da aplicação. Utilize a anotação @Resource, passando o nome da JNDI que será associada ao recurso:
+- **@Resources** por que não usar o @Inject?
+    - Isso ocorreu porque ainda não é possível utilizar a anotação @Inject para injetar um componente quem vem de um recurso mapeado via JNDI.
+    - sempre que agente usa um recurso que é capitado pelo JNDI o defaul do Java EE é usar o *resource*
+    - já procura as configurações automáticas
+
+- Para que a injeção do objeto Session definido na classe MailSender funcione, é necessário que você adicione algumas configurações no arquivo standalone-full.xml no Wildfly.
+
+- Esse arquivo fica DIRETORIO-DO-WILDLY/standalone/configuration, e pode ser acessado pelo Eclipse, a aba Servers:
+- Encontre a tag <mail-session> dentro do arquivo:
+
+- Adicione a sua configuração de envio de e-mail. Para o nome de usuário e senha, adicione um e-mail e senha de alguma conta sua, para que você possa testar o envio de e-mails:
+
+```
+<subsystem xmlns="urn:jboss:domain:mail:2.0">
+    <mail-session name="default" jndi-name="java:jboss/mail/Default">
+        <smtp-server outbound-socket-binding-ref="mail-smtp" />
+    </mail-session>
+    <mail-session name="gmail" jndi-name="java:jboss/mail/gmail">
+        <smtp-server outbound-socket-binding-ref="mail-smtp-gmail"
+            ssl="true" username="SEU-NOME-DE-USUARIO" password="SUA-SENHA" />
+    </mail-session>
+</subsystem>
+```
+- O atributo outbound-socket-binding-ref faz referência a um "mail-smtp-gmail". Então precisamos adicionar essa configuração, onde vamos adicionar detalhes como o host e a porta utilizados pelo Gmail. Busque por outbound-socket-binding:
+- E adicione o mail-smtp-gmail:
+```
+<socket-binding-group name="standard-sockets"
+    <!-- código omitido -->
+    <outbound-socket-binding name="mail-smtp">
+        <remote-destination host="localhost" port="25" />
+    </outbound-socket-binding>
+    <outbound-socket-binding name="mail-smtp-gmail">
+        <remote-destination host="smtp.gmail.com" port="465" />
+    </outbound-socket-binding>
+</socket-binding-group>
+```
+
+- No seu email, acesse a página de segurança e selecione a opção "Permitir aplicações menos seguras", para que seja possível enviar o e-mail através da nossa aplicação.
+
 
 <a name="anc3"></a>
 
