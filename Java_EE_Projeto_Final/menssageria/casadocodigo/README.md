@@ -101,6 +101,14 @@ public class MailSender {
 
 - No seu email, acesse a página de segurança e selecione a opção "Permitir aplicações menos seguras", para que seja possível enviar o e-mail através da nossa aplicação.
 
+### JMS
+
+- Dentro do JMS temos dois tipos de mensagens assíncronas que podemos enviar:
+
+    - Tópico (topic): lista de discussão, como grupo de e-mail ou whatsapp, onde todos recebem a mesma mensagem.
+    - Fila (queue): envia um e-mail para o primeiro da fila, o segundo poderá receber outra mensagem, diferente do Tópico.
+- O /jms abre o contexto JMS no Wildfly, mas o /topics é aleatório, podendo ser substituído por, por exemplo, /topic ou /topico.
+- Temos então o Destination sendo injetado e o envio da mensagem pelo producer.send(destination, compra.getUuid()). O próximo passo configuraremos quem irá ouvir (listener) a mensagem.
 
 <a name="anc3"></a>
 
