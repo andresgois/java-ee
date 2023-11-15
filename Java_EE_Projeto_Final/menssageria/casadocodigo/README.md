@@ -377,6 +377,55 @@ public class ConfigureJMSDestination {
 
 - Reinicie o servidor e tente acessar a lista de livros (http://localhost:8080/casadocodigo/livros/lista.xhtml) e em seguida se logar na aplicação com o e-mail e senha(sem criptografia) que você cadastrou.
 
+### Exibindo demais dados do usuário
+- A forma mais fácil de todas é utilizarmos o c:if. O c:if já é conhecido, você usou o JSTL. O JSTL pode ser utilizado em alguns momentos. Por exemplo: quando nós queremos pegar alguma informação, verificar alguma informação desde que numa determinada tela ele não influencie o ciclo de vida do JSF.
+
+- Agora precisamos verificar se o usuário tem acesso a administração, pois caso não, não vamos exibir o link. Vamos fazer isso utilizando a taglib c:if:
+
+```
+<c:if test="#{currentUser.hasRole('ADMIN')}">
+    <li class="colecoesDaCDC-colecaoItem">
+        <a href="#{request.contextPath}/livros/lista.xhtml" class="colecoesDaCDC-colecaoLink">
+            Administração
+        </a>
+    </li>
+</c:if>
+```
+
+#### Usuário logado
+```
+
+@Model
+public class CurrentUser {
+
+	@Inject
+	private HttpServletRequest request;
+
+	@Inject
+	private SecurityDao securityDao;
+
+	private SystemUser systemUser;
+
+	public SystemUser get() {
+		return systemUser;
+	}
+	
+	public boolean hasRole(String role) {
+		return request.isUserInRole(role);
+	}
+
+	@PostConstruct
+	private void loadSystemUser() {
+		Principal principal = request.getUserPrincipal();
+		if (principal != null) {
+			String email = request.getUserPrincipal().getName();
+			systemUser = securityDao.findByEmail(email);
+		}
+	}
+
+}
+```
+
 <a name="anc5"></a>
 
 ## Utilizando template
