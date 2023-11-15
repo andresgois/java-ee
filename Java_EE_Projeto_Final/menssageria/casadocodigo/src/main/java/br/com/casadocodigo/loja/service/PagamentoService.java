@@ -40,13 +40,17 @@ public class PagamentoService {
 	private MailSender mailSender;
 	
 	/**
-	 * Em geral usamos o JMS (Java Messaging Service) para fazer o assíncrono no Java. O JMS é uma especificação do Java EE com a qual temos a capacidade de enviar uma mensagem assíncrona. Para isso precisamos que o JMS passe por algumas configurações via annotations e um contexto do JMS dentro de pagamentoService.java:
+	 * Em geral usamos o JMS (Java Messaging Service) para fazer o assíncrono no Java. O JMS é uma 
+		especificação do Java EE com a qual temos a capacidade de enviar uma mensagem assíncrona. Para isso 
+		precisamos que o JMS passe por algumas configurações via annotations e um contexto do JMS dentro de 
+		pagamentoService.java:
 	 */
 	@Inject
 	private JMSContext jmsContext;
 	
 	/**
-	 * O destination é criado e configurado pelo servidor, mas em tempo de execução é criado pelo próprio servidor e o servidor precisa colocá-lo para nós, logo:
+	 * O destination é criado e configurado pelo servidor, mas em tempo de execução é criado pelo 
+	 * próprio servidor e o servidor precisa colocá-lo para nós, logo:
 	 */
 	@Resource(name="java:/jms/topics/CarrinhoComprasTopico")
 	private Destination destination;
@@ -102,7 +106,9 @@ public class PagamentoService {
         String contextPath = context.getContextPath();
         
         /*
-         * O JMSContext é um objeto que tem toda a comunicação com o servidor. Com o contexto do JMS podemos criar a mensagem. Para isso precisaremos de um produtor e de um "ouvidor" (listener) dessa mensagem. Então, dentro do método pagar() fazemos:
+         * O JMSContext é um objeto que tem toda a comunicação com o servidor. Com o contexto do JMS 
+         * podemos criar a mensagem. Para isso precisaremos de um produtor e de um "ouvidor" (listener) 
+         * dessa mensagem. Então, dentro do método pagar() fazemos:
          */
         JMSProducer producer = jmsContext.createProducer();
         
@@ -110,7 +116,7 @@ public class PagamentoService {
             	try {
 					pagamentoGateway.pagar(compra.getTotal());
 					
-					producer.send(destination, "olá");
+					producer.send(destination, compra.getUuid());
 					//enviaEmailELiberaOMeuUsuario();
 					
 					// pra onde vai

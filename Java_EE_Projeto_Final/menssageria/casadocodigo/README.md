@@ -110,6 +110,31 @@ public class MailSender {
 - O /jms abre o contexto JMS no Wildfly, mas o /topics é aleatório, podendo ser substituído por, por exemplo, /topic ou /topico.
 - Temos então o Destination sendo injetado e o envio da mensagem pelo producer.send(destination, compra.getUuid()). O próximo passo configuraremos quem irá ouvir (listener) a mensagem.
 
+### Entendendo o message driven
+
+- Vamos tentar capturar a mensagem que estamos enviando de maneira que possamos, de fato, enviar o e-mail. Para isso usaremos a Classe EnviaEmailCompra. Ela será bastante modificada em relação a como está agora. ela tem uma configuração diferente para que se consiga receber as mensagens. Já discutimos alguns conceitos do JMS, como o assíncrono que o servidor executa e aquele que liberamos o usuário para que outras operações sejam executadas em background. Focaremos agora em resolver de fato o listener. A primeira implementação será anotar a Classe com @MessageDriven():
+- O pacote dele é "javax.ejb". O @MessageDriven() é um EJB especial através do qual conseguimos escutar uma determinada mensagem,podendo ser uma fila ou um tópico. Precisamos indicar quem ele vai, de fato, ouvir, ou seja, o Destination. Passamos o caminho já configurado anteriormente como a propriedade activationConfig e a anotation @ActivationConfigProperty com chave e valor. Este é o mesmo do @Resource:
+
+```
+@MessageDriven(activationConfig = {
+    @ActivationConfigProperty(propertyName="destinationLookup", propertyValue="java:/jms/topics/CarrinhoComprasTopico")
+})
+```
+- O propertyValue é aquele que "ouviremos" e, como nesse caso estaremos ouvindo um tópico e para o EnviaEmailCompra não faz diferença aquilo que ele estará ouvindo, só precisamos realmente conseguir receber a mensagem. Mas como o @MessageDriven sabe que a Classe EnviaEmailCompra possui o método enviar(String uuid)? Não tem como saber, portanto precisamos implementar isso utilizando o MessageListener do pacote javax.jms:
+
+### Diferença entre tópicos e filas
+> Um message-driven bean escuta um destino que pode ser um tópico ou uma fila. Qual a diferença, se existir alguma?
+
+- Um destino conhecido como tópico é uma forma de fazer com que a mensagem seja tratada por vários objetos.
+
+> Qual anotação utilizamos para indicar que uma classe será um message driven bean e será capaz de receber mensagens?
+- @MessageDriven
+
+
+
+
+
+
 <a name="anc3"></a>
 
 ## Trabalhe Assincronamente com JMS
