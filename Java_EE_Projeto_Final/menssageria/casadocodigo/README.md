@@ -130,8 +130,23 @@ public class MailSender {
 > Qual anotação utilizamos para indicar que uma classe será um message driven bean e será capaz de receber mensagens?
 - @MessageDriven
 
+### Recebendo o e-mail assíncrono
+- Falta-nos uma última configuração que é a do Destination, para que nosso servidor entenda que o destino é um tópico e para onde ele será enviado para todo mundo que se registra nele. Além do emissor/produtor da mensagem, temos também aquele que escuta a mensagem, o listener e precisamos de alguém no meio que faça essa comunicação. Precisamos lembrar que este é um processo assíncrono, ou seja, quem está enviando a mensagem não o faz diretamente para o receptor, mas sim para alguém que está no meio e recebe esta mensagem. Este que está no meio precisa saber quem precisa ouvir a mensagem. Quem precisar receber deverá avisar quem está no meio falando que quer receber, assim ele sai enviando para cada um dos listeners. É assim que funciona o JMS. Este destino central é conhecido como destination config ou JMS Destination.
 
+- Para que isso funcione precisamos de uma Classe, que chamaremos de ConfigureJMSDestination
+- Essa Classe de configuração não terá nenhum código, não temos como fugir disso. Estamos ganhando em configuração, uma vez que não precisamos abrir XML, mas alguns códigos ficam estranhos. Precisaremos configurar um @JMSDestinationDefinition, o qual será um array de definições:
+- 
+```
+@JMSDestinationDefinition(
+    name="java:/jms/topics/CarrinhoComprasTopico",
+    interfaceName="javax.jms.Topic"
+)
+public class ConfigureJMSDestination {
 
+}
+```
+- É no interfaceNameque avisamos que é um tópico de fato. Dessa forma temos nossa configuração de destino. Se subirmos o servidor aparecerão alguns erros, sendo um deles um WARN referenciando destinationType=null. Isso acontece porque também precisamos configurar o listener. Dentro do @MessageDriven fazemos:
+- Antigamente o Wildfly utilizava um framework JMS de fila chamado HornetQ, porém ele foi passado para o grupo da Apache. Agora o Wildfly está usando o ActiveMQ.
 
 
 
