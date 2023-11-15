@@ -430,6 +430,62 @@ public class CurrentUser {
 
 ## Utilizando template
 
+```
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:h="http://xmlns.jcp.org/jsf/html"
+    xmlns:f="http://xmlns.jcp.org/jsf/core"
+    xmlns:ui="http://xmlns.jcp.org/jsf/facelets"> <!-- Novo namespace -->
+
+<h:head>
+	<h:outputStylesheet library="css" name="bootstrap.min.css" />
+	<h:outputStylesheet library="css" name="style-admin.css" />
+</h:head>
+
+<h:body>
+
+	<nav class="navbar navbar-default navbar-fixed-top">
+	<div class="container">
+		<div class="navbar-header">
+			<a class="navbar-brand" href="#{request.contextPath}/index.xhtml">Casa do Código</a>
+		</div>
+		<div id="navbar" class="collapse navbar-collapse">
+			<ul class="nav navbar-nav">
+				<li class="active"><a href="#">Lista</a></li>
+				<li><h:link value="Cadastro" outcome="form" /></li>
+			</ul>
+			
+			<ul class="nav navbar-nav navbar-right">
+				<li class="pad">
+					<p class="navbar-text">#{currentUser.get().email}</p>
+				</li>
+				<li role="separator" class="divider"></li>
+				<li>
+					<h:commandLink action="#{currentUser.logout}" value="Logout" />
+				</li>
+			</ul>
+		</div>
+		<!--/.nav-collapse -->
+		</div>
+	</nav>
+
+	<div class="container">
+		<ui:insert name="body" />
+    </div>
+</h:body>
+</html>
+```
+
+#### Links entre páginas
+- Link no template
+```
+<li class="#{lista}"><h:link value="Lista" outcome="lista" /></li>
+<li class="#{cadastro}"><h:link value="Cadastro" outcome="form" /></li>
+```
+- link para cada página
+```
+<ui:param name="lista" value="active" />
+```
+
 <a name="anc6"></a>
 
 ## Utilize WebSockets para comunicação Síncrona
