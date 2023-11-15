@@ -149,6 +149,12 @@ public class ConfigureJMSDestination {
 - Antigamente o Wildfly utilizava um framework JMS de fila chamado HornetQ, porém ele foi passado para o grupo da Apache. Agora o Wildfly está usando o ActiveMQ.
 
 
+- Todo JB tem que sair no console. ele é registrado e são criados alguns namespaces, ou JDI names, os quais são configurados no log do servidor, porém ainda não foram na Classe EnviaEmailCompra. O @MessageDriven é uma JDI name e deve ser registrado no log do servidor.
+
+- Iremos forçar isso com a anotação @Stateless do javax.ejb, pois não queremos guardar o estado do compraDao. Como ele será injetado no PagamentoService. Vejamos se irá funcionar. Subimos novamente o servidor e dará outro erro. Teremos que usar a anotação @Singleton na Classe ConfigureJMSDestination.
+
+- Vamos rodar novamente a aplicação, fazendo uma compra. Dessa vez conseguiremos rodar, mas por algum motivo a aplicação não está encontrando o ConfigureJMSDestination.
+
 
 <a name="anc3"></a>
 
