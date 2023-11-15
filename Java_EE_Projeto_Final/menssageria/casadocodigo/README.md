@@ -489,3 +489,28 @@ public class CurrentUser {
 <a name="anc6"></a>
 
 ## Utilize WebSockets para comunicação Síncrona
+
+> Se quisermos mostrar uma promoção relâmpago para um usuário que já está na index da casa do código, podemos utilizar AJAX ou Websockets. Qual a diferença entre uma abordagem e a outra?
+- Ao utilizar WebSockets, abrimos uma conexão entre cliente e servidor, na qual o servidor pode enviar uma mensagem para o cliente sem que seja necessário o cliente fazer uma requisição.
+
+### WebSocket
+- utilize a anotação @ServerEndPoint para indicar que nossa aplicação aceita conexões via WebSockets. A URL deve ser a mesma que foi utilizada na página:
+- Quando a conexão for solicitada, vamos enviar uma mensagem com o JSON para o cliente. Para isso utilizamos a anotação @OnOpen.
+
+- Utilize uma session para enviar um texto para o cliente:
+```
+@ServerEndpoint(value = "/canal/promos")
+public class PromosEndpoint {
+
+    @OnOpen
+    public void onMessage(Session session) {
+        if(session.isOpen()) {
+            try {
+                session.getBasicRemote().sendText("{\"titulo\": \"Livro Java OO com 40% de desconto\", \"livroId\": 1}");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+```

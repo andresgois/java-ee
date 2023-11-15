@@ -416,6 +416,17 @@
 	</div>
 </footer>
 
+<SCRIPT type="text/javascript">
+	var canalDePromos = new WebSocket("ws://localhost:8080/#{request.contextPath}/canal/promos");
+	
+	canalDePromos.onmessage = function(msg){
+		var promo = JSON.parse(msg.data);
+		if(confirm("Que tal aproveitar a promoção relânpago "+ promo.titulo)){
+			document.location.href="#{request.contextPath}/detalhe-livro.xhtml?id="+promo.livroId;
+		}
+	}
+</SCRIPT>
+
 <script type="text/javascript" src="#{request.contextPath}/resources/js/trackExternalLinks.js"></script>
 	
 <iframe src="#{request.contextPath}/resources/ut.html" style="display: none;"></iframe>
