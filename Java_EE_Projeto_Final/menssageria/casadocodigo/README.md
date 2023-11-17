@@ -514,3 +514,81 @@ public class PromosEndpoint {
     }
 }
 ```
+
+### Integrando a tela de promoções com Websocket
+- Por isso que esse try class aqui desse thread.sleep foi temporário, só para nós entendermos que de fato precisávamos mandar mensagem, mas nós vamos pegar essa informação e guardar dentro de um método public void send, por exemplo, que vai ser onde nós vamos mandar mensagem. Essa mensagem vai ser para um usuário aqui para o websocket é if session, então nós temos o session.
+
+- O ponto é: se você simplesmente fizer send passando o session aqui, não mudará nada, nós só criaremos um método e chamaremos esse método, que nos dá a possibilidade de chamar esse método de outro lugar.
+
+- O que mais temos que fazer é que cada objeto, cada cliente que entrar aqui objetos session, nós temos que salvá-lo. Para salvarmos esse objeto session, nós podemos criar aqui uma lista deles, um conjunto, um list, alguma coisa disso aqui. Mas nós nem vamos começar por aí!
+
+- Porque se nós começarmos por esse caminho, vamos nos dar mal. Esse conjunto de usuários aqui não vai ficar salvo por todo a aplicação. Como assim? Pense comigo: quantas pessoas entram?
+
+- Quantos promosEndPoint nós vamos ter quando as pessoas entram para serem registradas dentro da nossa promoção? Nós não podemos ficar dependendo do uso do framework ou do serverEndpoint ser criado ou não para que nós tenhamos a lista de usuários!
+
+- Para resolvermos isso de forma bem simples, vamos criar uma nova classe, chamada UsuariosSession. Vou chamar só de usuarios aquit e esse UsuariosSession. Vamos criar isso dentro do websocket mesmo, ele vai ser exclusivo para isso e sse usuárioSession vai ter um escopo de aplicação. O application scoped, lembra?
+
+- O application scoped vai garantir que esse UsuariosSession exista durante todo o ciclo de vida da nossa aplicação. Dentro dele nós precisamos salvar uma lista de usuários ou uma lista de session, mas esse session vai ser de usuários, serão os nossos usuários ou a new ArrayList, onde essa lista de usuários, esse list aqui de session, são sessions do websocket.
+
+- Tecla "Ctrl" em cima já no último da lista e recla "Ctrl" em cima do session. Nós vamos ir para javax.websocket. Primeiro passo de todos que nós vamos precisar aqui será um public void add. Esse add vai pegar um session e vai salvar dentro dos session.add.
+
+- Agora que nós já adicionamos a session, nós já sabemos que esse objetivo UserSession aqui, o usuário de sessão vai continuar existindo, então nós temos que ter isso e vamos precisar pegar esses session como sendo um getSession e getUsuarios.
+
+- GetUsuarios(){ return sessions;. Então nós retornamos as sessões que nós temos. No que isso vai ajudar, pessoal? Ao invés de enviarmos isso aqui, o que nós vamos fazer? Nós chamamos usuarios.add e passamos a session para ele.
+
+- Na hora de enviarmos, o que nós vamos ter que fazer é percorrer todos os usuários que nós já adicionamos e enviar de fato para o nosso websocket, a mensagem que nós queremos. Mas lembre-se: primeiro session.isOpen, significa que nós temos que verificar se de fato a sessão ainda está aberta.
+
+- Como eu estou salvando todos os usuários que passaram pela aplicação, você que tem um usuário que já tenha fechado o navegador, já saiu, a conexão perdeu e várias outras causas podem acontecer.
+
+- Por conta disso nós usaremos usuarios.getusuario, esses usuários terão passado como sendo a session, faremos um for each de session e pegreamos todo esse código moveremos aqui para cima. No caso, segurando as teclas "Alt + Seta para cima" ei acho que nos outros também devem ser a mesma coisa. Temos aqui a session, mas o send não vai mais receber uma session. Então em cada session nós verificamos e mandamos mensagem, mas o send na verdade vai nos mandar a promo.
+
+- Nós temos aqui promo. Apertamos as teclas “Ctrl + 1" e importamos a promo. Agora ficou fácil, porque olhe só: na hora de fazermos o sendText, o que nós vamos fazer é simplesmente promo.toJson.
+
+- Mas nós não criamos esse tipo de JSON, de fato, por enquanto nós não criamos ainda, mas praticamente está pronto agora o nosso promosEndpoint aqui, método sendPoint e já faz envio de todas as promoções para todos os usuários. Na verdade, de uma produção para todos os usuários.
+
+- Aproveitando que já está dando erro aqui no toJson, vamos criar esse método com as teclas “Ctrl + 1” em cima dele "Create method Json". Eu já vou tirar, já vou mover isso lá para cima, que os métodos getteres servisse, eu gosto de deixar sempre por último.
+
+- O toJson vai ser um método bem simples, nós vamos criar um builder aqui, Json builder: Json.createObjectBuilder. Será nossa promo. Nós fazemos promo.add e adicionamos um título que será o nosso título aqui, bem simples mesmo!
+
+```
+public class Promo {
+
+    private String titulo;
+    private Livro livro = new Livro();
+
+    public String toJson() {
+        JsonObjectBuilder promo = Json.createObjectBuilder();
+        promo.add("titulo", titulo)
+            .add("livroId", livro.getId());
+
+        return promo.build().toString();
+    }
+
+    // ...
+}
+```
+
+- Podemos fazer, na verdade, o objeto inteiro para facilitar. Aqui nós já adicionamos isso como sendo o objeto que nós precisamos, porque aqui na parte do livro, então será livroId, nós só queremos apenas o ID do livro, livro.getId. Por isso que eu falei que poderíamos manter o livroId completo, mas só para trabalharmos com objetos bonitos vamos deixar isso assim.
+
+- Promo.build.toString. Com isso, temos o nosso objetivo montado. Agora que estamos montando bonito, está indo o JSON da forma correta, porque estava errado antes e agora com isso nós já resolvemos. Mas aqui no adminPromosBean, o método enviar vai precisar receber aqui por injeção, @inject, o nosso objeto PromosEnpoint.
+
+- Nesse PromosEndpoint vai ficar promos.send e nós enviamos o nosso objeto pronto. Olhe que bacana! Nós ligamos uma ponta com a outra, só falta funcionar! Vamos ver se isso funciona.
+
+- O que nós fizemos foi criarmos do nosso administrador, a nossa tela aqui que nós temos, fazer com que ela envie de fato uma promoção. Essa promoção que é colocada lá dentro da lista de seções e automaticamente aqui no send nós pegamos todas as seções, ou seja, todos os clientes que já conectaram nosso sistema e nós enviamos a mensagem para eles.
+
+- Para testarmos, nós vamos fazer isso de uma forma bem simples: eu vou colocar o servidor para reiniciar. Enquanto reinicia, o que nós vamos fazer? Vamos entrar na home da “Casa do Código” através do modo privado. Nesse modo privado nós vamos entrar na index dela. Vamos lá! Passando 10 segundos, nós não queremos que apareça nada de network vindo com mensagens, ainda não pelo menos.
+
+- Abriu aqui essa tela e nem fecha. Então nós estamos aqui no Safari, estamos no Chrome, só que na parte aqui de aba anônima. Vou entrar de novo aqui no nosso admin.form e fazer a nossa promoção livro de springMVC com 90% de desconto.
+
+- Na hora em que mandarmos “enviar”, nós esperamos que apareça o envio aqui da seção... Deu um feio gigante, não funcionou! Vamos dar uma olhada aqui porque não funcionou, ainda está imprimindo.
+
+- Como assim ainda está imprimindo!? Nós já resolvemos esse passo, promos.enviar, será que ele não pegou? Não pegou essa parte do código, vamos reiniciar o servidor de novo. O servidor subiu, vamos dar um refresh aqui na tela.
+
+- Aqui nós vamos para cadastrar promoção, livros deMVC. Lembrando que se o servidor subir de novo, então você tem que vir aqui e abrir de novo, porque ele tem que se registrar novamente.
+
+- Ele registra novamente, limpa o console e aqui no Safari também se registra de novo. Vamos manda enviar... O que foi isso no Endpoint.send aqui!? Vamos dar uma olhada, é algo bem simples e que você também pode ter esse erro!
+
+- O usuário está nulo porque faltou injetar, @inject. O usuário session é ApplicationScoped, então o CDI tem que injetar ele para nós. Vamos lá! Mais uma vez!
+
+- Detalhe: eu precisei fazer um full republish para conseguir publicar direito, porque ele não estava pegando. Reiniciei o celular algumas vezes e ele não estava pegando. Também tenha cuidado, você pode fazer isso. Por acaso, se não estiver pegando, faça um full republish, só para garantir.
+
