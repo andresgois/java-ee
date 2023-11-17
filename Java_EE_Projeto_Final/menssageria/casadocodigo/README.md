@@ -2,15 +2,18 @@
 
 
 ### Links
--(#anc1)
--(#anc2)
--(#anc3)
--(#anc4)
--(#anc5)
--(#anc6)
+- [Disponibilizando lançamentos em XML e JSON](#anc1)
+- [Envie e-mails para o usuário](#anc2)
+- [Trabalhe Assincronamente com JMS](#anc3)
+- [Proteja sua aplicação com JAAS](#anc4)
+- [Utilizando template](#anc5)
+- [Utilize WebSockets para comunicação Síncrona](#anc6)
 
 -(http://localhost:8080/casadocodigo/index.xhtml)
 ##
+#### Links
+- http://localhost:8080/casadocodigo/admin/promos.xhtml
+- http://localhost:8080/casadocodigo/index.xhtml
 
 <a name="anc1"></a>
 
@@ -592,3 +595,37 @@ public class Promo {
 
 - Detalhe: eu precisei fazer um full republish para conseguir publicar direito, porque ele não estava pegando. Reiniciei o celular algumas vezes e ele não estava pegando. Também tenha cuidado, você pode fazer isso. Por acaso, se não estiver pegando, faça um full republish, só para garantir.
 
+```
+public void onClose(Session session, CloseReason closeReason) {
+    usuarios.remove(session);
+    System.out.println(closeReason.getCloseCode());
+}
+```
+- retorno ao fechar a sessão ou o navegador
+```
+INFO  [stdout] (default task-33) GOING_AWAY
+```
+
+> O que é necessário fazer para que um método seja chamado quando a sessão do WebSocket estiver sendo encerrada?
+- Utilizar a anotação @OnClose no método.
+
+### Últimos ajustes
+- Para fazer com que o usuário tenha que logar para acessar as páginas internas do sistema, basta alterar o url-pattern da tag security-constraint no web.xml.
+
+- Defina o valor /admin/*:
+
+```
+<security-constraint>
+    <display-name>Administration</display-name>
+    <web-resource-collection>
+        <web-resource-name>administration</web-resource-name>
+        <description>URLs que levam para a adminstração da loja</description>
+        <url-pattern>/admin/*</url-pattern>
+        <http-method>GET</http-method>
+        <http-method>POST</http-method>
+    </web-resource-collection>
+    <auth-constraint>
+        <role-name>ADMIN</role-name>
+    </auth-constraint>
+</security-constraint>
+```

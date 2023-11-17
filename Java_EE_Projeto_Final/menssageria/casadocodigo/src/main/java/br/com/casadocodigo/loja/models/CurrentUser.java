@@ -40,7 +40,7 @@ public class CurrentUser {
 	public String logout() {
 		System.out.println("Logout");
 		request.getSession().invalidate();
-		return "/livro/lista.xhtml?faces-redirect=true";
+		return "/admin/livro/lista.xhtml?faces-redirect=true";
 	}
 
 }
