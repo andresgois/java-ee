@@ -1,17 +1,25 @@
 package br.com.casadocodigo.loja.beans;
 
 import javax.enterprise.inject.Model;
+import javax.inject.Inject;
 
 import br.com.casadocodigo.loja.models.Promo;
+import br.com.casadocodigo.loja.websockets.PromosEndpoint;
 
 @Model
 public class AdminPromosBean {
 
     private Promo promo = new Promo();
 
+    @Inject
+    private PromosEndpoint promos;
+    
     public void enviar() {
         System.out.println(promo.getTitulo());
-        System.out.println(promo.getLivro());        
+        System.out.println(promo.getLivro());
+        
+        promos.send(promo);
+        
     }
 
     public Promo getPromo() {
