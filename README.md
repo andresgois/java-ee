@@ -25,7 +25,7 @@
 
 ### [Continuação Módulo 4](./README2.MD)
 
-### jpa1
+### JPA 1
 <a name="anc1"></a>
 
 ## Sobre a Java Persistence API
