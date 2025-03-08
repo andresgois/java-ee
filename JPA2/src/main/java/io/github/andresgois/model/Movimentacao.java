@@ -17,7 +17,8 @@ import javax.persistence.OneToMany;
 import io.github.andresgois.enumerated.TipoMovimentacao;
 
 @NamedQuery(name =  "mediaDiariaMovimentacos", 
-    query = "select new io.github.andresgois.model.MediaComData(avg(m.valor), day(m.data), month(m.data)) from Movimentacao m group by day(m.data), month(m.data), year(m.data)"
+    query = "select new io.github.andresgois.model.MediaComData(avg(m.valor), day(m.data), month(m.data)) "
+    		+ "from Movimentacao m group by day(m.data), month(m.data), year(m.data)"
     )
 @Entity
 public class Movimentacao {
@@ -91,7 +92,6 @@ public class Movimentacao {
 
     public void setData(LocalDateTime data) {
         this.data = data;
-    }
+	}
 
-    
 }

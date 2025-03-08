@@ -75,7 +75,7 @@
 					<br />
 				<p:fieldset style="text-align:center;">
 					<p:commandButton value="Gravar Livro" action="#{livroBean.gravar}" process="@form" 
-							update="@form :formTabelaLivros:tabelaLivros"  />
+							update="@form:formTabelaLivros:tabelaLivros" rendered=":formTabelaLivros:tabelaLivros"  />
 				</p:fieldset>
 			</h:form>
 			

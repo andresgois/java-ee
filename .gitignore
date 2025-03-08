@@ -1,1 +1,15 @@
 /.metadata/
+.classpath
+.project
+*.prefs
+*.class
+**/*.class 
+**/*.factorypath 
+**/*.component 
+**/*.core.xml
+**/*.MF
+**/*.lst
+/bin/
+/out/
+/target/*
+

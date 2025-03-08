@@ -39,7 +39,7 @@ docker container run --name java-ee-mysql-container -e MYSQL_USER=andre -e MYSQL
 - Acessando o banco
 ```
 $ docker exec -it container_id bash
-root@container_id:/# mysql -uroot -p
+root@container_id:/# mysql -u root -p
 Enter password: 123456
 
 show databases
@@ -186,7 +186,7 @@ Classe Movimentacao
 // Criando uma segunda tabela *conta_movimentacao*
 ```
 ![Unindo com mappedBy](./asserts/relacionamento_by_direcional.png)
-> Relacionamento em apenas uma vi, bi-direcional
+> Relacionamento em apenas uma via, bi-direcional
 ```
 Classe Conta
     @OneToMany(mappedBy = "conta")
